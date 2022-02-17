@@ -323,7 +323,8 @@ public class ShipLoaderDialog
 						TreeItem selectedItem = tree.getSelection()[0];
 						ShipMetadata metadata = (ShipMetadata)selectedItem.getData();
 						try {
-							ShipObject object = ShipLoadUtils.loadShipXML( metadata.getElement() );
+							ShipObject object = ShipLoadUtils.loadShipXML( metadata.getElement(), metadata );
+							object.setCrewCap(metadata.realCrewCap);
 
 							if ( !Manager.allowRoomOverlap && object.hasOverlappingRooms() ) {
 								log.info( "Ship contains overlapping rooms, but overlap is disabled - forcing room overlap enable." );
@@ -504,6 +505,10 @@ public class ShipLoaderDialog
 		buf.append( ex.getClass().getSimpleName() );
 		buf.append( ": " );
 		buf.append( ex.getMessage() );
+		if (ex.getClass().getSimpleName().equals("IllegalArgumentException"))
+		{
+			buf.append("\n\nAre you missing a race in Race list.txt?");
+		}
 		buf.append( "\n\nCheck the log or console for details." );
 		UIUtils.showWarningDialog( shell, null, buf.toString() );
 	}

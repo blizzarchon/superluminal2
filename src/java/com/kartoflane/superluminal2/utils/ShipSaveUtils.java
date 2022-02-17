@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -19,6 +20,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.jdom2.Comment;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import org.jdom2.Namespace;
 import org.jdom2.input.JDOMParseException;
 
 import com.kartoflane.superluminal2.components.Tuple;
@@ -29,7 +31,6 @@ import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.db.Database;
 import com.kartoflane.superluminal2.ftl.AugmentObject;
-import com.kartoflane.superluminal2.ftl.DefaultDeferredText;
 import com.kartoflane.superluminal2.ftl.DoorObject;
 import com.kartoflane.superluminal2.ftl.DroneList;
 import com.kartoflane.superluminal2.ftl.DroneObject;
@@ -156,6 +157,13 @@ public class ShipSaveUtils
 		fileName = "data/text_blueprints.xml.append";
 		bytes = IOUtils.readDocument( generateTextXML( ship ) ).getBytes( utf8 );
 		fileMap.put( fileName, bytes );
+		
+		if (ship.isPlayerShip())
+		{
+			fileName = "data/hyperspace.xml.append";
+			bytes = IOUtils.readDocument( generateHyperspaceXML( ship ) ).getBytes( utf8 );
+			fileMap.put( fileName, bytes );
+		}
 
 		fileName = "data/" + Database.getInstance().getAssociatedFile( ship.getBlueprintName() ) + ".append";
 		bytes = IOUtils.readDocument( generateBlueprintXML( ship ) ).getBytes( utf8 );
@@ -346,6 +354,16 @@ public class ShipSaveUtils
 
 		IOUtils.writeFileXML( generateLayoutXML( ship ), f );
 	}
+	
+	public static void saveHyperspaceXML( ShipObject ship, File f ) throws IllegalArgumentException, IOException
+	{
+		if ( ship == null )
+			throw new IllegalArgumentException( "Ship object must not be null." );
+		if ( f == null )
+			throw new IllegalArgumentException( "File must not be null." );
+
+		IOUtils.writeFileXML( generateHyperspaceXML( ship ), f );
+	}
 
 	private static void outputNamedTextReferenceElement( Element destElement, IDeferredText text )
 	{
@@ -354,14 +372,7 @@ public class ShipSaveUtils
 		if ( text == null )
 			throw new IllegalArgumentException( "Text must not be null." );
 
-		// Include for compatibility with FTL pre-1.6.1
 		destElement.setText( text.getTextValue() );
-
-		if ( text instanceof DefaultDeferredText ) {
-			// FTL 1.6.1+
-			// id attributes take precedence over tag value, if they're available.
-			destElement.setAttribute( "id", text.getTextId() );
-		}
 	}
 
 	private static Element createNamedTextSourceElement( IDeferredText text )
@@ -409,6 +420,14 @@ public class ShipSaveUtils
 
 		Element shipBlueprint = new Element( "shipBlueprint" );
 		value = ship.getBlueprintName();
+		if (ship.getLayoutSlot().equals("B") && !(ship.getBlueprintName().endsWith("_2")))
+		{
+			value += "_2";
+		}
+		else if (ship.getLayoutSlot().equals("C") && !(ship.getBlueprintName().endsWith("_3")))
+		{
+			value += "_3";
+		}
 		shipBlueprint.setAttribute( "name", value == null ? "" : value );
 		value = ship.getLayout();
 		shipBlueprint.setAttribute( "layout", value == null ? "" : value );
@@ -568,25 +587,25 @@ public class ShipSaveUtils
 
 		if ( ship.isPlayerShip() ) {
 			// List every crew member individually to allow ordering of crew
-			for ( Races race : ship.getCrew() ) {
-				if ( race == Races.NO_CREW )
+			for ( String race : ship.getCrew() ) {
+				if ( race.equals("no_crew") )
 					continue;
 				e = new Element( "crewCount" );
 				e.setAttribute( "amount", "1" );
-				e.setAttribute( "class", race.name().toLowerCase() );
+				e.setAttribute( "class", race.toLowerCase() );
 
 				shipBlueprint.addContent( e );
 			}
 		}
 		else {
-			for ( Races race : Races.getRaces() ) {
+			for ( String race : Races.getRaces() ) {
 				int amount = ship.getCrewMin( race );
 				int max = ship.getCrewMax( race );
 
 				e = new Element( "crewCount" );
 				e.setAttribute( "amount", "" + amount );
 				e.setAttribute( "max", "" + max );
-				e.setAttribute( "class", race.name().toLowerCase() );
+				e.setAttribute( "class", race.toLowerCase() );
 
 				// Don't print an empty tag
 				if ( amount > 0 && ( ship.isPlayerShip() || max > 0 ) )
@@ -600,7 +619,7 @@ public class ShipSaveUtils
 		}
 
 		for ( AugmentObject aug : ship.getAugments() ) {
-			if ( aug == Database.DEFAULT_AUGMENT_OBJ )
+			if ( aug == Database.DEFAULT_AUGMENT_OBJ || aug.isHidden)
 				continue;
 			e = new Element( "aug" );
 			e.setAttribute( "name", aug.getBlueprintName() );
@@ -797,6 +816,124 @@ public class ShipSaveUtils
 				root.addContent( glowEl );
 			}
 		}
+
+		doc.setRootElement( root );
+		return doc;
+	}
+	
+	public static Document generateHyperspaceXML( ShipObject ship )
+	{
+		Document doc = new Document();
+		Element root = new Element( "wrapper" );
+
+		Element ftl = new Element( "FTL" );
+
+		Element starter = new Element("findLike", Namespace.getNamespace("mod", "e"));
+		starter.setAttribute("type", "ships");
+		
+		Element shipTag = new Element("ship", Namespace.getNamespace("mod-append", "e"));
+		
+		shipTag.setAttribute("name", ship.getBlueprintName());
+		if (ship.getLayoutSlot().equals("A"))
+		{
+			shipTag.setAttribute("name", ship.getBlueprintName());
+		}
+//		else if (ship.getLayoutSlot().equals("B"))
+//		{
+//			if (ship.getBlueprintName().endsWith("_2"))
+//			{
+//				shipTag.setAttribute("name", ship.getBlueprintName());
+//			}
+//			else
+//			{
+//				shipTag.setAttribute("name", ship.getBlueprintName() + "_2");
+//			}
+//		}
+//		else
+//		{
+//			if (ship.getBlueprintName().endsWith("_3"))
+//			{
+//				shipTag.setAttribute("name", ship.getBlueprintName());
+//			}
+//			else
+//			{
+//				shipTag.setAttribute("name", ship.getBlueprintName() + "_3");
+//			}
+//		}
+		
+		if (ship.getLayoutSlot().equals("B"))
+		{
+			shipTag.setAttribute("b", "true", Namespace.NO_NAMESPACE);
+		}
+		else
+		{
+			shipTag.setAttribute("b", "false", Namespace.NO_NAMESPACE);
+		}
+		if (ship.getLayoutSlot().equals("C"))
+		{
+			shipTag.setAttribute("c", "true", Namespace.NO_NAMESPACE);
+		}
+		else
+		{
+			shipTag.setAttribute("c", "false", Namespace.NO_NAMESPACE);
+		}
+		
+		starter.addContent(shipTag);
+		ftl.addContent(starter);
+		
+		Element customShip = new Element("customShip", Namespace.getNamespace("mod-append", "e"));
+		if (ship.getLayoutSlot().equals("A"))
+		{
+			customShip.setAttribute("name", ship.getBlueprintName());
+		}
+		else if (ship.getLayoutSlot().equals("B"))
+		{
+			if (ship.getBlueprintName().endsWith("_2"))
+			{
+				customShip.setAttribute("name", ship.getBlueprintName());
+			}
+			else
+			{
+				customShip.setAttribute("name", ship.getBlueprintName() + "_2");
+			}
+		}
+		else
+		{
+			if (ship.getBlueprintName().endsWith("_3"))
+			{
+				customShip.setAttribute("name", ship.getBlueprintName());
+			}
+			else
+			{
+				customShip.setAttribute("name", ship.getBlueprintName() + "_3");
+			}
+		}
+
+		if (ship.isPlayerShip())
+		{
+			ArrayList<AugmentObject> list = new ArrayList<AugmentObject>();
+			for (AugmentObject aug : ship.getAugments())
+			{
+				if (aug.isHidden)
+				{
+					list.add(aug);
+				}
+			}
+			ArrayList<Element> hiddenAugs = new ArrayList<Element>();
+			for (int i = 0; i < list.size(); ++i)
+			{
+				hiddenAugs.add(new Element("hiddenAug").setText(list.get(i).getIdentifier()));
+			}
+			for(int i = 0; i < hiddenAugs.size(); ++i)
+			customShip.addContent(hiddenAugs.get(i));
+			customShip.addContent(new Element("crewLimit").setText(ship.getCrewCap() + ""));
+		}
+		
+//		Element hanger = new Element("ships");
+//		hanger.addContent(customShip);
+		starter.addContent(customShip);
+//		ftl.addContent(hanger);
+		root.addContent(ftl);
 
 		doc.setRootElement( root );
 		return doc;

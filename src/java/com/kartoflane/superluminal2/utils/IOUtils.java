@@ -522,7 +522,7 @@ public class IOUtils
 			writer = new StringWriter();
 			SloppyXMLOutputProcessor.sloppyPrint( doc, writer, null, false );
 
-			result = writer.toString();
+			result = writer.toString().replaceAll("xmlns:mod=\"e\"", "").replaceAll("xmlns:mod-append=\"e\"", "").replaceAll("  ", " ");
 		}
 		finally {
 			if ( writer != null )

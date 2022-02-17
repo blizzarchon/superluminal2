@@ -18,7 +18,7 @@ public class CrewMenu
 {
 	private static CrewMenu instance;
 
-	private Races result = null;
+	private String result = null;
 
 	private Menu crewMenu;
 	private MenuItem mntmNoCrew;
@@ -35,20 +35,20 @@ public class CrewMenu
 			@Override
 			public void widgetSelected( SelectionEvent e )
 			{
-				result = (Races)( (Widget)e.getSource() ).getData();
+				result = (String)( (Widget)e.getSource() ).getData();
 			}
 		};
 
 		mntmNoCrew = new MenuItem( crewMenu, SWT.NONE );
-		mntmNoCrew.setText( "No Crew" );
-		mntmNoCrew.setData( Races.NO_CREW );
+		mntmNoCrew.setText( "no_crew" );
+		mntmNoCrew.setData( "no_crew" );
 		mntmNoCrew.addSelectionListener( listener );
 
 		new MenuItem( crewMenu, SWT.SEPARATOR );
 
-		for ( Races race : Races.getPlayerRaces() ) {
+		for ( String race : Races.getPlayerRacesAliases() ) {
 			MenuItem item = new MenuItem( crewMenu, SWT.NONE );
-			item.setText( race.toString() );
+			item.setText( race );
 			item.setData( race );
 			item.addSelectionListener( listener );
 		}
@@ -59,7 +59,7 @@ public class CrewMenu
 		return instance;
 	}
 
-	public Races open()
+	public String open()
 	{
 		crewMenu.setVisible( true );
 

@@ -34,6 +34,8 @@ import com.kartoflane.superluminal2.utils.DataUtils;
 import com.kartoflane.superluminal2.utils.IOUtils;
 import com.kartoflane.superluminal2.utils.IOUtils.DecodeResult;
 
+import net.vhati.ftldat.Reader;
+
 
 /**
  * A class representing a database entry that can be installed in the
@@ -231,8 +233,7 @@ public abstract class AbstractDatabaseEntry
 	}
 
 	/**
-	 * @param the
-	 *            name of the blueprint list
+	 * @param listName the name of the blueprint list
 	 * @return the blueprint list with the given name
 	 */
 	public DroneList getDroneList( String listName )
@@ -460,14 +461,37 @@ public abstract class AbstractDatabaseEntry
 			for ( String ext : extensions ) {
 				try {
 					is = getInputStream( innerPath + ext );
+					DecodeResult hsdr = null;
+					InputStream hs = null;
+					try
+					{
+						hs = getInputStream( "data/hyperspace" + ext);
+						hsdr = IOUtils.decodeText( hs, null );
+					}
+					catch (Exception e)
+					{
+						
+					}
+
 					DecodeResult dr = IOUtils.decodeText( is, null );
 
+					Reader hsread = null;
+					try
+					{
+						hsread = new Reader(hsdr);
+					}
+					catch (Exception e)
+					{
+						hsread = new Reader(dr);
+					}
+
 					ArrayList<Element> elements = DataUtils.findTagsNamed( dr.text, "shipBlueprint" );
+					
 					for ( Element e : elements ) {
 						try {
-							store( DatParser.loadShipMetadata( e ) );
+							store( DatParser.loadShipMetadata( e, hsread ) );
 						}
-						catch ( IllegalArgumentException ex ) {
+						catch ( Exception ex ) {
 							log.warn( getName() + ": could not load ship metadata: " + ex.getMessage() );
 						}
 					}

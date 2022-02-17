@@ -32,6 +32,7 @@ import com.kartoflane.superluminal2.ftl.GlowObject;
 import com.kartoflane.superluminal2.ftl.GlowSet;
 import com.kartoflane.superluminal2.ftl.MountObject;
 import com.kartoflane.superluminal2.ftl.RoomObject;
+import com.kartoflane.superluminal2.ftl.ShipMetadata;
 import com.kartoflane.superluminal2.ftl.ShipObject;
 import com.kartoflane.superluminal2.ftl.StationObject;
 import com.kartoflane.superluminal2.ftl.SystemObject;
@@ -53,6 +54,7 @@ public class ShipLoadUtils
 	 * 
 	 * @param e
 	 *            the XML element for the shipBlueprint tag
+	 * @param metadata 
 	 * @return ShipObject instance representing the ship
 	 * 
 	 * @throws IllegalArgumentException
@@ -66,7 +68,7 @@ public class ShipLoadUtils
 	 * @throws JDOMParseException
 	 *             when the XML element is wrongly formatted, or a parser error occurs
 	 */
-	public static ShipObject loadShipXML( Element e )
+	public static ShipObject loadShipXML( Element e, ShipMetadata metadata )
 		throws IllegalArgumentException, FileNotFoundException, IOException, NumberFormatException, JDOMParseException
 	{
 		if ( e == null )
@@ -501,14 +503,26 @@ public class ShipLoadUtils
 				ship.setBoardingAI( BoardingStrategies.valueOf( attr.toUpperCase() ) );
 			}
 		}
-
+		int crewCap = 0;
 		for ( Element crew : e.getChildren( "crewCount" ) ) {
 			attr = crew.getAttributeValue( "class" );
 			if ( attr == null )
 				throw new IllegalArgumentException( "<crewCount> tag is missing 'class' attribute." );
-			Races race = null;
+			String race = null;
 			try {
-				race = Races.valueOf( attr.toUpperCase() );
+				if(Races.raceList.contains(attr))
+				{
+					if(ship.isPlayerShip())
+					{
+						race = Races.raceAliasList.get(Races.raceList.indexOf(attr));
+						crewCap+=1;
+					}
+					else
+					{
+						race = Races.raceList.get(Races.raceList.indexOf(attr));
+						crewCap+=1;
+					}
+				}
 			}
 			catch ( IllegalArgumentException ex ) {
 				throw new IllegalArgumentException( "Race class not recognised: " + attr );
@@ -516,10 +530,11 @@ public class ShipLoadUtils
 
 			if ( ship.isPlayerShip() ) {
 				attr = crew.getAttributeValue( "amount" );
+				crewCap+=Integer.parseInt(crew.getAttributeValue( "amount" )) - 1;
 				if ( attr == null )
 					throw new IllegalArgumentException( "<crewCount> tag is missing 'amount' attribute." );
 				for ( int i = 0; i < Integer.valueOf( attr ); i++ )
-					ship.changeCrew( Races.NO_CREW, race );
+					ship.changeCrew( "no_crew", race );
 			}
 			else {
 				attr = crew.getAttributeValue( "amount" );
@@ -535,9 +550,11 @@ public class ShipLoadUtils
 				}
 				else {
 					ship.setCrewMax( race, Integer.valueOf( attr ) );
+					crewCap+=(Integer.parseInt(crew.getAttributeValue("max"))-1);
 				}
 			}
 		}
+		ship.setCrewCap(crewCap);
 
 		for ( Element aug : e.getChildren( "aug" ) ) {
 			attr = aug.getAttributeValue( "name" );
@@ -548,6 +565,16 @@ public class ShipLoadUtils
 			if ( augmentObject == null )
 				throw new IllegalArgumentException( "AugBlueprint not found: " + attr );
 
+			ship.changeAugment( Database.DEFAULT_AUGMENT_OBJ, augmentObject );
+		}
+		
+		for (int i = 0; i < metadata.hiddenAugs.size(); ++i)
+		{
+			AugmentObject augmentObject = db.getAugment(metadata.hiddenAugs.get(i));
+			if ( augmentObject == null )
+				throw new IllegalArgumentException( "AugBlueprint not found: " + metadata.hiddenAugs.get(i) );
+			
+			augmentObject.isHidden = true;
 			ship.changeAugment( Database.DEFAULT_AUGMENT_OBJ, augmentObject );
 		}
 

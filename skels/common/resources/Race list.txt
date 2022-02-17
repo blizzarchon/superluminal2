@@ -1,0 +1,9 @@
+human,Human
+engi,Engi
+energy,Zoltan
+mantis,Mantis
+slug,Slug
+rock,Rock
+crystal,Crystal
+anaerobic,Lanius
+ghost,Ghost

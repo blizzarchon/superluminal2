@@ -316,13 +316,7 @@ public class Database
 
 	public boolean isPlayerShip( String blueprintName )
 	{
-		try {
-			PlayerShipBlueprints.valueOf( blueprintName.replace( "PLAYER_SHIP_", "" ) );
-			return true;
-		}
-		catch ( Exception e ) {
-			return false;
-		}
+		return blueprintName.startsWith("PLAYER_SHIP_");
 	}
 
 	/**
@@ -332,8 +326,14 @@ public class Database
 	 */
 	public String getAssociatedFile( String blueprint )
 	{
-		if ( shipFileMap.containsKey( blueprint ) )
-			return shipFileMap.get( blueprint );
+		if ( blueprint.startsWith("PLAYER_SHIP_"))
+		{
+			if (blueprint.endsWith("_3"))
+			{
+				return "dlcBlueprintsOverwrite.xml";
+			}
+			return "blueprints.xml";
+		}
 		else
 			return "autoBlueprints.xml";
 	}

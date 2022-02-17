@@ -101,7 +101,7 @@ public class EditorWindow
 	static final Logger log = LogManager.getLogger( EditorWindow.class );
 
 	public static final int SIDEBAR_MIN_WIDTH = 290;
-	public static final int CANVAS_MIN_SIZE = 400;
+	public static final int CANVAS_MIN_SIZE = 600;
 
 	private static final RGB canvasRGB = new RGB( 164, 164, 164 );
 
@@ -178,8 +178,8 @@ public class EditorWindow
 
 		Monitor m = display.getPrimaryMonitor();
 		Rectangle displaySize = m.getClientArea();
-		displaySize.width = ( displaySize.width / 5 ) * 4;
-		displaySize.height = ( displaySize.height / 5 ) * 4;
+		displaySize.width = ( displaySize.width / 5 ) * 8;
+		displaySize.height = ( displaySize.height / 5 ) * 5;
 
 		// Load icons
 		Image icon16 = Cache.checkOutImage( shell, "cpath:/assets/icons/Superluminal_2_16.png" );
@@ -2104,13 +2104,13 @@ public class EditorWindow
 	public void updateGibAnimationButton( boolean animate )
 	{
 		if ( animate ) {
-			Cache.checkInImage( this, "cpath:/assets/stop.png" );
+			Cache.checkInImage( this, "cpath:/resources/assets/stop.png" );
 			tltmAnimate.setImage( Cache.checkOutImage( this, "cpath:/assets/play.png" ) );
 			Hotkey h = Manager.getHotkey( Hotkeys.ANIMATE );
 			tltmAnimate.setToolTipText( "Animate Gibs" + ( h.isEnabled() ? String.format( " (%s)", h.toString() ) : "" ) );
 		}
 		else {
-			Cache.checkInImage( this, "cpath:/assets/play.png" );
+			Cache.checkInImage( this, "cpath:/resources/assets/play.png" );
 			tltmAnimate.setImage( Cache.checkOutImage( this, "cpath:/assets/stop.png" ) );
 			Hotkey h = Manager.getHotkey( Hotkeys.ANIMATE );
 			tltmAnimate.setToolTipText( "Stop Gib Animation" + ( h.isEnabled() ? String.format( " (%s)", h.toString() ) : "" ) );

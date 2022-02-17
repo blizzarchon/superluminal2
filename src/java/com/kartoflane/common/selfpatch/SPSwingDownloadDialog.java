@@ -19,7 +19,6 @@ import javax.swing.SwingUtilities;
 /**
  * Appropriated from Slipstream Mod Manager's ProgressDialog
  */
-@SuppressWarnings("serial")
 class SPSwingDownloadDialog extends JDialog implements SPDownloadWindow, ActionListener
 {
 	private final JScrollPane statusScroll;

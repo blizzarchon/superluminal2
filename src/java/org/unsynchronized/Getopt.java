@@ -180,7 +180,6 @@ public class Getopt
 	public static void main( String[] args )
 	{
 		try {
-			HashMap<String, Integer> options = new HashMap<String, Integer>();
 			Getopt go = new Getopt();
 			go.addOption( "-optzero", 0, "zero-arg constructor" );
 			go.addOption( "-optone", 1, "one-arg constructor" );

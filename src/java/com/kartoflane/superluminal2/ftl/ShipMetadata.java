@@ -1,5 +1,7 @@
 package com.kartoflane.superluminal2.ftl;
 
+import java.util.ArrayList;
+
 import org.jdom2.Element;
 
 import com.kartoflane.superluminal2.db.Database;
@@ -15,6 +17,9 @@ public class ShipMetadata
 	private IDeferredText shipClass = IDeferredText.EMPTY;
 	private IDeferredText shipName = IDeferredText.EMPTY;
 	private IDeferredText description = IDeferredText.EMPTY;
+	public String crewCap = "";
+	public int realCrewCap;
+	public ArrayList<String> hiddenAugs = new ArrayList<String>();
 
 
 	public ShipMetadata( Element element, String blueprintName )
@@ -100,5 +105,21 @@ public class ShipMetadata
 				return prefix + suffix;
 		}
 		return null;
+	}
+
+	public String getCrewCap() {
+		return crewCap;
+	}
+
+	public void setCrewCap(String crewCap) {
+		this.crewCap = crewCap;
+	}
+
+	public ArrayList<String> getHiddenAugs() {
+		return hiddenAugs;
+	}
+
+	public void setHiddenAugs(ArrayList<String> hiddenAugs) {
+		this.hiddenAugs = hiddenAugs;
 	}
 }

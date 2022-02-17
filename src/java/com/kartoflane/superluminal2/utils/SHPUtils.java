@@ -39,7 +39,6 @@ import com.kartoflane.superluminal2.ftl.RoomObject;
 import com.kartoflane.superluminal2.ftl.ShipObject;
 import com.kartoflane.superluminal2.ftl.StationObject;
 import com.kartoflane.superluminal2.ftl.SystemObject;
-import com.kartoflane.superluminal2.ftl.VerbatimText;
 import com.kartoflane.superluminal2.ftl.WeaponList;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 
@@ -245,11 +244,11 @@ public class SHPUtils
 			map = map( o );
 			// Crew -> integer
 			for ( Map.Entry<Object, Object> entry : map.entrySet() ) {
-				Races race = race( entry.getKey() );
+				String race = race( entry.getKey() );
 				int count = integer( entry.getValue() );
 				ship.setCrewMin( race, count );
 				for ( int in = 0; in < count; in++ )
-					ship.changeCrew( Races.NO_CREW, race );
+					ship.changeCrew( "no_crew", race );
 			}
 		}
 
@@ -258,7 +257,7 @@ public class SHPUtils
 			map = map( o );
 			// Crew -> integer
 			for ( Map.Entry<Object, Object> entry : map.entrySet() ) {
-				Races race = race( entry.getKey() );
+				String race = race( entry.getKey() );
 				int count = integer( entry.getValue() );
 				ship.setCrewMax( race, count );
 			}
@@ -384,17 +383,6 @@ public class SHPUtils
 				return result;
 		}
 
-		return null;
-	}
-
-	private static Object getFieldValueByName( Instance i, ClassDesc cd, String name )
-	{
-		if ( i == null || cd == null || name == null )
-			throw new IllegalArgumentException( "Argument must not be null." );
-
-		Map.Entry<Field, Object> result = getFieldByName( i, cd, name );
-		if ( result != null )
-			return result.getValue();
 		return null;
 	}
 
@@ -625,14 +613,14 @@ public class SHPUtils
 			throw new IllegalArgumentException( "Not a Direction: " + o.getClass() );
 	}
 
-	private static Races race( Object o )
+	private static String race( Object o )
 	{
 		if ( o == null )
 			throw new IllegalArgumentException( "Argument must not be null." );
 		if ( o instanceof Races )
-			return (Races)o;
+			return (String)o;
 		else if ( o instanceof String )
-			return Races.valueOf( ( (String)o ).toUpperCase() );
+			return ((String) o).toUpperCase();
 		else if ( o instanceof StringObject )
 			return race( ( (StringObject)o ).value );
 		else

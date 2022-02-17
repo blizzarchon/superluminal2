@@ -1,0 +1,79 @@
+human,Human
+engineer,Human Engineer
+medic,Human Medic
+soldier,Human Soldier
+engi,Engi
+seperatist,Engi Separatist
+defend,Engi Defender
+energy,Zoltan
+bomber,Duskbringer Devotee
+monk,Zoltan Monk
+peace,Zoltan Peacekeeper
+orchid,Orchid
+chieftain,Orchid Chieftain
+mantis,Mantis
+suzerain,Mantis Suzerain
+bishop,Mantis Bishop
+slug,Slug
+sabo,Slug Saboteur
+snail,Slug Clansman
+rock,Rock
+outcast,Rock Outcast
+commando,Rock Commando
+cultist,Ember Cultist
+crusader,Rock Crusader
+crystal,Crystal
+sentinel,Crystalline Sentinel
+anaerobic,Lanius
+welder,Lanius Welder
+ghosty,Ghost
+phantom,Ghost Phantom
+shell,Shell
+toxic,Shell Radiant
+hatch,Hatchling
+spider,Spider
+weaver,Weaver
+queen,Spider Queen
+ancient,Ancient
+royal,Ancient Royal
+tully,Tully
+detective,Detective
+turzil,Turzil
+symbiote,Symbiote
+ruwen,Ruwen
+lord,Grand Priest Lord Vortigon
+traveler,Traveler
+deep_one,Deep One
+shadow_deep_one,Shadow Deep One
+star_one,Star Child
+moonbeast,Moon-Beast
+oornbeast,Oorn-Beast
+shadow_moonbeast,Shadow Moon-Beast
+shadow_human,Shadow Human
+daoloth,Daoloth Engi
+shadow_engi,Shadow Engi
+shuma,Shuma-Zoltan
+shadow_zoltan,Shadow Zoltan
+shadow_orchid,Shadow Orchid
+slantis,Slantis
+shadow_mantis,Shadow Mantis
+glaakian,Gla'akian Slug
+shadow_slug,Shadow Slug
+mhar,Mhar Rockman
+shadow_rock,Shadow Rock
+qythaz,Q'yth-Az Crystal
+shadow_crystal,Shadow Crystal
+shadow_lanius,Shadow Lanius
+shadow_ghosty,Shadow Ghost
+shadow_shell,Shadow Shell
+shadow_spider,Shadow Spider
+migo,Mi-Go
+shadow_migo,Shadow Mi-Go
+shubgo,Scrag
+zombie,Zombie
+zombie_ghoul,Ghoul
+zombie_slasher,Slasher
+zombie_wheezer,Wheezer
+zombie_regenerator,Regenerator
+zombie_burning,Burning Zombie
+ghost,Vanilla Ghost(Don't use)

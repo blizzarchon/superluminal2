@@ -11,8 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-import net.vhati.ftldat.PackUtilities;
-
 
 /**
  * A pseudo-dat backed by a real filesystem.

@@ -1,57 +1,218 @@
 package com.kartoflane.superluminal2.components.enums;
 
-public enum Races
-{
-	NO_CREW,
-	HUMAN,
-	ENGI,
-	ENERGY,
-	ROCK,
-	MANTIS,
-	SLUG,
-	CRYSTAL,
-	ANAEROBIC,
-	GHOST,
-	RANDOM;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Scanner;
 
-	@Override
-	public String toString()
+final public class Races
+{
+	public static String[] races;
+	public static String[] raceAliases;
+	public static ArrayList<String> list;
+	public static ArrayList<String> raceList;
+	public static ArrayList<String> raceAliasList;
+	
+	private Races()
 	{
-		switch ( this ) {
-			case NO_CREW:
-				return "<No Crew>";
-			case ENERGY:
-				return "Zoltan";
-			case ANAEROBIC:
-				return "Lanius";
-			default:
-				String s = name();
-				s = s.substring( 0, 1 ) + s.substring( 1 ).toLowerCase();
-				return s;
+		try 
+		{
+			list = new ArrayList<String>();
+			raceList = new ArrayList<String>();
+			raceAliasList = new ArrayList<String>();
+			File raceFile = new File(System.getProperty("user.dir") + "/resources/Race list.txt");
+			Scanner sc = new Scanner(raceFile);
+			while (sc.hasNext())
+			list.add(sc.nextLine());
+			sc.close();
+			
+			races = new String[list.size()+1];
+			raceAliases = new String[list.size()+1];
+			for (int i = 0; i < list.size()+1; ++i)
+			{
+				raceList.add(list.get(i).split(",")[0]);
+				raceAliasList.add(list.get(i).split(",")[1]);
+				races[i] = list.get(i).split(",")[0];
+				raceAliases[i] = list.get(i).split(",")[1];
+				if (i == list.size())
+				{
+					raceList.add("random");
+					raceAliasList.add("random");
+					races[i] = "random";
+					raceAliases[i] = "random";
+				}
+			}
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
 	/**
 	 * @return an array containing all races, sans NO_CREW
 	 */
-	public static Races[] getRaces()
+	public static String[] getRaces()
 	{
-		return new Races[] {
-			HUMAN, ENGI, ENERGY, ROCK,
-			MANTIS, SLUG, CRYSTAL,
-			ANAEROBIC, GHOST, RANDOM
-		};
+		try 
+		{
+			list = new ArrayList<String>();
+			raceList = new ArrayList<String>();
+			raceAliasList = new ArrayList<String>();
+			File raceFile = new File(System.getProperty("user.dir") + "/resources/Race list.txt");
+			Scanner sc = new Scanner(raceFile);
+			while (sc.hasNext())
+			list.add(sc.nextLine());
+			sc.close();
+			
+			races = new String[list.size()+1];
+			raceAliases = new String[list.size()+1];
+			for (int i = 0; i < list.size()+1; ++i)
+			{
+				if (i != list.size())
+				{
+					raceList.add(list.get(i).split(",")[0]);
+					raceAliasList.add(list.get(i).split(",")[1]);
+					races[i] = list.get(i).split(",")[0];
+					raceAliases[i] = list.get(i).split(",")[1];
+				}
+				if (i == list.size())
+				{
+					raceList.add("random");
+					raceAliasList.add("random");
+					races[i] = "random";
+					raceAliases[i] = "random";
+				}
+			}
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return races;
+	}
+	public static String[] getRacesAliases()
+	{
+		try 
+		{
+			list = new ArrayList<String>();
+			raceList = new ArrayList<String>();
+			raceAliasList = new ArrayList<String>();
+			File raceFile = new File(System.getProperty("user.dir") + "/resources/Race list.txt");
+			Scanner sc = new Scanner(raceFile);
+			while (sc.hasNext())
+			list.add(sc.nextLine());
+			sc.close();
+			
+			races = new String[list.size()+1];
+			raceAliases = new String[list.size()+1];
+			for (int i = 0; i < list.size()+1; ++i)
+			{
+				if (i != list.size())
+				{
+					raceList.add(list.get(i).split(",")[0]);
+					raceAliasList.add(list.get(i).split(",")[1]);
+					races[i] = list.get(i).split(",")[0];
+					raceAliases[i] = list.get(i).split(",")[1];
+				}
+				if (i == list.size())
+				{
+					raceList.add("random");
+					raceAliasList.add("random");
+					races[i] = "random";
+					raceAliases[i] = "random";
+				}
+			}
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return raceAliases;
 	}
 
 	/**
 	 * @return an array containing all races, sans NO_CREW and RANDOM
 	 */
-	public static Races[] getPlayerRaces()
+	public static String[] getPlayerRaces()
 	{
-		return new Races[] {
-			HUMAN, ENGI, ENERGY, ROCK,
-			MANTIS, SLUG, CRYSTAL,
-			ANAEROBIC, GHOST
-		};
+		try 
+		{
+			list = new ArrayList<String>();
+			raceList = new ArrayList<String>();
+			raceAliasList = new ArrayList<String>();
+			File raceFile = new File(System.getProperty("user.dir") + "/resources/Race list.txt");
+			Scanner sc = new Scanner(raceFile);
+			while (sc.hasNext())
+			list.add(sc.nextLine());
+			sc.close();
+			
+			races = new String[list.size()+1];
+			raceAliases = new String[list.size()+1];
+			for (int i = 0; i < list.size()+1; ++i)
+			{
+				if (i != list.size())
+				{
+					raceList.add(list.get(i).split(",")[0]);
+					raceAliasList.add(list.get(i).split(",")[1]);
+					races[i] = list.get(i).split(",")[0];
+					raceAliases[i] = list.get(i).split(",")[1];
+				}
+				if (i == list.size())
+				{
+					raceList.add("random");
+					raceAliasList.add("random");
+					races[i] = "random";
+					raceAliases[i] = "random";
+				}
+			}
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		list.remove("random");
+		String[] returnArray;
+		returnArray = raceList.toArray(new String[list.size()]);
+		list.add("random");
+		return returnArray;
+	}
+	public static String[] getPlayerRacesAliases()
+	{
+		try 
+		{
+			list = new ArrayList<String>();
+			raceList = new ArrayList<String>();
+			raceAliasList = new ArrayList<String>();
+			File raceFile = new File(System.getProperty("user.dir") + "/resources/Race list.txt");
+			Scanner sc = new Scanner(raceFile);
+			while (sc.hasNext())
+			list.add(sc.nextLine());
+			sc.close();
+			
+			races = new String[list.size()+1];
+			raceAliases = new String[list.size()+1];
+			for (int i = 0; i < list.size()+1; ++i)
+			{
+				if (i != list.size())
+				{
+					raceList.add(list.get(i).split(",")[0]);
+					raceAliasList.add(list.get(i).split(",")[1]);
+					races[i] = list.get(i).split(",")[0];
+					raceAliases[i] = list.get(i).split(",")[1];
+				}
+				if (i == list.size())
+				{
+					raceList.add("random");
+					raceAliasList.add("random");
+					races[i] = "random";
+					raceAliases[i] = "random";
+				}
+			}
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		raceAliasList.remove("random");
+		String[] returnArray;
+		returnArray = raceAliasList.toArray(new String[list.size()]);
+		list.add("random");
+		return returnArray;
 	}
 }

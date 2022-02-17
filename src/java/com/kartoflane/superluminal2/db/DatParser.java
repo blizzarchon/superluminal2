@@ -24,6 +24,8 @@ import com.kartoflane.superluminal2.ftl.VerbatimText;
 import com.kartoflane.superluminal2.ftl.WeaponList;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 
+import net.vhati.ftldat.Reader;
+
 
 /**
  * This class contains utility methods used to interpret XML tags as game objects.
@@ -55,7 +57,7 @@ public class DatParser
 	 *            XML element for the shipBlueprint tag
 	 * @return the ship's metadata - blueprint name, txt and xml layouts, name, class, description
 	 */
-	public static ShipMetadata loadShipMetadata( Element e )
+	public static ShipMetadata loadShipMetadata( Element e, Reader hsread)
 	{
 		if ( e == null )
 			throw new IllegalArgumentException( "Element must not be null." );
@@ -93,6 +95,46 @@ public class DatParser
 			else {
 				metadata.setShipDescription( readTextElement( child ) );
 			}
+			
+			
+			int index = hsread.name.indexOf(e.getAttributeValue("name"));
+			if (index != -1)
+			{
+			for (int i = 0; i < hsread.aug.get(index).size(); ++i)
+			{
+				if (!(hsread.aug.get(index).get(0).equals("")))
+					metadata.hiddenAugs.add(hsread.aug.get(index).get(i));
+			}
+			metadata.crewCap = hsread.lim.get(index).toString();
+			if (Integer.parseInt(metadata.crewCap) == -1)
+			{
+				metadata.realCrewCap = 8;
+			}
+			else
+			{
+				metadata.realCrewCap = Integer.parseInt(metadata.crewCap);
+			}
+			}
+			// search for name's index, add hidden augs/crew, crew == -1 if no tag, aug == ""
+//			for (int i = 0; i < hs.size(); ++i)
+//			{
+//				try
+//				{
+//				if (hs.get(i).getAttributeValue("customShip").equals(e.getAttributeValue( "name" )))
+//				{
+//					metadata.setCrewCap( readTextElement(hs.get(i).getChild( "crewLimit")));
+//
+//					for (int j = 0; j < e.getChildren("hiddenAug").size(); ++j)
+//					{
+//						metadata.hiddenAugs.add( readTextElement(hs.get(i).getChildren( "hiddenAug").get(j)));
+//					}
+//				}
+//				}
+//				catch (Exception d)
+//				{
+//					
+//				}
+//			}
 		}
 
 		return metadata;

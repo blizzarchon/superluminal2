@@ -16,3 +16,9 @@ Desktop.ini
 
 # Mac crap
 .DS_Store
+
+# IDE folder
+.idea/
+
+# runs maven
+create.bat

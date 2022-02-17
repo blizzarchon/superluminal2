@@ -89,7 +89,7 @@ public class JDeserialize
 		"volatile", "const", "float", "native", "super", "while" };
 	public static HashSet<String> keywordSet;
 
-	private String filename;
+	private String fileName;
 	private HashMap<Integer, Content> handles = new HashMap<Integer, Content>();
 	private ArrayList<Map<Integer, Content>> handlemaps = new ArrayList<Map<Integer, Content>>();
 	private ArrayList<Content> content;
@@ -267,7 +267,7 @@ public class JDeserialize
 
 	public JDeserialize( String filename )
 	{
-		this.filename = filename;
+		this.fileName = filename;
 	}
 
 	private int newHandle()
@@ -1283,7 +1283,7 @@ public class JDeserialize
 
 	public static void main( String[] args )
 	{
-		HashMap<String, Integer> options = new HashMap<String, Integer>();
+		new HashMap<String, Integer>();
 		Getopt go = new Getopt();
 		go.addOption( "-help", 0, "Show this list." );
 		go.addOption( "-debug", 0, "Write debug info generated during parsing to stdout." );

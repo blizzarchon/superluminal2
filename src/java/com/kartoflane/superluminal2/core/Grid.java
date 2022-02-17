@@ -8,11 +8,11 @@ import org.eclipse.swt.graphics.Rectangle;
 import com.kartoflane.superluminal2.mvc.controllers.CellController;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 
-import javafx.scene.control.Cell;
+
 
 
 /**
- * A class representing the grid, consisting of individual {@link Cell} objects.
+ * A class representing the grid, consisting of individual objects.
  * 
  * Acts as a central system for positioning various entities on the canvas.
  * 

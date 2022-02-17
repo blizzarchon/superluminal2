@@ -408,7 +408,7 @@ public class Utils
 				currentWidth += token.length() + 1;
 			}
 		}
-
+		sc.close();
 		return buf.toString();
 	}
 
