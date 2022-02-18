@@ -24,7 +24,8 @@ public class ShipMetadata
 
 	public ShipMetadata( Element element, String blueprintName )
 	{
-		isPlayer = Database.getInstance().isPlayerShip( blueprintName );
+		Element name = element.getChild("name");
+		isPlayer = name != null;
 		this.blueprintName = blueprintName;
 		this.element = element;
 	}

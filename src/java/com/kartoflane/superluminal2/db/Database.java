@@ -316,7 +316,14 @@ public class Database
 
 	public boolean isPlayerShip( String blueprintName )
 	{
-		return blueprintName.startsWith("PLAYER_SHIP_");
+		HashMap<String, ArrayList<ShipMetadata>> shipMetadataListMap = getShipMetadata();
+		ArrayList<ShipMetadata> shipMetadataList = shipMetadataListMap.get( blueprintName );
+		for ( ShipMetadata s : shipMetadataList ) {
+			if ( s.isPlayerShip() ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -326,9 +333,9 @@ public class Database
 	 */
 	public String getAssociatedFile( String blueprint )
 	{
-		if ( blueprint.startsWith("PLAYER_SHIP_"))
+		if ( isPlayerShip( blueprint ) )
 		{
-			if (blueprint.endsWith("_3"))
+			if ( blueprint.endsWith("_3") )
 			{
 				return "dlcBlueprintsOverwrite.xml";
 			}
