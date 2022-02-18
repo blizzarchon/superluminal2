@@ -17,9 +17,8 @@ public class ShipMetadata
 	private IDeferredText shipClass = IDeferredText.EMPTY;
 	private IDeferredText shipName = IDeferredText.EMPTY;
 	private IDeferredText description = IDeferredText.EMPTY;
-	public String crewCap = "";
-	public int realCrewCap;
-	public ArrayList<String> hiddenAugs = new ArrayList<String>();
+	private int crewCap;
+	private ArrayList<String> hiddenAugs = new ArrayList<String>();
 
 
 	public ShipMetadata( Element element, String blueprintName )
@@ -108,11 +107,11 @@ public class ShipMetadata
 		return null;
 	}
 
-	public String getCrewCap() {
+	public int getCrewCap() {
 		return crewCap;
 	}
 
-	public void setCrewCap(String crewCap) {
+	public void setCrewCap( int crewCap ) {
 		this.crewCap = crewCap;
 	}
 
@@ -120,7 +119,7 @@ public class ShipMetadata
 		return hiddenAugs;
 	}
 
-	public void setHiddenAugs(ArrayList<String> hiddenAugs) {
-		this.hiddenAugs = hiddenAugs;
+	public void addHiddenAug( String hiddenAug ) {
+		this.hiddenAugs.add( hiddenAug );
 	}
 }

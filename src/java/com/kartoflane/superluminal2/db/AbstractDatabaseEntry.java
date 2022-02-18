@@ -34,8 +34,6 @@ import com.kartoflane.superluminal2.utils.DataUtils;
 import com.kartoflane.superluminal2.utils.IOUtils;
 import com.kartoflane.superluminal2.utils.IOUtils.DecodeResult;
 
-import net.vhati.ftldat.Reader;
-
 
 /**
  * A class representing a database entry that can be installed in the
@@ -90,7 +88,7 @@ public abstract class AbstractDatabaseEntry
 
 	/**
 	 * Loads the contents of this database entry.<br>
-	 * This method should not be called directly. Use {@link Database#addEntry(IDatabaseEntry)} instead.
+	 * This method should not be called directly. Use {@link Database#addEntry(AbstractDatabaseEntry)} instead.
 	 * 
 	 * <pre>
 	 * Loaded data:
@@ -189,7 +187,7 @@ public abstract class AbstractDatabaseEntry
 	}
 
 	/**
-	 * @param blueprint
+	 * @param blueprintName
 	 *            the blueprint name of the sought augment
 	 * @return the augment with the given blueprint, or null if not found
 	 */
@@ -207,7 +205,7 @@ public abstract class AbstractDatabaseEntry
 	}
 
 	/**
-	 * @param blueprint
+	 * @param blueprintName
 	 *            the blueprint name of the sought drone
 	 * @return the drone with the given blueprint name, or null if not found
 	 */
@@ -461,35 +459,27 @@ public abstract class AbstractDatabaseEntry
 			for ( String ext : extensions ) {
 				try {
 					is = getInputStream( innerPath + ext );
-					DecodeResult hsdr = null;
-					InputStream hs = null;
-					try
-					{
-						hs = getInputStream( "data/hyperspace" + ext);
-						hsdr = IOUtils.decodeText( hs, null );
-					}
-					catch (Exception e)
-					{
-						
-					}
-
 					DecodeResult dr = IOUtils.decodeText( is, null );
 
-					Reader hsread = null;
-					try
-					{
-						hsread = new Reader(hsdr);
-					}
-					catch (Exception e)
-					{
-						hsread = new Reader(dr);
+					ArrayList<Element> elements = DataUtils.findTagsNamed( dr.text, "shipBlueprint" );
+
+					boolean hyperspace = true;
+
+					ArrayList<Element> shipsTags = null;
+					try {
+						InputStream hs = getInputStream( "data/hyperspace" + ext );
+						DecodeResult hsdr = IOUtils.decodeText( hs, null );
+						shipsTags = DataUtils.findTagsNamed( hsdr.text, "ships" );
+					} catch ( Exception ex ) {
+						hyperspace = false;
 					}
 
-					ArrayList<Element> elements = DataUtils.findTagsNamed( dr.text, "shipBlueprint" );
-					
 					for ( Element e : elements ) {
 						try {
-							store( DatParser.loadShipMetadata( e, hsread ) );
+							if ( hyperspace )
+								store( DatParser.loadShipMetadata( e, shipsTags ) );
+							else
+								store ( DatParser.loadShipMetadata( e ) );
 						}
 						catch ( Exception ex ) {
 							log.warn( getName() + ": could not load ship metadata: " + ex.getMessage() );

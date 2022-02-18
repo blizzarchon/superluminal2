@@ -568,11 +568,11 @@ public class ShipLoadUtils
 			ship.changeAugment( Database.DEFAULT_AUGMENT_OBJ, augmentObject );
 		}
 		
-		for (int i = 0; i < metadata.hiddenAugs.size(); ++i)
+		for ( String hiddenAug : metadata.getHiddenAugs() )
 		{
-			AugmentObject augmentObject = db.getAugment(metadata.hiddenAugs.get(i));
+			AugmentObject augmentObject = db.getAugment( hiddenAug );
 			if ( augmentObject == null )
-				throw new IllegalArgumentException( "AugBlueprint not found: " + metadata.hiddenAugs.get(i) );
+				throw new IllegalArgumentException( "AugBlueprint not found: " + hiddenAug );
 			
 			augmentObject.isHidden = true;
 			ship.changeAugment( Database.DEFAULT_AUGMENT_OBJ, augmentObject );

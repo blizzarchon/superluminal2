@@ -1,5 +1,7 @@
 package com.kartoflane.superluminal2.db;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.jdom2.Element;
@@ -23,8 +25,6 @@ import com.kartoflane.superluminal2.ftl.ShipMetadata;
 import com.kartoflane.superluminal2.ftl.VerbatimText;
 import com.kartoflane.superluminal2.ftl.WeaponList;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
-
-import net.vhati.ftldat.Reader;
 
 
 /**
@@ -57,8 +57,7 @@ public class DatParser
 	 *            XML element for the shipBlueprint tag
 	 * @return the ship's metadata - blueprint name, txt and xml layouts, name, class, description
 	 */
-	public static ShipMetadata loadShipMetadata( Element e, Reader hsread)
-	{
+	public static ShipMetadata loadShipMetadata( Element e ) {
 		if ( e == null )
 			throw new IllegalArgumentException( "Element must not be null." );
 
@@ -95,47 +94,51 @@ public class DatParser
 			else {
 				metadata.setShipDescription( readTextElement( child ) );
 			}
-			
-			
-			int index = hsread.name.indexOf(e.getAttributeValue("name"));
-			if (index != -1)
-			{
-			for (int i = 0; i < hsread.aug.get(index).size(); ++i)
-			{
-				if (!(hsread.aug.get(index).get(0).equals("")))
-					metadata.hiddenAugs.add(hsread.aug.get(index).get(i));
-			}
-			metadata.crewCap = hsread.lim.get(index).toString();
-			if (Integer.parseInt(metadata.crewCap) == -1)
-			{
-				metadata.realCrewCap = 8;
-			}
-			else
-			{
-				metadata.realCrewCap = Integer.parseInt(metadata.crewCap);
-			}
-			}
-			// search for name's index, add hidden augs/crew, crew == -1 if no tag, aug == ""
-//			for (int i = 0; i < hs.size(); ++i)
-//			{
-//				try
-//				{
-//				if (hs.get(i).getAttributeValue("customShip").equals(e.getAttributeValue( "name" )))
-//				{
-//					metadata.setCrewCap( readTextElement(hs.get(i).getChild( "crewLimit")));
-//
-//					for (int j = 0; j < e.getChildren("hiddenAug").size(); ++j)
-//					{
-//						metadata.hiddenAugs.add( readTextElement(hs.get(i).getChildren( "hiddenAug").get(j)));
-//					}
-//				}
-//				}
-//				catch (Exception d)
-//				{
-//					
-//				}
-//			}
 		}
+
+		return metadata;
+	}
+
+	/**
+	 * Loads the ship's metadata from the supplied Element
+	 *
+	 * @param e
+	 *            XML element for the shipBlueprint tag
+	 *
+	 * @param shipsTags
+	 * 			  XML child elements of hyperspace &lt;ships&gt; tag
+	 * @return the ship's metadata - blueprint name, txt and xml layouts, name, class, description
+	 */
+	public static ShipMetadata loadShipMetadata( Element e, ArrayList<Element> shipsTags) {
+			ShipMetadata metadata = loadShipMetadata( e );
+			String blueprintName = metadata.getBlueprintName();
+
+			if ( metadata.isPlayerShip() ) {
+				Element customShipClone = null;
+				Collections.reverse( shipsTags );
+				for ( Element shipsTag : shipsTags ) {
+					for ( Element customShip : shipsTag.getChildren("customShip") ) {
+						String customShipName = customShip.getAttributeValue( "name" );
+						if ( customShipName != null && customShipName.equals( blueprintName ) ) {
+							customShipClone = customShip.clone();
+							break;
+						}
+					}
+				}
+
+				if (customShipClone != null) {
+					for ( Element hiddenAug : customShipClone.getChildren( "hiddenAug" ) ) {
+						metadata.addHiddenAug(hiddenAug.getTextTrim());
+					}
+					Element crewLimit = customShipClone.getChild("crewLimit");
+					metadata.setCrewCap( 8 );
+					if ( crewLimit != null ) {
+						int crewLimitValue = Integer.parseInt(crewLimit.getText());
+						if ( crewLimitValue > 0 )
+							metadata.setCrewCap( crewLimitValue );
+					}
+				}
+			}
 
 		return metadata;
 	}

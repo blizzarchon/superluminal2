@@ -324,7 +324,7 @@ public class ShipLoaderDialog
 						ShipMetadata metadata = (ShipMetadata)selectedItem.getData();
 						try {
 							ShipObject object = ShipLoadUtils.loadShipXML( metadata.getElement(), metadata );
-							object.setCrewCap(metadata.realCrewCap);
+							object.setCrewCap( metadata.getCrewCap() );
 
 							if ( !Manager.allowRoomOverlap && object.hasOverlappingRooms() ) {
 								log.info( "Ship contains overlapping rooms, but overlap is disabled - forcing room overlap enable." );
