@@ -505,10 +505,6 @@ public class ShipLoaderDialog
 		buf.append( ex.getClass().getSimpleName() );
 		buf.append( ": " );
 		buf.append( ex.getMessage() );
-		if (ex.getClass().getSimpleName().equals("IllegalArgumentException"))
-		{
-			buf.append("\n\nAre you missing a race in Race list.txt?");
-		}
 		buf.append( "\n\nCheck the log or console for details." );
 		UIUtils.showWarningDialog( shell, null, buf.toString() );
 	}

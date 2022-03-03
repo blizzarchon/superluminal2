@@ -26,11 +26,11 @@ import org.jdom2.input.JDOMParseException;
 import com.kartoflane.superluminal2.components.Tuple;
 import com.kartoflane.superluminal2.components.enums.Images;
 import com.kartoflane.superluminal2.components.enums.LayoutObjects;
-import com.kartoflane.superluminal2.components.enums.Races;
 import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.db.Database;
 import com.kartoflane.superluminal2.ftl.AugmentObject;
+import com.kartoflane.superluminal2.ftl.CrewObject;
 import com.kartoflane.superluminal2.ftl.DoorObject;
 import com.kartoflane.superluminal2.ftl.DroneList;
 import com.kartoflane.superluminal2.ftl.DroneObject;
@@ -587,25 +587,25 @@ public class ShipSaveUtils
 
 		if ( ship.isPlayerShip() ) {
 			// List every crew member individually to allow ordering of crew
-			for ( String race : ship.getCrew() ) {
-				if ( race.equals("no_crew") )
+			for ( CrewObject race : ship.getCrew() ) {
+				if ( race == Database.DEFAULT_CREW_OBJ )
 					continue;
 				e = new Element( "crewCount" );
 				e.setAttribute( "amount", "1" );
-				e.setAttribute( "class", race.toLowerCase() );
+				e.setAttribute( "class", race.getBlueprintName() );
 
 				shipBlueprint.addContent( e );
 			}
 		}
 		else {
-			for ( String race : Races.getRaces() ) {
+			for ( CrewObject race : Database.getInstance().getCrews() ) {
 				int amount = ship.getCrewMin( race );
 				int max = ship.getCrewMax( race );
 
 				e = new Element( "crewCount" );
 				e.setAttribute( "amount", "" + amount );
 				e.setAttribute( "max", "" + max );
-				e.setAttribute( "class", race.toLowerCase() );
+				e.setAttribute( "class", race.getBlueprintName() );
 
 				// Don't print an empty tag
 				if ( amount > 0 && ( ship.isPlayerShip() || max > 0 ) )

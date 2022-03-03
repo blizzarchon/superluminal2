@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.jdom2.Element;
 
+import com.kartoflane.superluminal2.components.enums.CrewStats;
 import com.kartoflane.superluminal2.components.enums.Directions;
 import com.kartoflane.superluminal2.components.enums.DroneStats;
 import com.kartoflane.superluminal2.components.enums.DroneTypes;
@@ -14,6 +15,7 @@ import com.kartoflane.superluminal2.components.enums.WeaponTypes;
 import com.kartoflane.superluminal2.ftl.AnimationObject;
 import com.kartoflane.superluminal2.ftl.AugmentObject;
 import com.kartoflane.superluminal2.ftl.BlueprintList;
+import com.kartoflane.superluminal2.ftl.CrewObject;
 import com.kartoflane.superluminal2.ftl.DefaultDeferredText;
 import com.kartoflane.superluminal2.ftl.DroneList;
 import com.kartoflane.superluminal2.ftl.DroneObject;
@@ -57,7 +59,8 @@ public class DatParser
 	 *            XML element for the shipBlueprint tag
 	 * @return the ship's metadata - blueprint name, txt and xml layouts, name, class, description
 	 */
-	public static ShipMetadata loadShipMetadata( Element e ) {
+	public static ShipMetadata loadShipMetadata( Element e )
+	{
 		if ( e == null )
 			throw new IllegalArgumentException( "Element must not be null." );
 
@@ -109,31 +112,33 @@ public class DatParser
 	 * 			  XML child elements of hyperspace &lt;ships&gt; tag
 	 * @return the ship's metadata - blueprint name, txt and xml layouts, name, class, description
 	 */
-	public static ShipMetadata loadShipMetadata( Element e, ArrayList<Element> shipsTags) {
+	public static ShipMetadata loadShipMetadata( Element e, ArrayList<Element> shipsTags)
+	{
 			ShipMetadata metadata = loadShipMetadata( e );
 			String blueprintName = metadata.getBlueprintName();
 
 			if ( metadata.isPlayerShip() ) {
 				Element customShipClone = null;
 				Collections.reverse( shipsTags );
+				loop:
 				for ( Element shipsTag : shipsTags ) {
 					for ( Element customShip : shipsTag.getChildren("customShip") ) {
 						String customShipName = customShip.getAttributeValue( "name" );
 						if ( customShipName != null && customShipName.equals( blueprintName ) ) {
 							customShipClone = customShip.clone();
-							break;
+							break loop;
 						}
 					}
 				}
 
-				if (customShipClone != null) {
+				if ( customShipClone != null ) {
 					for ( Element hiddenAug : customShipClone.getChildren( "hiddenAug" ) ) {
 						metadata.addHiddenAug(hiddenAug.getTextTrim());
 					}
 					Element crewLimit = customShipClone.getChild("crewLimit");
 					metadata.setCrewCap( 8 );
 					if ( crewLimit != null ) {
-						int crewLimitValue = Integer.parseInt(crewLimit.getText());
+						int crewLimitValue = Integer.parseInt( crewLimit.getText() );
 						if ( crewLimitValue > 0 )
 							metadata.setCrewCap( crewLimitValue );
 					}
@@ -403,6 +408,88 @@ public class DatParser
 		}
 
 		return drone;
+	}
+
+	public static CrewObject loadCrew( Element e ) {
+		if ( e == null )
+			throw new IllegalArgumentException( "Element must not be null." );
+
+		String attr = null;
+		Element child = null;
+
+		attr = e.getAttributeValue( "name" );
+		if ( attr == null )
+			throw new IllegalArgumentException( e.getName() + " is missing 'name' attribute." );
+		CrewObject crew = new CrewObject( attr );
+
+		child = e.getChild( "title" );
+		if ( child == null )
+			throw new IllegalArgumentException( crew.getBlueprintName() + " is missing <title> tag." );
+		crew.setTitle( readTextElement( child ) );
+
+		child = e.getChild( "short" );
+		if ( child == null )
+			crew.setShortName( new VerbatimText( "Missing short name" ) );
+		else
+			crew.setShortName( readTextElement( child ) );
+
+		child = e.getChild( "desc" );
+		if ( child == null )
+			crew.setDescription( new VerbatimText( "Missing description." ) );
+		else
+			crew.setDescription( readTextElement( child ) );
+
+		for ( CrewStats stat : CrewStats.values() ) {
+			try {
+				child = e.getChild( stat.getTagName() );
+				if ( child != null )
+					crew.setStat( stat, Integer.parseInt( child.getValue() ) );
+			}
+			catch ( NumberFormatException ex ) {
+				// Catch an re-throw the error to provide more information
+				throw new IllegalArgumentException(
+						crew.getBlueprintName() + ": <" + stat.getTagName() + "> tag's value could not be parsed: " + child.getValue()
+				);
+			}
+		}
+
+		child = e.getChild( "powerList" );
+
+		for ( Element power : child.getChildren( "power" ) ) {
+			crew.addPower( power.getTextTrim() );
+		}
+
+		return crew;
+	}
+
+	public static CrewObject loadCrew( Element e, ArrayList<Element> crewTags)
+	{
+		CrewObject crew = loadCrew( e );
+		String blueprintName = crew.getBlueprintName();
+
+		Element raceClone = null;
+		Collections.reverse( crewTags );
+		loop:
+		for ( Element crewTag : crewTags ) {
+			for ( Element race : crewTag.getChildren( "race" ) ) {
+				String raceName = race.getAttributeValue( "name" );
+				if ( raceName != null && raceName.equals( blueprintName ) ) {
+					raceClone = race.clone();
+					break loop;
+				}
+			}
+		}
+		// discard races that don't show up in hyperspace.xml
+		if ( raceClone == null ) {
+			return null;
+		}
+		// this isn't the right approach, because it could ignore vanilla races
+		// maybe instead just make a boolean hyperspace in CrewObject
+		// then if hyperspace == true, look at inner race info
+
+		// add more stats to display? traverse raceClone.getChildren
+
+		return crew;
 	}
 
 	public static AugmentObject loadAugment( Element e )

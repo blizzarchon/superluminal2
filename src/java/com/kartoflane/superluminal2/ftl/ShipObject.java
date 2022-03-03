@@ -11,11 +11,9 @@ import org.eclipse.swt.graphics.Rectangle;
 import com.kartoflane.superluminal2.components.enums.BoardingStrategies;
 import com.kartoflane.superluminal2.components.enums.Images;
 import com.kartoflane.superluminal2.components.enums.PlayerShipBlueprints;
-import com.kartoflane.superluminal2.components.enums.Races;
 import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.db.Database;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
-import com.kartoflane.superluminal2.mvc.controllers.RoomController;
 import com.kartoflane.superluminal2.utils.Utils;
 
 
@@ -38,7 +36,7 @@ public class ShipObject extends GameObject
 
 	private HashMap<Systems, ArrayList<SystemObject>> systemMap;
 	private HashMap<Images, ImageObject> imageMap;
-	private ArrayList<String> crewList;
+	private ArrayList<CrewObject> crewList;
 	private HashMap<String, Integer> crewMinMap;
 	private HashMap<String, Integer> crewMaxMap;
 
@@ -86,7 +84,7 @@ public class ShipObject extends GameObject
 		systemMap = new HashMap<Systems, ArrayList<SystemObject>>();
 		imageMap = new HashMap<Images, ImageObject>();
 		augments = new ArrayList<AugmentObject>();
-		crewList = new ArrayList<String>();
+		crewList = new ArrayList<CrewObject>();
 		crewMinMap = new HashMap<String, Integer>();
 		crewMaxMap = new HashMap<String, Integer>();
 
@@ -103,13 +101,14 @@ public class ShipObject extends GameObject
 			object.setAlias( image.name().toLowerCase() );
 			imageMap.put( image, object );
 		}
-		for ( String race : Races.getRaces() ) {
-			crewMinMap.put( race, 0 );
-			crewMaxMap.put( race, 0 );
+		for ( CrewObject race : Database.getInstance().getCrews() ) {
+			String blueprint = race.getBlueprintName();
+			crewMinMap.put( blueprint, 0 );
+			crewMaxMap.put( blueprint, 0 );
 		}
 		for ( int i = 0; i < crewCap; i++ )
 		{
-			crewList.add( "no_crew" );
+			crewList.add( Database.DEFAULT_CREW_OBJ );
 		}
 		if (blueprintName.endsWith("_2"))
 		{
@@ -1007,7 +1006,7 @@ public class ShipObject extends GameObject
 	 * Puts the new race at the specified index in the race list.<br>
 	 * Player ships only.
 	 */
-	public void changeCrew( int index, String neu )
+	public void changeCrew( int index, CrewObject neu )
 	{
 		if ( neu == null )
 			throw new IllegalArgumentException( "New augment must not be null." );
@@ -1023,7 +1022,7 @@ public class ShipObject extends GameObject
 	 * 
 	 * @return index at which the new race was placed
 	 */
-	public int changeCrew( String old, String neu )
+	public int changeCrew( CrewObject old, CrewObject neu )
 	{
 		if ( old == null )
 			throw new IllegalArgumentException( "Old augment must not be null." );
@@ -1040,30 +1039,19 @@ public class ShipObject extends GameObject
 	/**
 	 * @return the number of crew members of the given race in the ship.
 	 */
-	public int getCrewCount( String r )
+	public int getCrewCount( CrewObject r )
 	{
 		int result = 0;
-		for ( String race : crewList ) {
+		for ( CrewObject race : crewList ) {
 			if ( race.equals(r) )
 				result++;
 		}
 		return result;
 	}
 
-	public String[] getCrew()
+	public CrewObject[] getCrew()
 	{
-		String[] returnArray = crewList.toArray( new String[crewList.size()] );
-		for (int i = 0; i < returnArray.length; ++i)
-		{
-			for (int k = 0; k < Races.raceAliasList.size(); ++k)
-			{
-				if (Races.raceAliasList.get(k).toLowerCase().equals(returnArray[i].toLowerCase()))
-				{
-					returnArray[i] = Races.raceList.get(k);
-				}
-			}
-		}
-		return returnArray;
+		return crewList.toArray( new CrewObject[0] );
 	}
 
 	/**
@@ -1073,8 +1061,8 @@ public class ShipObject extends GameObject
 	public void coalesceCrew()
 	{
 		for ( int i = 0; i < crewList.size(); i++ ) {
-			String crew = crewList.get( i );
-			if ( crew.equals("no_crew") ) {
+			CrewObject crew = crewList.get( i );
+			if ( crew == Database.DEFAULT_CREW_OBJ ) {
 				crewList.remove( crew );
 				crewList.add( crew );
 			}
@@ -1085,7 +1073,7 @@ public class ShipObject extends GameObject
 	{
 		for (int i = amount; i > crewCap; --i)
 		{
-			crewList.add("no_crew");
+			crewList.add( Database.DEFAULT_CREW_OBJ );
 		}
 		for (int i = amount; i < crewCap; ++i)
 		{
@@ -1102,13 +1090,13 @@ public class ShipObject extends GameObject
 	 * Sets the minimum amount of crew members of the given race that the ship can have.<br>
 	 * Enemy ships only.
 	 */
-	public void setCrewMin( String race, int amount )
+	public void setCrewMin( CrewObject race, int amount )
 	{
 		if ( race == null )
 			throw new IllegalArgumentException( "Race must not be null." );
 		if ( amount < 0 )
 			throw new IllegalArgumentException( "Amount must be non-negative." );
-		crewMinMap.put( race, amount );
+		crewMinMap.put( race.getIdentifier(), amount );
 	}
 
 	/**
@@ -1116,11 +1104,11 @@ public class ShipObject extends GameObject
 	 * 
 	 * @return minimum amount of crew members of the given race that the ship can have
 	 */
-	public int getCrewMin( String race )
+	public int getCrewMin( CrewObject race )
 	{
 		if ( race == null )
 			throw new IllegalArgumentException( "Race must not be null." );
-		Integer result = crewMinMap.get( race );
+		Integer result = crewMinMap.get( race.getIdentifier() );
 		return result == null ? 0 : result;
 	}
 
@@ -1128,13 +1116,13 @@ public class ShipObject extends GameObject
 	 * Sets the maximum amount of crew members of the given race that the ship can have.<br>
 	 * Enemy ships only.
 	 */
-	public void setCrewMax( String race, int amount )
+	public void setCrewMax( CrewObject race, int amount )
 	{
 		if ( race == null )
 			throw new IllegalArgumentException( "Race must not be null." );
 		if ( amount < 0 )
 			throw new IllegalArgumentException( "Amount must be non-negative." );
-		crewMaxMap.put( race, amount );
+		crewMaxMap.put( race.getIdentifier(), amount );
 	}
 
 	/**
@@ -1142,11 +1130,11 @@ public class ShipObject extends GameObject
 	 * 
 	 * @return maximum amount of crew members of the given race that the ship can have
 	 */
-	public int getCrewMax( String race )
+	public int getCrewMax( CrewObject race )
 	{
 		if ( race == null )
 			throw new IllegalArgumentException( "Race must not be null." );
-		Integer result = crewMaxMap.get( race );
+		Integer result = crewMaxMap.get( race.getIdentifier() );
 		return result == null ? 0 : result;
 	}
 
@@ -1337,7 +1325,7 @@ public class ShipObject extends GameObject
 	 * Removes the game object from the ship.<br>
 	 * <br>
 	 * This method should not be called directly.
-	 * Use {@link com.kartoflane.superluminal2.ui.ShipContainer#remove(RoomController)
+	 * Use {@link com.kartoflane.superluminal2.ui.ShipContainer#remove(AbstractController)
 	 * ShipContainer.remove()} instead
 	 * 
 	 * @param object

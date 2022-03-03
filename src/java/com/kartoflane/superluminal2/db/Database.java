@@ -18,6 +18,7 @@ import com.kartoflane.superluminal2.components.enums.WeaponTypes;
 import com.kartoflane.superluminal2.components.interfaces.Predicate;
 import com.kartoflane.superluminal2.ftl.AnimationObject;
 import com.kartoflane.superluminal2.ftl.AugmentObject;
+import com.kartoflane.superluminal2.ftl.CrewObject;
 import com.kartoflane.superluminal2.ftl.DroneList;
 import com.kartoflane.superluminal2.ftl.DroneObject;
 import com.kartoflane.superluminal2.ftl.GibObject;
@@ -41,6 +42,7 @@ public class Database
 	public static final AnimationObject DEFAULT_ANIM_OBJ = new AnimationObject();
 	public static final WeaponObject DEFAULT_WEAPON_OBJ = new WeaponObject();
 	public static final DroneObject DEFAULT_DRONE_OBJ = new DroneObject();
+	public static final CrewObject DEFAULT_CREW_OBJ = new CrewObject();
 	public static final GlowSet DEFAULT_GLOW_SET = new GlowSet();
 	public static final GlowObject DEFAULT_GLOW_OBJ = new GlowObject();
 	public static final GibObject DEFAULT_GIB_OBJ = new GibObject();
@@ -371,6 +373,28 @@ public class Database
 		for ( int i = dataEntries.size() - 1; i >= 0; i-- ) {
 			AbstractDatabaseEntry de = dataEntries.get( i );
 			for ( AugmentObject o : de.getAugments() )
+				if ( !result.contains( o ) )
+					result.add( o );
+		}
+		return result;
+	}
+
+	public CrewObject getCrew( String blueprint )
+	{
+		CrewObject result = null;
+		for ( int i = dataEntries.size() - 1; i >=0 && result == null; i-- ) {
+			AbstractDatabaseEntry de = dataEntries.get( i );
+			result = de.getCrew( blueprint );
+		}
+		return result;
+	}
+
+	public ArrayList<CrewObject> getCrews()
+	{
+		ArrayList<CrewObject> result = new ArrayList<CrewObject>();
+		for ( int i = dataEntries.size() - 1; i >= 0; i-- ) {
+			AbstractDatabaseEntry de = dataEntries.get( i );
+			for ( CrewObject o : de.getCrews() )
 				if ( !result.contains( o ) )
 					result.add( o );
 		}

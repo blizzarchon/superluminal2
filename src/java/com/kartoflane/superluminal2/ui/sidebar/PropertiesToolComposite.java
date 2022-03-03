@@ -30,12 +30,12 @@ import org.eclipse.swt.widgets.Text;
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.enums.BoardingStrategies;
 import com.kartoflane.superluminal2.components.enums.OS;
-import com.kartoflane.superluminal2.components.enums.Races;
 import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.db.Database;
 import com.kartoflane.superluminal2.ftl.AugmentObject;
+import com.kartoflane.superluminal2.ftl.CrewObject;
 import com.kartoflane.superluminal2.ftl.DroneList;
 import com.kartoflane.superluminal2.ftl.DroneObject;
 import com.kartoflane.superluminal2.ftl.ShipObject;
@@ -46,7 +46,7 @@ import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.ShipController;
 import com.kartoflane.superluminal2.mvc.controllers.SystemController;
 import com.kartoflane.superluminal2.ui.AugmentSelectionDialog;
-import com.kartoflane.superluminal2.ui.CrewMenu;
+import com.kartoflane.superluminal2.ui.CrewSelectionDialog;
 import com.kartoflane.superluminal2.ui.DroneSelectionDialog;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.ShipContainer;
@@ -98,7 +98,6 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 	private Text txtLayout;
 	private Text txtImage;
 	private Group grpAugments;
-	private CrewMenu crewMenu;
 	private Label lblHullHelp;
 	private Label lblReactorInfo;
 	private Label lblLayoutInfo;
@@ -870,6 +869,7 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 			grpCrew.setLayout( new GridLayout( 2, false ) );
 			grpCrew.setLayoutData( new GridData( SWT.FILL, SWT.TOP, true, false, 1, 1 ) );
 			grpCrew.setText( "Crew" );
+
 			grpCrew.setVisible(true);
 			Label lblCrew = new Label( grpCrew, SWT.NONE );
 			lblCrew.setText( "Max (Hit Enter after change)" );
@@ -890,20 +890,13 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 
 					if ( i != -1 ) {
 						ShipObject ship = container.getShipController().getGameObject();
-						String current = ship.getCrew()[i];
-						for (int k = 0; k < Races.getPlayerRaces().length; ++k)
-						{
-							if (current.equals(Races.getPlayerRaces()[k]))
-							{
-								current = Races.getPlayerRacesAliases()[k];
-							}
-						}
+						CrewObject current = ship.getCrew()[i];
 
-						crewMenu = new CrewMenu( compCrew );
-						String neu = crewMenu.open();
+						CrewSelectionDialog dialog = new CrewSelectionDialog( EditorWindow.getInstance().getShell() );
+						CrewObject neu = dialog.open( current );
 
 						if ( neu != null ) {
-							if ( current.equals("no_crew") )
+							if ( current == Database.DEFAULT_CREW_OBJ )
 								ship.changeCrew( current, neu );
 							else
 								ship.changeCrew( i, neu );
@@ -1013,9 +1006,8 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 			lbl.setText( "Max" );
 			
 
-			for ( String race : Races.getRacesAliases() ) {
-				final String r = race;
-				final String ra = Races.getRaces()[Races.raceAliasList.indexOf(race)];
+			for ( CrewObject race : Database.getInstance().getCrews() ) {
+				final CrewObject r = race;
 				lbl = new Label( compCrew, SWT.NONE );
 				lbl.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 1, 1 ) );
 				lbl.setText( race.toString() );
@@ -1023,19 +1015,19 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 				final Spinner spMin = new Spinner( compCrew, SWT.BORDER );
 				final Spinner spMax = new Spinner( compCrew, SWT.BORDER );
 				spMin.setMaximum( 99 );
-				spCrewMin.put( Races.getRaces()[Races.raceAliasList.indexOf(race)], spMin );
+				spCrewMin.put( race.getIdentifier(), spMin );
 
 				spMax.setMaximum( 99 );
-				spCrewMax.put( Races.getRaces()[Races.raceAliasList.indexOf(race)], spMax );
+				spCrewMax.put( race.getIdentifier(), spMax );
 
 				spMin.addSelectionListener(
 					new SelectionAdapter() {
 						@Override
 						public void widgetSelected( SelectionEvent e )
 						{
-							ship.setCrewMin( ra, spMin.getSelection() );
-							if ( ship.getCrewMax( ra ) < ship.getCrewMin( ra ) ) {
-								spMax.setSelection( ship.getCrewMin( ra ) );
+							ship.setCrewMin( r, spMin.getSelection() );
+							if ( ship.getCrewMax( r ) < ship.getCrewMin( r ) ) {
+								spMax.setSelection( ship.getCrewMin( r ) );
 								spMax.notifyListeners( SWT.Selection, null );
 							}
 						}
@@ -1047,7 +1039,7 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 						@Override
 						public void widgetSelected( SelectionEvent e )
 						{
-							ship.setCrewMax( ra, spMax.getSelection() );
+							ship.setCrewMax( r, spMax.getSelection() );
 						}
 					}
 				);
@@ -1154,34 +1146,19 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 		// Crew tab
 		if ( ship.isPlayerShip() ) {
 			count = 0;
-			for ( String race : ship.getCrew() ) 
+			for ( CrewObject race : ship.getCrew() )
 			{
-						if (count < ship.getCrewCap())
-						{
-							if (Races.raceList.contains(race.toLowerCase()))
-							{
-								btnCrewMembers.get( count ).setText( Races.getPlayerRacesAliases()[Races.raceList.indexOf(race.toLowerCase())] );
-								count++;
-							}
-							else
-							{
-								btnCrewMembers.get( count ).setText( race.toString() );
-								count++;
-							}
-						}
+				if (count < ship.getCrewCap())
+				{
+					btnCrewMembers.get( count ).setText( race.getTitle().toString() );
+					count++;
+				}
 			}
 		}
 		else {
-			for ( String race : Races.getRaces() ) {
-				try
-				{
-				spCrewMin.get( race ).setSelection( ship.getCrewMin( race ) );
-				spCrewMax.get( race ).setSelection( ship.getCrewMax( race ) );
-				}
-				catch (NullPointerException e)
-				{
-
-				}
+			for ( CrewObject race : Database.getInstance().getCrews() ) {
+				spCrewMin.get( race.getIdentifier() ).setSelection( ship.getCrewMin( race ) );
+				spCrewMax.get( race.getIdentifier() ).setSelection( ship.getCrewMax( race ) );
 			}
 		}
 	}

@@ -21,6 +21,7 @@ import com.kartoflane.superluminal2.components.interfaces.Predicate;
 import com.kartoflane.superluminal2.ftl.AnimationObject;
 import com.kartoflane.superluminal2.ftl.AugmentObject;
 import com.kartoflane.superluminal2.ftl.BlueprintList;
+import com.kartoflane.superluminal2.ftl.CrewObject;
 import com.kartoflane.superluminal2.ftl.DroneList;
 import com.kartoflane.superluminal2.ftl.DroneObject;
 import com.kartoflane.superluminal2.ftl.GlowObject;
@@ -47,6 +48,7 @@ public abstract class AbstractDatabaseEntry
 	protected Map<String, WeaponObject> weaponMap = new HashMap<String, WeaponObject>();
 	protected Map<String, DroneObject> droneMap = new HashMap<String, DroneObject>();
 	protected Map<String, AugmentObject> augmentMap = new HashMap<String, AugmentObject>();
+	protected Map<String, CrewObject> crewMap = new HashMap<String, CrewObject>();
 	protected Map<String, GlowObject> glowMap = new HashMap<String, GlowObject>();
 	protected Map<String, GlowSet> glowSetMap = new HashMap<String, GlowSet>();
 	protected Map<String, WeaponList> weaponListMap = new HashMap<String, WeaponList>();
@@ -120,6 +122,11 @@ public abstract class AbstractDatabaseEntry
 	protected void store( AugmentObject augment )
 	{
 		augmentMap.put( augment.getIdentifier(), augment );
+	}
+
+	protected void store( CrewObject crew )
+	{
+		crewMap.put( crew.getIdentifier(), crew );
 	}
 
 	protected void store( BlueprintList<?> list )
@@ -202,6 +209,24 @@ public abstract class AbstractDatabaseEntry
 	public AugmentObject[] getAugments()
 	{
 		return augmentMap.values().toArray( new AugmentObject[0] );
+	}
+
+	/**
+	 * @param blueprintName
+	 *            the blueprint name of the sought crew
+	 * @return the crew with the given blueprint, or null if not found
+	 */
+	public CrewObject getCrew( String blueprintName )
+	{
+		return crewMap.get( blueprintName );
+	}
+
+	/**
+	 * @return an array of all augments in this entry
+	 */
+	public CrewObject[] getCrews()
+	{
+		return crewMap.values().toArray( new CrewObject[0] );
 	}
 
 	/**
@@ -470,7 +495,8 @@ public abstract class AbstractDatabaseEntry
 						InputStream hs = getInputStream( "data/hyperspace" + ext );
 						DecodeResult hsdr = IOUtils.decodeText( hs, null );
 						shipsTags = DataUtils.findTagsNamed( hsdr.text, "ships" );
-					} catch ( Exception ex ) {
+					}
+					catch ( Exception ex ) {
 						hyperspace = false;
 					}
 
@@ -479,7 +505,7 @@ public abstract class AbstractDatabaseEntry
 							if ( hyperspace )
 								store( DatParser.loadShipMetadata( e, shipsTags ) );
 							else
-								store ( DatParser.loadShipMetadata( e ) );
+								store( DatParser.loadShipMetadata( e ) );
 						}
 						catch ( Exception ex ) {
 							log.warn( getName() + ": could not load ship metadata: " + ex.getMessage() );
@@ -522,6 +548,40 @@ public abstract class AbstractDatabaseEntry
 						}
 					}
 					found = true;
+
+					elements.clear();
+					elements = null;
+					elements = DataUtils.findTagsNamed( dr.text, "crewBlueprint");
+					hyperspace = true;
+
+					ArrayList<Element> crewTags = null;
+					try {
+						InputStream hs = getInputStream( "data/hyperspace" + ext );
+						DecodeResult hsdr = IOUtils.decodeText( hs, null );
+						crewTags = DataUtils.findTagsNamed( hsdr.text, "crew" );
+					}
+					catch ( Exception ex ) {
+						hyperspace = false;
+					}
+					for ( Element e : elements ) {
+						try {
+							if ( hyperspace ) {
+								CrewObject c = DatParser.loadCrew( e, crewTags );
+								// only load crew if matches race in hyperspace.xml
+								// why again?
+								if ( c != null ) {
+									store( c );
+								}
+							}
+							else {
+								store( DatParser.loadCrew( e ) );
+							}
+						}
+						catch ( IllegalArgumentException ex ) {
+							log.warn( getName() + ": could not load crew: " + ex.getMessage() );
+						}
+					}
+
 				}
 				catch ( FileNotFoundException e ) {
 					// Spammy and not very useful.

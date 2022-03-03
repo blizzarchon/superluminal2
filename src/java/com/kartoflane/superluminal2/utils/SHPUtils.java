@@ -23,12 +23,12 @@ import org.unsynchronized.StringObject;
 
 import com.kartoflane.superluminal2.components.enums.Directions;
 import com.kartoflane.superluminal2.components.enums.Images;
-import com.kartoflane.superluminal2.components.enums.Races;
 import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.core.Grid;
 import com.kartoflane.superluminal2.core.Grid.Snapmodes;
 import com.kartoflane.superluminal2.db.Database;
 import com.kartoflane.superluminal2.ftl.AugmentObject;
+import com.kartoflane.superluminal2.ftl.CrewObject;
 import com.kartoflane.superluminal2.ftl.DoorObject;
 import com.kartoflane.superluminal2.ftl.DroneList;
 import com.kartoflane.superluminal2.ftl.DroneObject;
@@ -244,11 +244,11 @@ public class SHPUtils
 			map = map( o );
 			// Crew -> integer
 			for ( Map.Entry<Object, Object> entry : map.entrySet() ) {
-				String race = race( entry.getKey() );
+				CrewObject race = race( entry.getKey() );
 				int count = integer( entry.getValue() );
 				ship.setCrewMin( race, count );
 				for ( int in = 0; in < count; in++ )
-					ship.changeCrew( "no_crew", race );
+					ship.changeCrew( Database.DEFAULT_CREW_OBJ, race );
 			}
 		}
 
@@ -257,7 +257,7 @@ public class SHPUtils
 			map = map( o );
 			// Crew -> integer
 			for ( Map.Entry<Object, Object> entry : map.entrySet() ) {
-				String race = race( entry.getKey() );
+				CrewObject race = race( entry.getKey() );
 				int count = integer( entry.getValue() );
 				ship.setCrewMax( race, count );
 			}
@@ -613,16 +613,16 @@ public class SHPUtils
 			throw new IllegalArgumentException( "Not a Direction: " + o.getClass() );
 	}
 
-	private static String race( Object o )
+	private static CrewObject race( Object o )
 	{
 		if ( o == null )
 			throw new IllegalArgumentException( "Argument must not be null." );
-		if ( o instanceof Races )
-			return (String)o;
+		if ( o instanceof CrewObject )
+			return (CrewObject)o;
 		else if ( o instanceof String )
-			return ((String) o).toUpperCase();
+		    return race( Database.getInstance().getCrew( (String)o ) );
 		else if ( o instanceof StringObject )
-			return race( ( (StringObject)o ).value );
+			return race( Database.getInstance().getCrew( ( (StringObject)o ).value ) );
 		else
 			throw new IllegalArgumentException( "Not a Race: " + o.getClass() );
 	}

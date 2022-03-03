@@ -19,11 +19,11 @@ import com.kartoflane.superluminal2.components.enums.BoardingStrategies;
 import com.kartoflane.superluminal2.components.enums.Directions;
 import com.kartoflane.superluminal2.components.enums.Images;
 import com.kartoflane.superluminal2.components.enums.LayoutObjects;
-import com.kartoflane.superluminal2.components.enums.Races;
 import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.db.DatParser;
 import com.kartoflane.superluminal2.db.Database;
 import com.kartoflane.superluminal2.ftl.AugmentObject;
+import com.kartoflane.superluminal2.ftl.CrewObject;
 import com.kartoflane.superluminal2.ftl.DoorObject;
 import com.kartoflane.superluminal2.ftl.DroneList;
 import com.kartoflane.superluminal2.ftl.DroneObject;
@@ -508,25 +508,19 @@ public class ShipLoadUtils
 			attr = crew.getAttributeValue( "class" );
 			if ( attr == null )
 				throw new IllegalArgumentException( "<crewCount> tag is missing 'class' attribute." );
-			String race = null;
-			try {
-				if(Races.raceList.contains(attr))
-				{
-					if(ship.isPlayerShip())
-					{
-						race = Races.raceAliasList.get(Races.raceList.indexOf(attr));
-						crewCap+=1;
-					}
-					else
-					{
-						race = Races.raceList.get(Races.raceList.indexOf(attr));
-						crewCap+=1;
-					}
-				}
+			CrewObject race = db.getCrew( attr );
+			if ( race == null ) {
+				String error = "Race class not recognised: " + attr + "\n" +
+						       "Troubleshooting:\n" +
+						       "1. Go to Slipstream and patch in the mod containing this race class. " +
+									"Superluminal should detect changes to the dat and update the database. " +
+									"If it didn't, use File -> Reload Database.\n" +
+						       "2. If that didn't work, open the mod's data files in a text editor, " +
+									"find the chosen shipBlueprint from the blueprints files, " +
+									"and correct any typos in the crewCount tags.";
+				throw new IllegalArgumentException( error );
 			}
-			catch ( IllegalArgumentException ex ) {
-				throw new IllegalArgumentException( "Race class not recognised: " + attr );
-			}
+			crewCap += 1;
 
 			if ( ship.isPlayerShip() ) {
 				attr = crew.getAttributeValue( "amount" );
@@ -534,7 +528,7 @@ public class ShipLoadUtils
 				if ( attr == null )
 					throw new IllegalArgumentException( "<crewCount> tag is missing 'amount' attribute." );
 				for ( int i = 0; i < Integer.valueOf( attr ); i++ )
-					ship.changeCrew( "no_crew", race );
+					ship.changeCrew( Database.DEFAULT_CREW_OBJ, race );
 			}
 			else {
 				attr = crew.getAttributeValue( "amount" );
