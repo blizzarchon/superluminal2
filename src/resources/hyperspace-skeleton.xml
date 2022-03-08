@@ -1,0 +1,19 @@
+<!-- don't add any more ship tags to this findLike -->
+<FTL xmlns:mod="mod" xmlns:mod-append="mod-append">
+    <mod:findLike type="ships">
+        <!-- change ship if it exists -->
+        <mod:findName type="ship" name="replace_me">
+            <mod:setAttributes super="luminal"/>
+        </mod:findName>
+        <!-- add ship anyway -->
+        <mod-append:ship name="replace_me" a="false" b="false" c="false" super="luminal"/> -->
+        <!-- start="1" and shared attribute makes it so that <ship> is only added if there was no existing <ship> already -->
+        <mod:findLike type="ship" start="1"><mod:selector super="luminal" />
+            <mod:removeTag />
+        </mod:findLike>
+        <mod:findLike type="ship"><mod:selector super="luminal" />
+            <mod:removeAttributes super="luminal" />
+        </mod:findLike>
+        <mod-append:customShip />
+    </mod:findLike>
+</FTL>

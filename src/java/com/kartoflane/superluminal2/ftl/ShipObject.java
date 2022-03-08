@@ -41,6 +41,7 @@ public class ShipObject extends GameObject
 	private HashMap<String, Integer> crewMaxMap;
 
 	private ArrayList<AugmentObject> augments;
+	private ArrayList<AugmentObject> hiddenAugments;
 	private ArrayList<WeaponObject> weapons;
 	private ArrayList<DroneObject> drones;
 	private boolean weaponByList = false;
@@ -63,6 +64,7 @@ public class ShipObject extends GameObject
 
 	private int weaponSlots = 0;
 	private int droneSlots = 0;
+	private int hiddenAugmentsNumber = 0;
 	private int missiles = 0;
 	private int droneParts = 0;
 	private int hullHealth = 0;
@@ -84,6 +86,7 @@ public class ShipObject extends GameObject
 		systemMap = new HashMap<Systems, ArrayList<SystemObject>>();
 		imageMap = new HashMap<Images, ImageObject>();
 		augments = new ArrayList<AugmentObject>();
+		hiddenAugments = new ArrayList<AugmentObject>();
 		crewList = new ArrayList<CrewObject>();
 		crewMinMap = new HashMap<String, Integer>();
 		crewMaxMap = new HashMap<String, Integer>();
@@ -125,32 +128,13 @@ public class ShipObject extends GameObject
 		this();
 
 		this.isPlayer = isPlayer;
-		
-		if(this.isPlayer)
-		{
-			for ( int i = 0; i < 10; i++ ) {
-				if (i <= 2)
-				{
-					augments.add( Database.DEFAULT_AUGMENT_OBJ );
-				}
-				if (i > 2)
-				{
-					augments.add( Database.DEFAULT_AUGMENT_OBJ );//TODO: add a default hidden augment to database
-				}
-			}
+
+		for ( int i = 0; i < 3; i++ ) {
+			augments.add( Database.DEFAULT_AUGMENT_OBJ );
 		}
-		else
-		{
-			for ( int i = 0; i < 3; i++ ) {
-				if (i <= 2)
-				{
-					augments.add( Database.DEFAULT_AUGMENT_OBJ );
-				}
-				if (i > 2)
-				{
-					augments.add( Database.DEFAULT_AUGMENT_OBJ );//TODO: add a default hidden augment to database
-				}
-			}
+
+		for ( int i = 0; i < 5; i++ ) {
+			hiddenAugments.add( Database.DEFAULT_AUGMENT_OBJ );
 		}
 
 		for ( Systems system : Systems.values() ) {
@@ -822,6 +806,14 @@ public class ShipObject extends GameObject
 		if ( slots < 0 )
 			throw new IllegalArgumentException( "Number of slots must be non-negative." );
 		droneSlots = slots;
+		if ( drones.size() > slots ) {
+			for ( int i = slots; i < drones.size(); i++ )
+				drones.remove( i );
+		}
+		else if ( drones.size() < slots ) {
+			for ( int i = drones.size(); i <= slots; i++ )
+				drones.add( Database.DEFAULT_DRONE_OBJ );
+		}
 	}
 
 	/**
@@ -1139,6 +1131,28 @@ public class ShipObject extends GameObject
 	}
 
 	/**
+	 * Sets the number of hidden augments that the ship has.
+	 */
+	public void setHiddenAugmentsNumber( int number )
+	{
+		if ( number < 0 )
+			throw new IllegalArgumentException( "Number of hidden augments must be non-negative." );
+		hiddenAugmentsNumber = number;
+		if ( hiddenAugments.size() > number ) {
+			for ( int i = number; i < hiddenAugments.size(); i++ )
+				hiddenAugments.remove( i );
+		}
+		else if ( hiddenAugments.size() < number ) {
+			for ( int i = hiddenAugments.size(); i <= number; i++ )
+				hiddenAugments.add( Database.DEFAULT_AUGMENT_OBJ );
+		}
+	}
+
+	public int getHiddenAugmentsNumber() {
+		return hiddenAugmentsNumber;
+	}
+
+	/**
 	 * Modifying the array doesn't change the order of elements in the ship.
 	 * 
 	 * @return an array of all augments in this ship
@@ -1146,6 +1160,10 @@ public class ShipObject extends GameObject
 	public AugmentObject[] getAugments()
 	{
 		return augments.toArray( new AugmentObject[0] );
+	}
+
+	public AugmentObject[] getHiddenAugments() {
+		return hiddenAugments.toArray( new AugmentObject[0] );
 	}
 
 	/**
@@ -1191,6 +1209,53 @@ public class ShipObject extends GameObject
 			if ( augment == Database.DEFAULT_AUGMENT_OBJ) {
 				augments.remove( augment );
 				augments.add( augment );
+			}
+		}
+	}
+
+	/**
+	 * Puts the new augment at the specified index in the augment list.
+	 */
+	public void changeHiddenAugment( int index, AugmentObject neu )
+	{
+		if ( index < 0 )
+			throw new IllegalArgumentException( "Index is out of bounds: " + index );
+		if ( neu == null )
+			throw new IllegalArgumentException( "New augment must not be null." );
+		hiddenAugments.set( index, neu );
+		coalesceHiddenAugments();
+	}
+
+	/**
+	 * Removes the first occurence of the old augment, and puts the new augment in its place.
+	 *
+	 * @return index at which the new augment was placed
+	 */
+	public int changeHiddenAugment( AugmentObject old, AugmentObject neu )
+	{
+		if ( old == null )
+			throw new IllegalArgumentException( "Old augment must not be null." );
+		if ( neu == null )
+			throw new IllegalArgumentException( "New augment must not be null." );
+
+		int i = hiddenAugments.indexOf( old );
+		if ( i == -1 )
+			throw new IllegalArgumentException( "Old augment not found." );
+		hiddenAugments.set( i, neu );
+		return i;
+	}
+
+	/**
+	 * Coalesces augments, moving all dummy augments to the end of the list, so that
+	 * there are no gaps between 'real' augments.
+	 */
+	private void coalesceHiddenAugments()
+	{
+		for ( int i = 0; i < hiddenAugments.size(); i++ ) {
+			AugmentObject augment = hiddenAugments.get( i );
+			if ( augment == Database.DEFAULT_AUGMENT_OBJ) {
+				hiddenAugments.remove( augment );
+				hiddenAugments.add( augment );
 			}
 		}
 	}
@@ -1310,7 +1375,12 @@ public class ShipObject extends GameObject
 			gibs.add( (GibObject)object );
 		}
 		else if ( object instanceof AugmentObject ) {
-			augments.add( (AugmentObject)object );
+			if ( ((AugmentObject) object).isHidden() ) {
+				hiddenAugments.add( (AugmentObject)object );
+			}
+			else {
+				augments.add( (AugmentObject)object );
+			}
 		}
 		else if ( object instanceof SystemObject ) {
 			SystemObject system = (SystemObject)object;
@@ -1346,7 +1416,12 @@ public class ShipObject extends GameObject
 			gibs.remove( object );
 		}
 		else if ( object instanceof AugmentObject ) {
-			augments.remove( object );
+			if ( ((AugmentObject) object).isHidden() ) {
+				hiddenAugments.remove( object );
+			}
+			else {
+				augments.remove( object );
+			}
 		}
 		else if ( object instanceof SystemObject ) {
 			SystemObject system = (SystemObject)object;

@@ -10,7 +10,7 @@ public class AugmentObject extends GameObject implements Comparable<AugmentObjec
 	private final String blueprintName;
 	private IDeferredText title = IDeferredText.EMPTY;
 	private IDeferredText description = IDeferredText.EMPTY;
-	public boolean isHidden;
+	private boolean hidden;
 
 
 	/** Creates a default augment object. */
@@ -18,7 +18,7 @@ public class AugmentObject extends GameObject implements Comparable<AugmentObjec
 	{
 		blueprintName = "Default Augment";
 		title = NO_AUGMENT;
-		isHidden = false;
+		hidden = false;
 	}
 
 	public AugmentObject( String blueprintName )
@@ -28,7 +28,11 @@ public class AugmentObject extends GameObject implements Comparable<AugmentObjec
 
 	public void setHidden(boolean hidden)
 	{
-		isHidden = hidden;
+		this.hidden = hidden;
+	}
+
+	public boolean isHidden() {
+		return hidden;
 	}
 	
 	public String getIdentifier()

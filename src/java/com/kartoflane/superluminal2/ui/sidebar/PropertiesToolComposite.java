@@ -9,7 +9,6 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.events.TraverseEvent;
 import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.graphics.Image;
@@ -77,6 +76,7 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 	private ArrayList<Button> btnWeapons = new ArrayList<Button>();
 	private ArrayList<Button> btnDrones = new ArrayList<Button>();
 	private ArrayList<Button> btnAugments = new ArrayList<Button>();
+	private ArrayList<Button> btnHiddenAugments = new ArrayList<Button>();
 	private ArrayList<Button> btnArtilleries = new ArrayList<Button>();
 	private ArrayList<Button> btnCrewMembers = new ArrayList<Button>();
 	private HashMap<String, Spinner> spCrewMin = new HashMap<String, Spinner>();
@@ -84,7 +84,6 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 	private Spinner spMissiles;
 	private Spinner spWeaponSlots;
 	private Button btnWeaponByList;
-	private ArrayList<Button> hiddenAugment;
 	private Button btnDroneByList;
 	private Button btnWeaponList;
 	private Button btnDroneList;
@@ -98,6 +97,8 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 	private Text txtLayout;
 	private Text txtImage;
 	private Group grpAugments;
+	private Group grpHiddenAugments;
+	private Spinner spHiddenAugments;
 	private Label lblHullHelp;
 	private Label lblReactorInfo;
 	private Label lblLayoutInfo;
@@ -221,14 +222,7 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 			lblBlueprint = new Label( compGeneral, SWT.NONE );
 			lblBlueprint.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 3, 1 ) );
 			lblBlueprint.setText( "Slot:" );
-			if (ship.isPlayerShip())
-			{
-				lblBlueprint.setText( "Blueprint Name (start with PLAYER_SHIP_):" );
-			}
-			else
-			{
-				lblBlueprint.setText( "Blueprint Name:" );
-			}
+			lblBlueprint.setText( "Blueprint Name:" );
 			lblBlueprintHelp = new Label( compGeneral, SWT.NONE );
 			lblBlueprintHelp.setImage( helpImage );
 			String msg = "This determines your ship's blueprint name. " +
@@ -715,7 +709,6 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 		grpAugments.setLayout( new GridLayout( 1, false ) );
 		grpAugments.setLayoutData( new GridData( SWT.FILL, SWT.TOP, true, false, 1, 1 ) );
 		grpAugments.setText( "Augments" );
-		hiddenAugment = new ArrayList<Button>();
 		SelectionAdapter augmentListener = new SelectionAdapter() {
 			@Override
 			public void widgetSelected( SelectionEvent e )
@@ -741,48 +734,45 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 				}
 			}
 		};
-		SelectionListener hiddenListener = new SelectionListener() {
-			@Override
-			public void widgetSelected( SelectionEvent e )
-			{
-				
-				if (ship.getAugments()[hiddenAugment.indexOf(e.getSource())] != Database.DEFAULT_AUGMENT_OBJ)
-				ship.getAugments()[hiddenAugment.indexOf(e.getSource())].isHidden = hiddenAugment.get(hiddenAugment.indexOf(e.getSource())).getSelection();
-				updateData();
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent arg0) {
-				// TODO Auto-generated method stub
-				updateData();
-			}
-		};
 		Button augBtn;
-		if (ship.isPlayerShip())
-		{
-			for ( int i = 0; i < 10; i++ ) {
-				augBtn = new Button( grpAugments, SWT.NONE );
-				augBtn.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 1, 1 ) );
-				augBtn.setText( "<hidden augment slot>" );
-				augBtn.addSelectionListener( augmentListener );
-				btnAugments.add(augBtn);
-				Button hdnAug = new Button( grpAugments, SWT.CHECK);
-				hdnAug.setLayoutData( new GridData( SWT.FILL, SWT.LEFT, true, false, 1, 1 ) );
-				hdnAug.setText( "Hidden augment?" );
-				hdnAug.addSelectionListener(hiddenListener);
-				hiddenAugment.add(hdnAug);
-			}
+		for ( int i = 0; i < 3; i++ ) {
+			augBtn = new Button( grpAugments, SWT.NONE );
+			augBtn.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 1, 1 ) );
+			augBtn.setText( "<augment slot>" );
+			augBtn.addSelectionListener( augmentListener );
+			btnAugments.add(augBtn);
 		}
-		else
-		{
-			for ( int i = 0; i < 3; i++ ) {
-				augBtn = new Button( grpAugments, SWT.NONE );
-				augBtn.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 1, 1 ) );
-				augBtn.setText( "<hidden augment slot>" );
-				augBtn.addSelectionListener( augmentListener );
-				btnAugments.add(augBtn);
+
+		grpHiddenAugments = new Group( compArm, SWT.NONE );
+		grpHiddenAugments.setLayout( new GridLayout( 2, false ) );
+		grpHiddenAugments.setLayoutData( new GridData( SWT.FILL, SWT.TOP, true, false, 1, 1 ) );
+		grpHiddenAugments.setText( "Hidden Augments" );
+
+		Label lblHiddenAugmentNumber = new Label( grpHiddenAugments, SWT.NONE );
+		lblHiddenAugmentNumber.setText( "Number:" );
+
+		spHiddenAugments = new Spinner( grpHiddenAugments, SWT.BORDER );
+		spHiddenAugments.setMaximum( 99 );
+		GridData gd_spHiddenAugments = new GridData( SWT.RIGHT, SWT.CENTER, true, false, 1, 1 );
+		gd_spHiddenAugments.widthHint = 25;
+		spHiddenAugments.setLayoutData( gd_spHiddenAugments );
+		spHiddenAugments.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e ) {
+					int number = spHiddenAugments.getSelection();
+
+					ship.setHiddenAugmentsNumber( number );
+					clearHiddenAugments();
+					createHiddenAugments( number );
+					updateData();
+
+					EditorWindow.getInstance().updateSidebarScroll();
+				}
 			}
-		}
+		);
+
+		createHiddenAugments( ship.getHiddenAugmentsNumber() );
 
 		/*
 		 * =========================================================================
@@ -1089,11 +1079,12 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 		}
 
 		// Armaments tab
-		if(ship.isPlayerShip())
+
 		spMissiles.setSelection( ship.getMissilesAmount() );
 		spWeaponSlots.setSelection( ship.getWeaponSlots() );
 		spDrones.setSelection( ship.getDronePartsAmount() );
 		spDroneSlots.setSelection( ship.getDroneSlots() );
+		spHiddenAugments.setSelection( ship.getHiddenAugmentsNumber() );
 
 		int count = 0;
 		if ( ship.getWeaponsByList() ) {
@@ -1126,13 +1117,16 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 
 		count = 0;
 		for ( AugmentObject augment : ship.getAugments() ) {
-			if (btnAugments.size() != 0)
-			{
-			btnAugments.get( count ).setText( augment.toString() );
-			if(hiddenAugment.size() != 0)
-			hiddenAugment.get(count).setSelection(augment.isHidden);
-			}
+			btnAugments.get(count).setText(augment.toString());
 			count++;
+		}
+
+		count = 0;
+		for ( AugmentObject augment : ship.getHiddenAugments() ) {
+			if ( count < ship.getHiddenAugmentsNumber() ) {
+				btnHiddenAugments.get(count).setText(augment.toString());
+				count++;
+			}
 		}
 
 		spArtillerySlots.setSelection( ship.getSystems( Systems.ARTILLERY ).size() );
@@ -1184,6 +1178,14 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 		for ( Button b : btnArtilleries )
 			b.dispose();
 		btnArtilleries.clear();
+		compArm.layout();
+	}
+
+	private void clearHiddenAugments()
+	{
+		for ( Button b : btnHiddenAugments )
+			b.dispose();
+		btnHiddenAugments.clear();
 		compArm.layout();
 	}
 
@@ -1358,6 +1360,46 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 
 		compArm.layout();
 	}
+
+	private void createHiddenAugments(int n )
+	{
+		SelectionAdapter listener = new SelectionAdapter() {
+			@Override
+			public void widgetSelected( SelectionEvent e )
+			{
+				int i = btnHiddenAugments.indexOf( e.getSource() );
+
+				if ( i != -1 ) {
+					ShipObject ship = container.getShipController().getGameObject();
+					AugmentObject current = ship.getHiddenAugments()[i];
+
+					AugmentSelectionDialog dialog = new AugmentSelectionDialog( EditorWindow.getInstance().getShell() );
+					AugmentObject neu = dialog.open( current );
+
+					if ( neu != null ) {
+						// If the augment is the default dummy, then replace the first occurence of
+						// the dummy aug, so that there are no gaps
+						if ( current == Database.DEFAULT_AUGMENT_OBJ )
+							ship.changeHiddenAugment( current, neu );
+						else
+							ship.changeHiddenAugment( i, neu );
+						updateData();
+					}
+				}
+			}
+		};
+
+		for ( int i = 0; i < n; i++ ) {
+			Button b = new Button( grpHiddenAugments, SWT.NONE );
+			b.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 2, 1 ) );
+			b.setText( "<hidden augment slot>" );
+			b.addSelectionListener( listener );
+			btnHiddenAugments.add( b );
+		}
+
+		compArm.layout();
+	}
+
 
 	@Override
 	public boolean isFocusControl()

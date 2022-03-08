@@ -21,3 +21,6 @@ Desktop.ini
 editor-log.txt
 editor.cfg
 hotkeys.xml
+
+# crash files
+crash_[0-9]*.ftl
