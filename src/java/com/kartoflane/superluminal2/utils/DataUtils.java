@@ -8,6 +8,7 @@ import java.util.ArrayList;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.input.JDOMParseException;
@@ -24,8 +25,8 @@ public class DataUtils
 
 	/**
 	 * Finds all ships with the specified blueprintName within the file.
-	 * 
-	 * @param f
+	 *
+	 * @param fileName
 	 * @param blueprintName
 	 * @return
 	 * @throws JDOMParseException
@@ -82,8 +83,11 @@ public class DataUtils
 			tagList.add( root );
 		}
 		else {
-			for ( Element e : root.getChildren( tagName ) )
-				tagList.add( e );
+			for ( Element e : root.getChildren() ) {
+				if ( e.getName().equals( tagName ) ) {
+					tagList.add( e );
+				}
+			}
 		}
 
 		return tagList;
@@ -100,5 +104,33 @@ public class DataUtils
 		throws IllegalArgumentException, JDOMParseException, IOException
 	{
 		return findTagsNamed( new FileInputStream( f ), f.getName(), tagName );
+	}
+
+	public static Element transformShipsFindLikes( String contents )
+			throws IllegalArgumentException, JDOMParseException, IOException
+	{
+		ArrayList<Element> findLikes = findTagsNamed( contents, "findLike" );
+
+		ArrayList<Element> shipsFindLikes = new ArrayList<Element>();
+		for ( Element findLike : findLikes ) {
+			Attribute typeAttribute = findLike.getAttribute( "type" );
+			if ( typeAttribute != null && typeAttribute.getValue().equals( "ships" ) ) {
+				shipsFindLikes.add( findLike );
+			}
+		}
+
+		Element finalShipsTag = new Element( "ships" );
+		for ( Element shipsFindLike : shipsFindLikes ) {
+			Element detached = shipsFindLike.clone();
+
+			for ( Element shipTag : detached.getChildren( "ship", SlipstreamTagNS.MOD_APPEND ) ) {
+				finalShipsTag.addContent( shipTag.clone().setNamespace( null ) );
+			}
+			for ( Element customShipTag : detached.getChildren( "customShip", SlipstreamTagNS.MOD_APPEND ) ) {
+				finalShipsTag.addContent( customShipTag.clone().setNamespace( null ) );
+			}
+		}
+
+		return finalShipsTag;
 	}
 }

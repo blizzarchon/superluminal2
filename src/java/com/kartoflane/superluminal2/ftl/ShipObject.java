@@ -133,10 +133,6 @@ public class ShipObject extends GameObject
 			augments.add( Database.DEFAULT_AUGMENT_OBJ );
 		}
 
-		for ( int i = 0; i < 5; i++ ) {
-			hiddenAugments.add( Database.DEFAULT_AUGMENT_OBJ );
-		}
-
 		for ( Systems system : Systems.values() ) {
 			ArrayList<SystemObject> list = new ArrayList<SystemObject>();
 			systemMap.put( system, list );
@@ -211,6 +207,30 @@ public class ShipObject extends GameObject
 	public String getLayoutSlot()
 	{
 		return layoutSlot;
+	}
+
+	/**
+	 * Returns a version of the ship's blueprint name where the suffix accurately reflects the given slot.
+	 */
+	public String getSlotResolvedName() {
+		boolean wrongSuffixOnSlotA = layoutSlot.equals( "A" ) && ( blueprintName.endsWith( "_2" ) || blueprintName.endsWith( "_3" ) ) ;
+		boolean    slotBLooksLikeC = layoutSlot.equals( "B" ) && blueprintName.endsWith( "_3" );
+		boolean    slotCLooksLikeB = layoutSlot.equals( "C" ) && blueprintName.endsWith( "_2" );
+
+		String name = blueprintName;
+		if ( wrongSuffixOnSlotA || slotBLooksLikeC || slotCLooksLikeB ) {
+			name = name.substring( 0, name.length() - 2 );
+		}
+
+		if ( layoutSlot.equals( "B" ) && !( name.endsWith( "_2" ) ) )
+		{
+			name += "_2";
+		}
+		else if ( layoutSlot.equals( "C" ) && !( name.endsWith( "_3" ) ) )
+		{
+			name += "_3";
+		}
+		return name;
 	}
 
 	/**
@@ -1224,6 +1244,14 @@ public class ShipObject extends GameObject
 			throw new IllegalArgumentException( "New augment must not be null." );
 		hiddenAugments.set( index, neu );
 		coalesceHiddenAugments();
+	}
+
+	/**
+	 * Just adds the new augment to the augment list. Only meant for constructing the list initially.
+	 * Not for adding augments through the menu, use {@link ShipObject#changeHiddenAugment(int, AugmentObject) } instead.
+	 */
+	public void addHiddenAugment( AugmentObject augmentObject ) {
+		hiddenAugments.add( augmentObject );
 	}
 
 	/**

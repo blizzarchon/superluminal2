@@ -492,9 +492,15 @@ public abstract class AbstractDatabaseEntry
 
 					ArrayList<Element> shipsTags = null;
 					try {
-						InputStream hs = getInputStream( "data/hyperspace" + ext );
+						String hsPath = "data/hyperspace" + ext;
+						InputStream hs = getInputStream( hsPath );
 						DecodeResult hsdr = IOUtils.decodeText( hs, null );
+						// using the same 'ext' is probably not ideal. it will probably be fine.
 						shipsTags = DataUtils.findTagsNamed( hsdr.text, "ships" );
+						Element finalShipsTag = DataUtils.transformShipsFindLikes( hsdr.text );
+						if ( finalShipsTag.getChildren().size() > 0 ) {
+							shipsTags.add( finalShipsTag );
+						}
 					}
 					catch ( Exception ex ) {
 						hyperspace = false;
