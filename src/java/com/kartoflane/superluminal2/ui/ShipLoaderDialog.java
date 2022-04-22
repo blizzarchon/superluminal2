@@ -323,8 +323,7 @@ public class ShipLoaderDialog
 						TreeItem selectedItem = tree.getSelection()[0];
 						ShipMetadata metadata = (ShipMetadata)selectedItem.getData();
 						try {
-							ShipObject object = ShipLoadUtils.loadShipXML( metadata.getElement(), metadata );
-							object.setCrewCap( metadata.getCrewCap() );
+							ShipObject object = ShipLoadUtils.loadShipXML( metadata );
 
 							if ( !Manager.allowRoomOverlap && object.hasOverlappingRooms() ) {
 								log.info( "Ship contains overlapping rooms, but overlap is disabled - forcing room overlap enable." );

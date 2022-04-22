@@ -21,7 +21,6 @@ import org.jdom2.Comment;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
-import org.jdom2.Namespace;
 import org.jdom2.input.JDOMParseException;
 
 import com.kartoflane.superluminal2.components.Tuple;
@@ -63,8 +62,6 @@ import org.jdom2.input.SAXBuilder;
 public class ShipSaveUtils
 {
 	private static final Logger log = LogManager.getLogger( ShipSaveUtils.class );
-	private static final Namespace modNS = Namespace.getNamespace( "mod", "mod" );
-	private static final Namespace modAppendNS = Namespace.getNamespace( "mod-append", "mod-append" );
 
 
 	/**
@@ -161,15 +158,16 @@ public class ShipSaveUtils
 		fileName = "data/text_blueprints.xml.append";
 		bytes = IOUtils.readDocument( generateTextXML( ship ) ).getBytes( utf8 );
 		fileMap.put( fileName, bytes );
-		
-		if (ship.isPlayerShip())
+
+		if ( ship.isPlayerShip() )
 		{
+			ship.setBlueprintName( ship.getSlotResolvedName() );
 			fileName = "data/hyperspace.xml.append";
 			bytes = IOUtils.readDocument( generateHyperspaceXML( ship ) ).getBytes( utf8 );
 			fileMap.put( fileName, bytes );
 		}
 
-		fileName = "data/" + Database.getInstance().getAssociatedFile( ship.getBlueprintName() ) + ".append";
+		fileName = "data/" + Database.getInstance().getAssociatedFile( ship ) + ".append";
 		bytes = IOUtils.readDocument( generateBlueprintXML( ship ) ).getBytes( utf8 );
 		fileMap.put( fileName, bytes );
 
@@ -424,14 +422,6 @@ public class ShipSaveUtils
 
 		Element shipBlueprint = new Element( "shipBlueprint" );
 		value = ship.getBlueprintName();
-		if (ship.getLayoutSlot().equals("B") && !(ship.getBlueprintName().endsWith("_2")))
-		{
-			value += "_2";
-		}
-		else if (ship.getLayoutSlot().equals("C") && !(ship.getBlueprintName().endsWith("_3")))
-		{
-			value += "_3";
-		}
 		shipBlueprint.setAttribute( "name", value == null ? "" : value );
 		value = ship.getLayout();
 		shipBlueprint.setAttribute( "layout", value == null ? "" : value );
@@ -863,37 +853,31 @@ public class ShipSaveUtils
 
 		String base = shipBlueprintName;
 
-		if ( slotB ) {
-			if ( shipBlueprintName.endsWith( "_2" ) ) {
-				base = shipBlueprintName.substring( 0, shipBlueprintName.lastIndexOf( "_2" ) );
-			} else {
-				shipBlueprintName += "_2";
-			}
-		}
-		if ( slotC ) {
-			if ( shipBlueprintName.endsWith( "_3" ) ) {
-				base = shipBlueprintName.substring( 0, shipBlueprintName.lastIndexOf( "_3" ) );
-			} else {
-				shipBlueprintName += "_3";
-			}
+		if ( shipBlueprintName.endsWith( "_2" ) || shipBlueprintName.endsWith( "_3" ) ) {
+			base = shipBlueprintName.substring( 0, shipBlueprintName.length() - 2 );
 		}
 
-		Element topFindLike = ftl.getChild( "findLike", modNS );
+		Element shipsTag = ftl.getChild( "ships" );
+		Element shipTag = shipsTag.getChild( "ship" );
+		Element customShip = shipsTag.getChild( "customShip" );
 
-		Element findName = topFindLike.getChild( "findName", modNS );
-		findName.setAttribute( "name", base );
-		Element setAttributes = findName.getChild( "setAttributes", modNS );
-		setAttributes.setAttribute( hyperspaceSlot, "true" );
-
-		Element shipTag = topFindLike.getChild( "ship", modAppendNS );
 		shipTag.setAttribute( "name", base );
 		shipTag.setAttribute( hyperspaceSlot, "true" );
-
-		Element customShip = topFindLike.getChild( "customShip", modAppendNS );
 		customShip.setAttribute( "name", shipBlueprintName );
+
+		Element firstChildLike = ftl.getChild( "findWithChildLike", SlipstreamTagNS.MOD );
+		Element selector = firstChildLike.getChild( "selector", SlipstreamTagNS.MOD );
+		Element findName = firstChildLike.getChild( "findName", SlipstreamTagNS.MOD );
+		Element setAttributes = findName.getChild( "setAttributes", SlipstreamTagNS.MOD );
+
+		selector.setAttribute( "name", base );
+		findName.setAttribute( "name", base );
+		setAttributes.setAttribute( hyperspaceSlot, "true" );
 
 		// not cycling through ship.getHiddenAugments b/c size() doesn't match Number
 		for ( int i = 0; i < ship.getHiddenAugmentsNumber(); i++ ) {
+			if ( ship.getHiddenAugments()[i] == Database.DEFAULT_AUGMENT_OBJ )
+				continue;
 			Element hiddenAugElement = new Element( "hiddenAug" );
 			hiddenAugElement.setText( ship.getHiddenAugments()[i].getIdentifier() );
 			customShip.addContent( hiddenAugElement );

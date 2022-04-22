@@ -52,9 +52,8 @@ public class ShipLoadUtils
 	 * Interprets the XML element as a shipBlueprint tag, loading its contents
 	 * and creating a ShipObject to store the data.
 	 * 
-	 * @param e
-	 *            the XML element for the shipBlueprint tag
-	 * @param metadata 
+	 * @param metadata
+	 *            basic holder of existing ship info, also contains the XML element for the shipBlueprint tag
 	 * @return ShipObject instance representing the ship
 	 * 
 	 * @throws IllegalArgumentException
@@ -68,9 +67,11 @@ public class ShipLoadUtils
 	 * @throws JDOMParseException
 	 *             when the XML element is wrongly formatted, or a parser error occurs
 	 */
-	public static ShipObject loadShipXML( Element e, ShipMetadata metadata )
+	public static ShipObject loadShipXML( ShipMetadata metadata )
 		throws IllegalArgumentException, FileNotFoundException, IOException, NumberFormatException, JDOMParseException
 	{
+		Element e = metadata.getElement();
+
 		if ( e == null )
 			throw new IllegalArgumentException( "Element must not be null." );
 
@@ -561,16 +562,22 @@ public class ShipLoadUtils
 
 			ship.changeAugment( Database.DEFAULT_AUGMENT_OBJ, augmentObject );
 		}
-		
-		for ( String hiddenAug : metadata.getHiddenAugs() )
-		{
-			AugmentObject augmentObject = db.getAugment( hiddenAug );
-			if ( augmentObject == null )
-				throw new IllegalArgumentException( "AugBlueprint not found: " + hiddenAug );
-			
-			augmentObject.isHidden = true;
-			ship.changeAugment( Database.DEFAULT_AUGMENT_OBJ, augmentObject );
+
+		ArrayList<String> hiddenAugIDs = metadata.getHiddenAugs();
+		if ( ! hiddenAugIDs.isEmpty() ) {
+			for ( String id : hiddenAugIDs ) {
+				AugmentObject augmentObject = db.getAugment( id );
+				if ( augmentObject == null )
+					throw new IllegalArgumentException( "AugBlueprint not found: " + id );
+
+				augmentObject.setHidden( true );
+				ship.addHiddenAugment( augmentObject );
+			}
 		}
+		ship.setHiddenAugmentsNumber( hiddenAugIDs.size() );
+
+		if ( metadata.getCrewCap() > 0 )
+			ship.setCrewCap( metadata.getCrewCap() );
 
 		return ship;
 	}

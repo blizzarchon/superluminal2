@@ -97,6 +97,8 @@ public class DatParser
 			else {
 				metadata.setShipDescription( readTextElement( child ) );
 			}
+
+			metadata.setCrewCap( 8 );
 		}
 
 		return metadata;
@@ -136,7 +138,6 @@ public class DatParser
 						metadata.addHiddenAug(hiddenAug.getTextTrim());
 					}
 					Element crewLimit = customShipClone.getChild("crewLimit");
-					metadata.setCrewCap( 8 );
 					if ( crewLimit != null ) {
 						int crewLimitValue = Integer.parseInt( crewLimit.getText() );
 						if ( crewLimitValue > 0 )

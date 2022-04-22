@@ -3,24 +3,20 @@ package com.kartoflane.superluminal2.ui.sidebar;
 import java.util.ArrayList;
 import java.util.HashMap;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.FocusEvent;
-import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.TraverseEvent;
-import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
@@ -107,12 +103,26 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 	private Combo cmbBoardingAI;
 	private Group grpArtillery;
 	private Spinner spArtillerySlots;
-	private List cmbSlot;
+	private Group layoutSlots;
 
+	private static final String layoutAOffImageLocation = "cpath:/assets/layout slots/a.png";
+	private static final String layoutAOnImageLocation = "cpath:/assets/layout slots/a_selected.png";
+	private static final String layoutBOffImageLocation = "cpath:/assets/layout slots/b.png";
+	private static final String layoutBOnImageLocation = "cpath:/assets/layout slots/b_selected.png";
+	private static final String layoutCOffImageLocation = "cpath:/assets/layout slots/c.png";
+	private static final String layoutCOnImageLocation = "cpath:/assets/layout slots/c_selected.png";
 
 	public PropertiesToolComposite( Composite parent )
 	{
 		super( parent, SWT.NONE );
+
+		final Image layoutAOffImage = Cache.checkOutImage( this, layoutAOffImageLocation);
+		final Image layoutAOnImage = Cache.checkOutImage( this, layoutAOnImageLocation);
+		final Image layoutBOffImage = Cache.checkOutImage( this, layoutBOffImageLocation);
+		final Image layoutBOnImage = Cache.checkOutImage( this, layoutBOnImageLocation);
+		final Image layoutCOffImage = Cache.checkOutImage( this, layoutCOffImageLocation);
+		final Image layoutCOnImage = Cache.checkOutImage( this, layoutCOnImageLocation);
+
 		setLayout( new GridLayout( 1, false ) );
 
 		container = Manager.getCurrentShip();
@@ -155,52 +165,70 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 		compGeneral.setLayout( new GridLayout( 4, false ) );
 
 		if ( ship.isPlayerShip() ) {
-			
-			cmbSlot = new List(compGeneral, SWT.SINGLE);
-			cmbSlot.add("A");
-			cmbSlot.add("B");
-			cmbSlot.add("C");
-			if (ship.getBlueprintName().endsWith("_2") || ship.getBlueprintName().endsWith("_B"))
+			layoutSlots = new Group( compGeneral, SWT.NONE );
+			layoutSlots.setLayoutData( new GridData( SWT.LEFT, SWT.CENTER, false, false, 4, 1 ) );
+			layoutSlots.setLayout( new RowLayout( SWT.HORIZONTAL ) );
+			layoutSlots.setText( "Layout Slot" );
+
+			final Button slotA = new Button( layoutSlots, SWT.RADIO );
+			final Button slotB = new Button( layoutSlots, SWT.RADIO );
+			final Button slotC = new Button( layoutSlots, SWT.RADIO );
+
+			slotA.setImage( layoutAOffImage );
+			slotB.setImage( layoutBOffImage );
+			slotC.setImage( layoutCOffImage );
+
+			if ( ship.getBlueprintName().endsWith( "_2" ) )
 			{
-				ship.setLayoutSlot("B");
+				ship.setLayoutSlot( "B" );
+				slotB.setImage( layoutBOnImage );
+				slotB.setSelection( true );
 			}
-			else if (ship.getBlueprintName().endsWith("_3") || ship.getBlueprintName().endsWith("_C"))
+			else if ( ship.getBlueprintName().endsWith( "_3" ) )
 			{
-				ship.setLayoutSlot("C");
+				ship.setLayoutSlot( "C" );
+				slotC.setImage( layoutCOnImage );
+				slotC.setSelection( true );
 			}
-			if (ship.getLayoutSlot().equals("A"))
-			{
-				cmbSlot.setSelection(0);
+			else {
+				ship.setLayoutSlot( "A" );
+				slotA.setImage( layoutAOnImage );
+				slotA.setSelection( true );
 			}
-			else if (ship.getLayoutSlot().equals("B"))
-			{
-				cmbSlot.setSelection(1);
-			}
-			else
-			{
-				cmbSlot.setSelection(2);
-			}
-			cmbSlot.addSelectionListener(
+			slotA.addSelectionListener(
 					new SelectionAdapter() {
 						@Override
-						public void widgetSelected( SelectionEvent e )
-						{
-							if (cmbSlot.getSelectionIndex() == 0)
-							{
-								ship.setLayoutSlot("A");
-							}
-							else if (cmbSlot.getSelectionIndex() == 1)
-							{
-								ship.setLayoutSlot("B");
-							}
-							else
-							{
-								ship.setLayoutSlot("C");
-							}
+						public void widgetSelected( SelectionEvent e ) {
+							ship.setLayoutSlot( "A" );
+							slotA.setImage( layoutAOnImage );
+							slotB.setImage( layoutBOffImage );
+							slotC.setImage( layoutCOffImage );
 						}
 					}
-				);
-			
+			);
+			slotB.addSelectionListener(
+					new SelectionAdapter() {
+						@Override
+						public void widgetSelected( SelectionEvent e ) {
+							ship.setLayoutSlot( "B" );
+							slotA.setImage( layoutAOffImage );
+							slotB.setImage( layoutBOnImage );
+							slotC.setImage( layoutCOffImage );
+						}
+					}
+			);
+			slotC.addSelectionListener(
+					new SelectionAdapter() {
+						@Override
+						public void widgetSelected( SelectionEvent e ) {
+							ship.setLayoutSlot( "C" );
+							slotA.setImage( layoutAOffImage );
+							slotB.setImage( layoutBOffImage );
+							slotC.setImage( layoutCOnImage );
+						}
+					}
+			);
+
 			
 			Label lblName = new Label( compGeneral, SWT.NONE );
 			lblName.setLayoutData( new GridData( SWT.LEFT, SWT.CENTER, false, false, 4, 1 ) );
@@ -219,31 +247,31 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 				}
 			);
 		}
-			lblBlueprint = new Label( compGeneral, SWT.NONE );
-			lblBlueprint.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 3, 1 ) );
-			lblBlueprint.setText( "Slot:" );
-			lblBlueprint.setText( "Blueprint Name:" );
-			lblBlueprintHelp = new Label( compGeneral, SWT.NONE );
-			lblBlueprintHelp.setImage( helpImage );
-			String msg = "This determines your ship's blueprint name. " +
-				"Blueprint name is a unique identifier of the " +
-				"ship, that the game uses internally.";
-			UIUtils.addTooltip( lblBlueprintHelp, Utils.wrapOSNot( msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX() ) );
+		lblBlueprint = new Label( compGeneral, SWT.NONE );
+		lblBlueprint.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 3, 1 ) );
+		lblBlueprint.setText( "Slot:" );
+		lblBlueprint.setText( "Blueprint Name:" );
+		lblBlueprintHelp = new Label( compGeneral, SWT.NONE );
+		lblBlueprintHelp.setImage( helpImage );
+		String msg = "This determines your ship's blueprint name. " +
+			"Blueprint name is a unique identifier of the " +
+			"ship, that the game uses internally.";
+		UIUtils.addTooltip( lblBlueprintHelp, Utils.wrapOSNot( msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX() ) );
 
-			txtBlueprint = new Text( compGeneral, SWT.BORDER );
-			txtBlueprint.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 4, 1 ) );
-			txtBlueprint.setText(ship.getBlueprintName());
+		txtBlueprint = new Text( compGeneral, SWT.BORDER );
+		txtBlueprint.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 4, 1 ) );
+		txtBlueprint.setText(ship.getBlueprintName());
 
-			txtBlueprint.addModifyListener(
-				new ModifyListener() {
-					@Override
-					public void modifyText( ModifyEvent e )
-					{
-						ship.setBlueprintName( txtBlueprint.getText() );
-						ship.update();
-					}
+		txtBlueprint.addModifyListener(
+			new ModifyListener() {
+				@Override
+				public void modifyText( ModifyEvent e )
+				{
+					ship.setBlueprintName( txtBlueprint.getText() );
+					ship.update();
 				}
-			);
+			}
+		);
 
 		Label lblClass = new Label( compGeneral, SWT.NONE );
 		lblClass.setLayoutData( new GridData( SWT.LEFT, SWT.CENTER, false, false, 4, 1 ) );
@@ -860,126 +888,33 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 			grpCrew.setLayoutData( new GridData( SWT.FILL, SWT.TOP, true, false, 1, 1 ) );
 			grpCrew.setText( "Crew" );
 
-			grpCrew.setVisible(true);
 			Label lblCrew = new Label( grpCrew, SWT.NONE );
-			lblCrew.setText( "Max (Hit Enter after change)" );
-			lblCrew.setVisible(true);
+			lblCrew.setText( "Total Capacity:" );
 			
 			spCrew = new Spinner( grpCrew, SWT.BORDER );
-			spCrew.setMaximum( 999 );
-			spCrew.setSelection(ship.getCrewCap());
+			spCrew.setMaximum( 99 );
 			GridData gd_spCrew = new GridData( SWT.RIGHT, SWT.CENTER, true, false, 1, 1 );
 			gd_spCrew.widthHint = 25;
 			spCrew.setLayoutData( gd_spCrew );
-			spCrew.setVisible(true);
-			final SelectionAdapter listener = new SelectionAdapter() {
-				@Override
-				public void widgetSelected( SelectionEvent e )
-				{
-					int i = btnCrewMembers.indexOf( e.getSource() );
-
-					if ( i != -1 ) {
-						ShipObject ship = container.getShipController().getGameObject();
-						CrewObject current = ship.getCrew()[i];
-
-						CrewSelectionDialog dialog = new CrewSelectionDialog( EditorWindow.getInstance().getShell() );
-						CrewObject neu = dialog.open( current );
-
-						if ( neu != null ) {
-							if ( current == Database.DEFAULT_CREW_OBJ )
-								ship.changeCrew( current, neu );
-							else
-								ship.changeCrew( i, neu );
-							updateData();
-						}
-					}
-				}};
-				
-				btnCrewMembers.clear();
-				for ( int i = 0; i < ship.getCrewCap(); i++ ) {
-					Button btn = new Button( compCrew, SWT.NONE );
-					btn.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 3, 1 ) );
-					btn.setText( "<crew slot>" );
-					btn.addSelectionListener( listener );
-					btnCrewMembers.add( btn );
-				}
-				
-//			spCrew.addSelectionListener(
-//				new SelectionAdapter() {
-//					@Override
-//					public void widgetSelected( SelectionEvent e )
-//					{
-//						ship.setCrewCap( spCrew.getSelection() );
-//						for ( Button b : btnCrewMembers )
-//							b.dispose();
-//						btnCrewMembers.clear();
-//						for ( int i = 0; i < ship.getCrewCap(); i++ ) {
-//							Button btn = new Button( compCrew, SWT.NONE );
-//							btn.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 3, 1 ) );
-//							btn.setText( "<crew slot>" );
-//							btn.addSelectionListener( listener );
-//							ship.coalesceCrew();
-//							btnCrewMembers.add( btn );
-//						}
-//						compCrew.layout();
-//						updateData();
-//						EditorWindow.getInstance().updateSidebarScroll();
-//					}
-//				});
-			spCrew.addFocusListener(
-					new FocusListener() {
-
+			spCrew.addSelectionListener(
+					new SelectionAdapter() {
 						@Override
-						public void focusGained(FocusEvent arg0) {
-							// TODO Auto-generated method stub
-							
-						}
+						public void widgetSelected( SelectionEvent e ) {
+							int number = spCrew.getSelection();
 
-						@Override
-						public void focusLost(FocusEvent arg0) {
-							ship.setCrewCap( spCrew.getSelection() );
-							for ( Button b : btnCrewMembers )
-								b.dispose();
-							btnCrewMembers.clear();
-							for ( int i = 0; i < ship.getCrewCap(); i++ ) {
-								Button btn = new Button( compCrew, SWT.NONE );
-								btn.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 3, 1 ) );
-								btn.setText( "<crew slot>" );
-								btn.addSelectionListener( listener );
-								ship.coalesceCrew();
-								btnCrewMembers.add( btn );
-							}
-							compCrew.layout();
+							ship.setCrewCap( number );
+							clearCrewMembers();
+							createCrewMembers( number );
 							updateData();
+
 							EditorWindow.getInstance().updateSidebarScroll();
 						}
-						
-					});
-			spCrew.addTraverseListener(
-					new TraverseListener() {
+					}
+			);
 
-						@Override
-						public void keyTraversed(TraverseEvent arg0) {
-							// TODO Auto-generated method stub
-							if (arg0.detail == SWT.TRAVERSE_RETURN)
-							{
-								ship.setCrewCap( spCrew.getSelection() );
-								for ( Button b : btnCrewMembers )
-									b.dispose();
-								btnCrewMembers.clear();
-								for ( int i = 0; i < ship.getCrewCap(); i++ ) {
-									Button btn = new Button( compCrew, SWT.NONE );
-									btn.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 3, 1 ) );
-									btn.setText( "<crew slot>" );
-									btn.addSelectionListener( listener );
-									ship.coalesceCrew();
-									btnCrewMembers.add( btn );
-								}
-								compCrew.layout();
-								updateData();
-								EditorWindow.getInstance().updateSidebarScroll();
-							}
-						} });
+				
+			createCrewMembers( ship.getCrewCap() );
+
 		}
 		else {
 			spCrewMin.clear();
@@ -1124,7 +1059,7 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 		count = 0;
 		for ( AugmentObject augment : ship.getHiddenAugments() ) {
 			if ( count < ship.getHiddenAugmentsNumber() ) {
-				btnHiddenAugments.get(count).setText(augment.toString());
+				btnHiddenAugments.get( count ).setText( augment.toString() );
 				count++;
 			}
 		}
@@ -1139,11 +1074,10 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 
 		// Crew tab
 		if ( ship.isPlayerShip() ) {
+			spCrew.setSelection( ship.getCrewCap() );
 			count = 0;
-			for ( CrewObject race : ship.getCrew() )
-			{
-				if (count < ship.getCrewCap())
-				{
+			for ( CrewObject race : ship.getCrew() ) {
+				if ( count < ship.getCrewCap() ) {
 					btnCrewMembers.get( count ).setText( race.getTitle().toString() );
 					count++;
 				}
@@ -1187,6 +1121,13 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 			b.dispose();
 		btnHiddenAugments.clear();
 		compArm.layout();
+	}
+
+	private void clearCrewMembers() {
+		for ( Button b : btnCrewMembers )
+			b.dispose();
+		btnCrewMembers.clear();
+		compCrew.layout();
 	}
 
 	private void createWeaponList( final ShipObject ship )
@@ -1400,6 +1341,42 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 		compArm.layout();
 	}
 
+	private void createCrewMembers( int n ) {
+		SelectionAdapter listener = new SelectionAdapter() {
+			@Override
+			public void widgetSelected( SelectionEvent e )
+			{
+				int i = btnCrewMembers.indexOf( e.getSource() );
+
+				if ( i != -1 ) {
+					ShipObject ship = container.getShipController().getGameObject();
+					CrewObject current = ship.getCrew()[i];
+
+					CrewSelectionDialog dialog = new CrewSelectionDialog( EditorWindow.getInstance().getShell() );
+					CrewObject neu = dialog.open( current );
+
+					if ( neu != null ) {
+						if ( current == Database.DEFAULT_CREW_OBJ )
+							ship.changeCrew( current, neu );
+						else
+							ship.changeCrew( i, neu );
+						updateData();
+					}
+				}
+			}
+		};
+		//todo: verify compCrew should not be grpCrew
+		for ( int i = 0; i < n; i++ ) {
+			Button btn = new Button( grpCrew, SWT.NONE );
+			btn.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 3, 1 ) );
+			btn.setText( "<crew slot>" );
+			btn.addSelectionListener( listener );
+			btnCrewMembers.add( btn );
+		}
+
+		compCrew.layout();
+	} 
+
 
 	@Override
 	public boolean isFocusControl()
@@ -1430,5 +1407,12 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 	{
 		super.dispose();
 		Cache.checkInImage( this, "cpath:/assets/help.png" );
+
+		Cache.checkInImage( this, layoutAOffImageLocation );
+		Cache.checkInImage( this, layoutAOnImageLocation );
+		Cache.checkInImage( this, layoutBOffImageLocation );
+		Cache.checkInImage( this, layoutBOnImageLocation );
+		Cache.checkInImage( this, layoutCOffImageLocation );
+		Cache.checkInImage( this, layoutCOnImageLocation );
 	}
 }

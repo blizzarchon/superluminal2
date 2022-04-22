@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import com.kartoflane.superluminal2.ftl.ShipObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.graphics.Image;
@@ -316,10 +317,16 @@ public class Database
 		}
 	}
 
+	/**
+	 * Checks the database to see if the ship denoted by <code>blueprintName</code> is a player ship or not,
+	 * according to the database archives. If it cannot be found in the archives, an exception is thrown.
+	 */
 	public boolean isPlayerShip( String blueprintName )
 	{
 		HashMap<String, ArrayList<ShipMetadata>> shipMetadataListMap = getShipMetadata();
 		ArrayList<ShipMetadata> shipMetadataList = shipMetadataListMap.get( blueprintName );
+		if ( shipMetadataList == null )
+			throw new IllegalArgumentException( "Could not find the ship named: " + blueprintName + " in the database archives." );
 		for ( ShipMetadata s : shipMetadataList ) {
 			if ( s.isPlayerShip() ) {
 				return true;
@@ -329,15 +336,13 @@ public class Database
 	}
 
 	/**
-	 * @param blueprint
-	 *            blueprint name of a ship
-	 * @return name of the file in which the given shipBlueprint should be saved
+	 * @return name of the file in which the given ship should be saved
 	 */
-	public String getAssociatedFile( String blueprint )
+	public String getAssociatedFile( ShipObject ship )
 	{
-		if ( isPlayerShip( blueprint ) )
+		if ( ship.isPlayerShip() )
 		{
-			if ( blueprint.endsWith("_3") )
+			if ( ship.getLayoutSlot().equals( "C" ) )
 			{
 				return "dlcBlueprintsOverwrite.xml";
 			}
