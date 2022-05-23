@@ -188,7 +188,7 @@ public class SystemsMenu
 		mntmSpecial.setMenu( menuSpecial );
 
 		systems = new Systems[] { Systems.CLOAKING, Systems.DRONES,
-			Systems.HACKING, Systems.MIND, Systems.TELEPORTER
+			Systems.HACKING, Systems.MIND, Systems.TELEPORTER, Systems.TEMPORAL
 		};
 		for ( Systems sys : systems ) {
 			for ( SystemObject system : ship.getSystems( sys ) ) {

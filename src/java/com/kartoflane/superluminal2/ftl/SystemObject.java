@@ -3,6 +3,7 @@ package com.kartoflane.superluminal2.ftl;
 import com.kartoflane.superluminal2.components.enums.Directions;
 import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.components.interfaces.Alias;
+import com.kartoflane.superluminal2.components.interfaces.WeaponLike;
 import com.kartoflane.superluminal2.db.Database;
 import com.kartoflane.superluminal2.mvc.controllers.GlowController;
 
@@ -22,7 +23,7 @@ public class SystemObject extends GameObject implements Alias
 	/** Only used by systems with a mannable station */
 	private GlowObject glowObject;
 	/** Only used by artillery systems */
-	private WeaponObject weapon = null;
+	private WeaponLike weapon = null;
 
 	private String interiorNamespace = null;
 	private String interiorPath = null;
@@ -51,6 +52,7 @@ public class SystemObject extends GameObject implements Alias
 			case OXYGEN:
 			case HACKING:
 			case MIND:
+			case TEMPORAL:
 				levelCap = 3;
 				break;
 			case ARTILLERY:
@@ -129,7 +131,7 @@ public class SystemObject extends GameObject implements Alias
 	 * 
 	 * Only used by {@link Systems#ARTILLERY artillery} systems.
 	 */
-	public void setWeapon( WeaponObject newWeapon )
+	public void setWeapon( WeaponLike newWeapon )
 	{
 		weapon = newWeapon;
 	}
@@ -139,7 +141,7 @@ public class SystemObject extends GameObject implements Alias
 	 * 
 	 * @return the weapon associated with this system.
 	 */
-	public WeaponObject getWeapon()
+	public WeaponLike getWeapon()
 	{
 		return weapon;
 	}

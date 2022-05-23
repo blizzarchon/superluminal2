@@ -18,6 +18,7 @@ public enum Systems
 	SENSORS,
 	SHIELDS,
 	TELEPORTER,
+	TEMPORAL,
 	WEAPONS;
 
 	@Override
@@ -31,7 +32,7 @@ public enum Systems
 	{
 		return new Systems[] {
 			ARTILLERY, BATTERY, CLOAKING, CLONEBAY, DOORS, DRONES, ENGINES, HACKING,
-			MEDBAY, MIND, OXYGEN, PILOT, SENSORS, SHIELDS, TELEPORTER, WEAPONS,
+			MEDBAY, MIND, OXYGEN, PILOT, SENSORS, SHIELDS, TELEPORTER, TEMPORAL, WEAPONS,
 		};
 	}
 
@@ -131,6 +132,7 @@ public enum Systems
 				return "room_weapons";
 			case CLONEBAY: // always uses the clonebay "station", can't have interior
 			case TELEPORTER: // always uses teleporter pads, can't have interior
+			case TEMPORAL:
 			case EMPTY: // can't have interior
 			default:
 				return null;
