@@ -5,6 +5,7 @@ import java.util.HashMap;
 import com.kartoflane.superluminal2.components.enums.WeaponStats;
 import com.kartoflane.superluminal2.components.enums.WeaponTypes;
 import com.kartoflane.superluminal2.components.interfaces.Identifiable;
+import com.kartoflane.superluminal2.components.interfaces.WeaponLike;
 import com.kartoflane.superluminal2.db.Database;
 
 
@@ -16,7 +17,7 @@ import com.kartoflane.superluminal2.db.Database;
  * @author kartoFlane
  * 
  */
-public class WeaponObject extends GameObject implements Comparable<WeaponObject>, Identifiable
+public class WeaponObject extends GameObject implements Comparable<WeaponObject>, Identifiable, WeaponLike
 {
 	private static final IDeferredText NO_WEAPON = new VerbatimText( "<No Weapon>" );
 
@@ -53,6 +54,11 @@ public class WeaponObject extends GameObject implements Comparable<WeaponObject>
 	public String getIdentifier()
 	{
 		return blueprintName;
+	}
+
+	@Override
+	public String buttonView() {
+		return title.toString();
 	}
 
 	public void update()

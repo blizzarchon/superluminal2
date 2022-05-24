@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import com.kartoflane.superluminal2.ftl.ShipObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.graphics.Image;
@@ -19,6 +18,7 @@ import com.kartoflane.superluminal2.components.enums.WeaponTypes;
 import com.kartoflane.superluminal2.components.interfaces.Predicate;
 import com.kartoflane.superluminal2.ftl.AnimationObject;
 import com.kartoflane.superluminal2.ftl.AugmentObject;
+import com.kartoflane.superluminal2.ftl.CrewList;
 import com.kartoflane.superluminal2.ftl.CrewObject;
 import com.kartoflane.superluminal2.ftl.DroneList;
 import com.kartoflane.superluminal2.ftl.DroneObject;
@@ -27,6 +27,7 @@ import com.kartoflane.superluminal2.ftl.GlowObject;
 import com.kartoflane.superluminal2.ftl.GlowSet;
 import com.kartoflane.superluminal2.ftl.RoomObject;
 import com.kartoflane.superluminal2.ftl.ShipMetadata;
+import com.kartoflane.superluminal2.ftl.ShipObject;
 import com.kartoflane.superluminal2.ftl.WeaponList;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 import com.kartoflane.superluminal2.utils.UIUtils;
@@ -49,6 +50,7 @@ public class Database
 	public static final GibObject DEFAULT_GIB_OBJ = new GibObject();
 	public static final WeaponList DEFAULT_WEAPON_LIST = new WeaponList();
 	public static final DroneList DEFAULT_DRONE_LIST = new DroneList();
+	public static final CrewList DEFAULT_CREW_LIST = new CrewList();
 	public static final RoomObject AIRLOCK_OBJECT = new RoomObject();
 
 	/**
@@ -382,6 +384,29 @@ public class Database
 					result.add( o );
 		}
 		return result;
+	}
+
+	public ArrayList<CrewList> getCrewLists()
+	{
+		ArrayList<CrewList> result = new ArrayList<CrewList>();
+		for ( int i = dataEntries.size() - 1; i >= 0; i-- ) {
+			AbstractDatabaseEntry de = dataEntries.get( i );
+			for ( CrewList o : de.getCrewLists() )
+				if ( !result.contains( o ) )
+					result.add( o );
+		}
+		return result;
+	}
+
+	public CrewList getCrewList( String name )
+	{
+		CrewList result = null;
+		for ( int i = dataEntries.size() - 1; i >= 0 && result == null; i-- ) {
+			AbstractDatabaseEntry de = dataEntries.get( i );
+			result = de.getCrewList( name );
+		}
+		return result;
+
 	}
 
 	public CrewObject getCrew( String blueprint )

@@ -27,13 +27,15 @@ import com.kartoflane.superluminal2.components.Tuple;
 import com.kartoflane.superluminal2.components.enums.Images;
 import com.kartoflane.superluminal2.components.enums.LayoutObjects;
 import com.kartoflane.superluminal2.components.enums.Systems;
+import com.kartoflane.superluminal2.components.interfaces.CrewLike;
+import com.kartoflane.superluminal2.components.interfaces.DroneLike;
+import com.kartoflane.superluminal2.components.interfaces.WeaponLike;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.db.Database;
 import com.kartoflane.superluminal2.ftl.AugmentObject;
 import com.kartoflane.superluminal2.ftl.CrewObject;
 import com.kartoflane.superluminal2.ftl.DoorObject;
 import com.kartoflane.superluminal2.ftl.DroneList;
-import com.kartoflane.superluminal2.ftl.DroneObject;
 import com.kartoflane.superluminal2.ftl.GibObject;
 import com.kartoflane.superluminal2.ftl.GlowObject;
 import com.kartoflane.superluminal2.ftl.GlowSet;
@@ -46,7 +48,6 @@ import com.kartoflane.superluminal2.ftl.ShipObject;
 import com.kartoflane.superluminal2.ftl.StationObject;
 import com.kartoflane.superluminal2.ftl.SystemObject;
 import com.kartoflane.superluminal2.ftl.WeaponList;
-import com.kartoflane.superluminal2.ftl.WeaponObject;
 import com.kartoflane.superluminal2.ui.SaveOptionsDialog.SaveOptions;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 import org.jdom2.input.SAXBuilder;
@@ -474,7 +475,7 @@ public class ShipSaveUtils
 
 					// Artillery has a special 'weapon' attribute to determine which weapon is used as artillery weapon
 					if ( sys == Systems.ARTILLERY ) {
-						WeaponObject weapon = system.getWeapon();
+						WeaponLike weapon = system.getWeapon();
 
 						// If none set, default to ARTILLERY_FED
 						if ( weapon == Database.DEFAULT_WEAPON_OBJ ) {
@@ -535,7 +536,7 @@ public class ShipSaveUtils
 		else {
 			// Weapons declared explicitly, ie. listed by name
 			// Only the first 'count' weapons are loaded in-game
-			for ( WeaponObject weapon : ship.getWeapons() ) {
+			for ( WeaponLike weapon : ship.getWeapons() ) {
 				if ( weapon == Database.DEFAULT_WEAPON_OBJ )
 					continue;
 				e = new Element( "weapon" );
@@ -559,7 +560,7 @@ public class ShipSaveUtils
 		else {
 			// Drones declared explicitly, ie. listed by name
 			// Only the first 'count' drones are loaded in-game
-			for ( DroneObject drone : ship.getDrones() ) {
+			for ( DroneLike drone : ship.getDrones() ) {
 				if ( drone == Database.DEFAULT_DRONE_OBJ )
 					continue;
 				e = new Element( "drone" );
@@ -581,25 +582,25 @@ public class ShipSaveUtils
 
 		if ( ship.isPlayerShip() ) {
 			// List every crew member individually to allow ordering of crew
-			for ( CrewObject race : ship.getCrew() ) {
-				if ( race == Database.DEFAULT_CREW_OBJ )
+			for ( CrewLike crew : ship.getCrew() ) {
+				if ( crew == Database.DEFAULT_CREW_OBJ )
 					continue;
 				e = new Element( "crewCount" );
 				e.setAttribute( "amount", "1" );
-				e.setAttribute( "class", race.getBlueprintName() );
+				e.setAttribute( "class", crew.getBlueprintName() );
 
 				shipBlueprint.addContent( e );
 			}
 		}
 		else {
-			for ( CrewObject race : Database.getInstance().getCrews() ) {
-				int amount = ship.getCrewMin( race );
-				int max = ship.getCrewMax( race );
+			for ( CrewObject crew : Database.getInstance().getCrews() ) {
+				int amount = ship.getCrewMin( crew );
+				int max = ship.getCrewMax( crew );
 
 				e = new Element( "crewCount" );
 				e.setAttribute( "amount", "" + amount );
 				e.setAttribute( "max", "" + max );
-				e.setAttribute( "class", race.getBlueprintName() );
+				e.setAttribute( "class", crew.getBlueprintName() );
 
 				// Don't print an empty tag
 				if ( amount > 0 && ( ship.isPlayerShip() || max > 0 ) )

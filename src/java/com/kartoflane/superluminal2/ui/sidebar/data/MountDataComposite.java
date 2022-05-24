@@ -15,11 +15,11 @@ import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.enums.Directions;
 import com.kartoflane.superluminal2.components.enums.Images;
 import com.kartoflane.superluminal2.components.enums.OS;
+import com.kartoflane.superluminal2.components.interfaces.WeaponLike;
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.db.Database;
 import com.kartoflane.superluminal2.ftl.GibObject;
-import com.kartoflane.superluminal2.ftl.WeaponObject;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.MountController;
 import com.kartoflane.superluminal2.tools.ManipulationTool;
@@ -288,9 +288,9 @@ public class MountDataComposite extends Composite implements DataComposite
 				@Override
 				public void widgetSelected( SelectionEvent e )
 				{
-					WeaponObject current = controller.getWeapon();
+					WeaponLike current = controller.getWeapon();
 					WeaponSelectionDialog dialog = new WeaponSelectionDialog( EditorWindow.getInstance().getShell() );
-					WeaponObject neu = dialog.open( current );
+					WeaponLike neu = dialog.open( current );
 
 					if ( neu != null ) {
 						controller.setWeapon( neu );
@@ -346,7 +346,7 @@ public class MountDataComposite extends Composite implements DataComposite
 
 		cmbDirection.select( DirectionCombo.toIndex( controller.getDirection() ) );
 
-		WeaponObject weapon = controller.getWeapon();
+		WeaponLike weapon = controller.getWeapon();
 		btnWeapon.setText( weapon.toString() );
 
 		GibObject gib = controller.getGib();

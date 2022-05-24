@@ -24,6 +24,7 @@ import com.kartoflane.superluminal2.components.enums.Images;
 import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.components.interfaces.Disposable;
 import com.kartoflane.superluminal2.components.interfaces.Follower;
+import com.kartoflane.superluminal2.components.interfaces.WeaponLike;
 import com.kartoflane.superluminal2.core.Grid;
 import com.kartoflane.superluminal2.core.Grid.Snapmodes;
 import com.kartoflane.superluminal2.core.LayeredPainter;
@@ -46,7 +47,7 @@ import com.kartoflane.superluminal2.ftl.MountObject;
 import com.kartoflane.superluminal2.ftl.RoomObject;
 import com.kartoflane.superluminal2.ftl.ShipObject;
 import com.kartoflane.superluminal2.ftl.SystemObject;
-import com.kartoflane.superluminal2.ftl.WeaponObject;
+import com.kartoflane.superluminal2.ftl.WeaponList;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.DoorController;
 import com.kartoflane.superluminal2.mvc.controllers.GibController;
@@ -357,7 +358,7 @@ public class ShipContainer implements Disposable, SLListener
 	/**
 	 * Saves the ship at the specified location, with the same save settings as previously.
 	 * 
-	 * @see #save(File, ModDatabaseEntry, GameVersion)
+	 * @see #save(File, ModDatabaseEntry)
 	 */
 	public void save( File f )
 	{
@@ -1034,13 +1035,13 @@ public class ShipContainer implements Disposable, SLListener
 		return shipController.getGameObject().getNextMountId();
 	}
 
-	public void changeWeapon( int index, WeaponObject neu )
+	public void changeWeapon( int index, WeaponLike neu )
 	{
 		shipController.getGameObject().changeWeapon( index, neu );
 		updateMounts();
 	}
 
-	public void changeWeapon( WeaponObject old, WeaponObject neu )
+	public void changeWeapon( WeaponLike old, WeaponLike neu )
 	{
 		shipController.getGameObject().changeWeapon( old, neu );
 		updateMounts();
@@ -1050,14 +1051,14 @@ public class ShipContainer implements Disposable, SLListener
 	{
 		int i = 0;
 		ShipObject ship = shipController.getGameObject();
-		WeaponObject[] weapons = ship.getWeapons();
+		WeaponLike[] weapons = ship.getWeapons();
 		ArrayList<SystemObject> artilleries = ship.getSystems( Systems.ARTILLERY );
 		int slots = ship.getWeaponSlots();
 
 		for ( MountController mount : mountControllers ) {
 			mount.setId( i );
 			if ( i < slots ) {
-				if ( ship.getWeaponsByList() ) {
+				if ( ship.getWeaponsByList() || weapons[i] instanceof WeaponList ) {
 					mount.setWeapon( Database.DEFAULT_WEAPON_OBJ );
 				}
 				else {

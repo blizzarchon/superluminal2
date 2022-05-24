@@ -40,6 +40,7 @@ import com.kartoflane.superluminal2.components.enums.Hotkeys;
 import com.kartoflane.superluminal2.components.enums.WeaponStats;
 import com.kartoflane.superluminal2.components.enums.WeaponTypes;
 import com.kartoflane.superluminal2.components.interfaces.Predicate;
+import com.kartoflane.superluminal2.components.interfaces.WeaponLike;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.db.Database;
 import com.kartoflane.superluminal2.ftl.AnimationObject;
@@ -71,7 +72,7 @@ public class WeaponSelectionDialog
 	private WeaponList resultList = null;
 	private int response = SWT.NO;
 
-	private boolean listMode = false;
+	private boolean byListMode = false;
 	private boolean sortByBlueprint = true;
 	private HashMap<WeaponTypes, TreeItem> treeItemMap = null;
 	private Preview preview = null;
@@ -87,6 +88,12 @@ public class WeaponSelectionDialog
 	private TreeColumn trclmnBlueprint;
 	private TreeColumn trclmnName;
 	private Button btnSearch;
+	private Button btnSwitch;
+
+	private final String btnSwitch_list = "Blueprint Lists";
+	private final String btnSwitch_regular = "Single Weapons";
+	private boolean listsView = false;
+	private boolean selectedEmpty = false;
 
 
 	public WeaponSelectionDialog( Shell parent )
@@ -165,6 +172,12 @@ public class WeaponSelectionDialog
 		btnSearch.setLayoutData( gd_btnSearch );
 		btnSearch.setText( "Search" );
 
+		btnSwitch = new Button( compButtons, SWT.NONE );
+		GridData gd_btnSwitch = new GridData( SWT.LEFT, SWT.CENTER, false, false, 1, 1 );
+		gd_btnSwitch.widthHint = 120;
+		btnSwitch.setLayoutData( gd_btnSwitch );
+		btnSwitch.setText( btnSwitch_list );
+
 		btnConfirm = new Button( compButtons, SWT.NONE );
 		GridData gd_btnConfirm = new GridData( SWT.RIGHT, SWT.CENTER, true, false, 1, 1 );
 		gd_btnConfirm.widthHint = 80;
@@ -211,17 +224,20 @@ public class WeaponSelectionDialog
 					if ( tree.getSelectionCount() != 0 ) {
 						TreeItem selectedItem = tree.getSelection()[0];
 						Object o = selectedItem.getData();
+						selectedEmpty = false;
+
 						if ( o instanceof WeaponList ) {
 							selectionList = (WeaponList)o;
 							resultList = selectionList;
 							result = null;
-							btnConfirm.setEnabled( listMode && resultList != null );
+							if ( o.equals( Database.DEFAULT_WEAPON_LIST ) ) selectedEmpty = true;
+							btnConfirm.setEnabled( byListMode || listsView );
 						}
 						else if ( o instanceof WeaponObject ) {
 							resultList = null;
 							selection = (WeaponObject)o;
 							result = selection;
-							btnConfirm.setEnabled( !listMode && result != null );
+							btnConfirm.setEnabled( !byListMode && !listsView );
 						}
 						else {
 							resultList = null;
@@ -245,9 +261,9 @@ public class WeaponSelectionDialog
 				public void widgetSelected( SelectionEvent e )
 				{
 					// Sort by blueprint name
-					if ( !listMode && !sortByBlueprint ) {
+					if ( !byListMode && !sortByBlueprint ) {
 						sortByBlueprint = true;
-						updateTree();
+						if ( !listsView ) updateTree();
 					}
 				}
 			}
@@ -259,9 +275,9 @@ public class WeaponSelectionDialog
 				public void widgetSelected( SelectionEvent e )
 				{
 					// Sort by title
-					if ( !listMode && sortByBlueprint ) {
+					if ( !byListMode && sortByBlueprint ) {
 						sortByBlueprint = false;
-						updateTree();
+						if ( !listsView ) updateTree();
 					}
 				}
 			}
@@ -289,6 +305,29 @@ public class WeaponSelectionDialog
 					tree.notifyListeners( SWT.Selection, null );
 				}
 			}
+		);
+
+		btnSwitch.addSelectionListener(
+				new SelectionAdapter() {
+					@Override
+					public void widgetSelected( SelectionEvent e )
+					{
+						btnSearch.setEnabled( listsView );
+						if ( btnSwitch.getText().equals( btnSwitch_list ) )
+						{
+							btnSwitch.setText( btnSwitch_regular );
+							listsView = true;
+							updateTreeList();
+						}
+						else
+						{
+							btnSwitch.setText( btnSwitch_list );
+							listsView = false;
+							updateTree();
+						}
+						tree.notifyListeners( SWT.Selection, null );
+					}
+				}
 		);
 
 		btnCancel.addSelectionListener(
@@ -388,7 +427,7 @@ public class WeaponSelectionDialog
 	{
 		response = SWT.NO;
 
-		if ( listMode )
+		if ( byListMode || listsView )
 			updateTreeList();
 		else
 			updateTree();
@@ -404,9 +443,9 @@ public class WeaponSelectionDialog
 		}
 	}
 
-	public WeaponList open( WeaponList current )
+	public WeaponList openByList( WeaponList current )
 	{
-		listMode = true;
+		byListMode = true;
 		resultList = current;
 		result = null;
 
@@ -418,6 +457,7 @@ public class WeaponSelectionDialog
 		}
 
 		btnSearch.setEnabled( false );
+		btnSwitch.setEnabled( false );
 
 		open();
 
@@ -429,9 +469,55 @@ public class WeaponSelectionDialog
 		}
 	}
 
-	public WeaponObject open( WeaponObject current )
+	public WeaponLike open( WeaponLike current )
 	{
-		listMode = false;
+		if ( current instanceof WeaponObject )
+		{
+			return open( (WeaponObject) current );
+		}
+		else if ( current instanceof WeaponList )
+		{
+			return open( (WeaponList) current );
+		}
+		else
+		{
+			throw new IllegalArgumentException(
+					"Weapon Selection Error: " + current.toString() + " is not a weapon or list of weapons"
+			);
+		}
+	}
+
+	public WeaponLike open( WeaponList current )
+	{
+		byListMode = false;
+		resultList = current;
+		result = null;
+
+		if ( current == null || current == Database.DEFAULT_WEAPON_LIST ) {
+			resultList = selectionList;
+		}
+		else {
+			selectionList = resultList;
+		}
+
+		btnSearch.setEnabled( true );
+		btnSwitch.setEnabled( true );
+		btnSwitch.notifyListeners( SWT.Selection, null );
+
+		open();
+
+		if ( response == SWT.YES ) {
+			if ( selectedEmpty ) return Database.DEFAULT_WEAPON_OBJ;
+			return listsView ? resultList : result;
+		}
+		else {
+			return null;
+		}
+	}
+
+	public WeaponLike open( WeaponObject current )
+	{
+		byListMode = false;
 		resultList = null;
 		result = current;
 
@@ -443,11 +529,13 @@ public class WeaponSelectionDialog
 		}
 
 		btnSearch.setEnabled( true );
+		btnSwitch.setEnabled( true );
 
 		open();
 
 		if ( response == SWT.YES ) {
-			return result;
+			if ( selectedEmpty ) return Database.DEFAULT_WEAPON_OBJ;
+			return listsView ? resultList : result;
 		}
 		else {
 			return null;

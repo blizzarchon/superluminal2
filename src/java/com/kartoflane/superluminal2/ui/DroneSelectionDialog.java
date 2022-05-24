@@ -36,6 +36,7 @@ import com.kartoflane.superluminal2.components.Hotkey;
 import com.kartoflane.superluminal2.components.enums.DroneStats;
 import com.kartoflane.superluminal2.components.enums.DroneTypes;
 import com.kartoflane.superluminal2.components.enums.Hotkeys;
+import com.kartoflane.superluminal2.components.interfaces.DroneLike;
 import com.kartoflane.superluminal2.components.interfaces.Predicate;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.db.Database;
@@ -66,7 +67,7 @@ public class DroneSelectionDialog
 	private DroneList resultList = null;
 	private int response = SWT.NO;
 
-	private boolean listMode = false;
+	private boolean byListMode = false;
 	private boolean sortByBlueprint = true;
 	private HashMap<DroneTypes, TreeItem> treeItemMap = null;
 	private Predicate<DroneObject> filter = defaultFilter;
@@ -80,6 +81,12 @@ public class DroneSelectionDialog
 	private TreeColumn trclmnBlueprint;
 	private TreeColumn trclmnName;
 	private Button btnSearch;
+	private Button btnSwitch;
+
+	private final String btnSwitch_list = "Blueprint Lists";
+	private final String btnSwitch_regular = "Single Drones";
+	private boolean listsView = false;
+	private boolean selectedEmpty = false;
 
 
 	public DroneSelectionDialog( Shell parent )
@@ -147,6 +154,12 @@ public class DroneSelectionDialog
 		btnSearch.setLayoutData( gd_btnSearch );
 		btnSearch.setText( "Search" );
 
+		btnSwitch = new Button( compButtons, SWT.NONE );
+		GridData gd_btnSwitch = new GridData( SWT.LEFT, SWT.CENTER, false, false, 1, 1 );
+		gd_btnSwitch.widthHint = 120;
+		btnSwitch.setLayoutData( gd_btnSwitch );
+		btnSwitch.setText( btnSwitch_list );
+
 		btnConfirm = new Button( compButtons, SWT.NONE );
 		GridData gd_btnConfirm = new GridData( SWT.RIGHT, SWT.CENTER, true, false, 1, 1 );
 		gd_btnConfirm.widthHint = 80;
@@ -193,17 +206,20 @@ public class DroneSelectionDialog
 					if ( tree.getSelectionCount() != 0 ) {
 						TreeItem selectedItem = tree.getSelection()[0];
 						Object o = selectedItem.getData();
+						selectedEmpty = false;
+
 						if ( o instanceof DroneList ) {
 							selectionList = (DroneList)o;
 							resultList = selectionList;
 							result = null;
-							btnConfirm.setEnabled( listMode && resultList != null );
+							if ( o.equals( Database.DEFAULT_DRONE_LIST ) ) selectedEmpty = true;
+							btnConfirm.setEnabled( byListMode || listsView );
 						}
 						else if ( o instanceof DroneObject ) {
 							resultList = null;
 							selection = (DroneObject)o;
 							result = selection;
-							btnConfirm.setEnabled( !listMode && result != null );
+							btnConfirm.setEnabled( !byListMode && !listsView );
 						}
 						else {
 							resultList = null;
@@ -227,9 +243,9 @@ public class DroneSelectionDialog
 				public void widgetSelected( SelectionEvent e )
 				{
 					// Sort by blueprint name
-					if ( !listMode && !sortByBlueprint ) {
+					if ( !byListMode && !sortByBlueprint ) {
 						sortByBlueprint = true;
-						updateTree();
+						if ( !listsView ) updateTree();
 					}
 				}
 			}
@@ -241,9 +257,9 @@ public class DroneSelectionDialog
 				public void widgetSelected( SelectionEvent e )
 				{
 					// Sort by title
-					if ( !listMode && sortByBlueprint ) {
+					if ( !byListMode && sortByBlueprint ) {
 						sortByBlueprint = false;
-						updateTree();
+						if ( !listsView ) updateTree();
 					}
 				}
 			}
@@ -271,6 +287,29 @@ public class DroneSelectionDialog
 					tree.notifyListeners( SWT.Selection, null );
 				}
 			}
+		);
+
+		btnSwitch.addSelectionListener(
+				new SelectionAdapter() {
+					@Override
+					public void widgetSelected( SelectionEvent e )
+					{
+						btnSearch.setEnabled( listsView );
+						if ( btnSwitch.getText().equals( btnSwitch_list ) )
+						{
+							btnSwitch.setText( btnSwitch_regular );
+							listsView = true;
+							updateTreeList();
+						}
+						else
+						{
+							btnSwitch.setText( btnSwitch_list );
+							listsView = false;
+							updateTree();
+						}
+						tree.notifyListeners( SWT.Selection, null );
+					}
+				}
 		);
 
 		btnCancel.addSelectionListener(
@@ -353,7 +392,7 @@ public class DroneSelectionDialog
 	{
 		response = SWT.NO;
 
-		if ( listMode )
+		if ( byListMode || listsView )
 			updateTreeList();
 		else
 			updateTree();
@@ -369,9 +408,9 @@ public class DroneSelectionDialog
 		}
 	}
 
-	public DroneList open( DroneList current )
+	public DroneList openByList( DroneList current )
 	{
-		listMode = true;
+		byListMode = true;
 		resultList = current;
 		result = null;
 
@@ -383,6 +422,7 @@ public class DroneSelectionDialog
 		}
 
 		btnSearch.setEnabled( false );
+		btnSwitch.setEnabled( false );
 
 		open();
 
@@ -392,9 +432,55 @@ public class DroneSelectionDialog
 			return null;
 	}
 
-	public DroneObject open( DroneObject current )
+	public DroneLike open( DroneLike current )
 	{
-		listMode = false;
+		if ( current instanceof DroneObject )
+		{
+			return open( (DroneObject) current );
+		}
+		else if ( current instanceof DroneList )
+		{
+			return open( (DroneList) current );
+		}
+		else
+		{
+			throw new IllegalArgumentException(
+					"Drone Selection Error: " + current.toString() + " is not a drone or list of drones"
+			);
+		}
+	}
+
+	public DroneLike open( DroneList current )
+	{
+		byListMode = false;
+		resultList = current;
+		result = null;
+
+		if ( current == null || current == Database.DEFAULT_DRONE_LIST ) {
+			resultList = selectionList;
+		}
+		else {
+			selectionList = resultList;
+		}
+
+		btnSearch.setEnabled( true );
+		btnSwitch.setEnabled( true );
+		btnSwitch.notifyListeners( SWT.Selection, null );
+
+		open();
+
+		if ( response == SWT.YES ) {
+			if ( selectedEmpty ) return Database.DEFAULT_DRONE_OBJ;
+			return listsView ? resultList : result;
+		}
+		else {
+			return null;
+		}
+	}
+
+	public DroneLike open( DroneObject current )
+	{
+		byListMode = false;
 		resultList = null;
 		result = current;
 
@@ -406,13 +492,17 @@ public class DroneSelectionDialog
 		}
 
 		btnSearch.setEnabled( true );
+		btnSwitch.setEnabled( true );
 
 		open();
 
-		if ( response == SWT.YES )
-			return result;
-		else
+		if ( response == SWT.YES ) {
+			if ( selectedEmpty ) return Database.DEFAULT_DRONE_OBJ;
+			return listsView ? resultList : result;
+		}
+		else {
 			return null;
+		}
 	}
 
 	private void updateTree()

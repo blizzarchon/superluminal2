@@ -32,10 +32,13 @@ import org.eclipse.swt.widgets.TreeItem;
 
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.Hotkey;
+import com.kartoflane.superluminal2.components.enums.CrewStats;
 import com.kartoflane.superluminal2.components.enums.Hotkeys;
+import com.kartoflane.superluminal2.components.interfaces.CrewLike;
 import com.kartoflane.superluminal2.components.interfaces.Predicate;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.db.Database;
+import com.kartoflane.superluminal2.ftl.CrewList;
 import com.kartoflane.superluminal2.ftl.CrewObject;
 import com.kartoflane.superluminal2.utils.UIUtils;
 
@@ -55,9 +58,11 @@ public class CrewSelectionDialog
 		}
 	};
 
-	private static CrewObject selection = null;
+	private static CrewObject selection = Database.DEFAULT_CREW_OBJ;
+	private static CrewList selectionList = Database.DEFAULT_CREW_LIST;
 
 	private CrewObject result = null;
+	private CrewList resultList = null;
 	private int response = SWT.NO;
 
 	private boolean sortByBlueprint = true;
@@ -65,12 +70,19 @@ public class CrewSelectionDialog
 
 	private Shell shell = null;
 	private Text txtDesc;
+	private StatTable statTable;
 	private Button btnCancel;
 	private Button btnConfirm;
 	private Tree tree;
 	private TreeColumn trclmnBlueprint;
 	private TreeColumn trclmnName;
 	private Button btnSearch;
+	private Button btnSwitch;
+
+	private final String btnSwitch_list = "Blueprint Lists";
+	private final String btnSwitch_regular = "Single Crew Types";
+	private boolean listsView = false;
+	private boolean selectedEmpty = false;
 
 
 	public CrewSelectionDialog( Shell parent )
@@ -120,6 +132,9 @@ public class CrewSelectionDialog
 		scrolledComposite.setMinSize( compData.computeSize( SWT.DEFAULT, SWT.DEFAULT ) );
 		sashForm.setWeights( new int[] { minTreeWidth, defaultDataWidth } );
 
+		statTable = new StatTable( compData );
+		statTable.setLayoutData( new GridData( SWT.FILL, SWT.FILL, true, false, 1, 1 ));
+
 		Composite compButtons = new Composite( shell, SWT.NONE );
 		GridLayout gl_compButtons = new GridLayout( 3, false );
 		gl_compButtons.marginWidth = 0;
@@ -132,6 +147,12 @@ public class CrewSelectionDialog
 		gd_btnSearch.widthHint = 80;
 		btnSearch.setLayoutData( gd_btnSearch );
 		btnSearch.setText( "Search" );
+
+		btnSwitch = new Button( compButtons, SWT.NONE );
+		GridData gd_btnSwitch = new GridData( SWT.LEFT, SWT.CENTER, false, false, 1, 1 );
+		gd_btnSwitch.widthHint = 133;
+		btnSwitch.setLayoutData( gd_btnSwitch );
+		btnSwitch.setText( btnSwitch_list );
 
 		btnConfirm = new Button( compButtons, SWT.NONE );
 		GridData gd_btnConfirm = new GridData( SWT.RIGHT, SWT.CENTER, true, false, 1, 1 );
@@ -179,11 +200,19 @@ public class CrewSelectionDialog
 					if ( tree.getSelectionCount() != 0 ) {
 						TreeItem selectedItem = tree.getSelection()[0];
 						Object o = selectedItem.getData();
+						selectedEmpty = false;
 
-						if ( o instanceof CrewObject ) {
+						if ( o instanceof CrewList ) {
+							selectionList = (CrewList)o;
+							resultList = selectionList;
+							result = null;
+							if ( o.equals( Database.DEFAULT_CREW_LIST ) ) selectedEmpty = true;
+							btnConfirm.setEnabled( listsView );
+						}
+						else if ( o instanceof CrewObject ) {
 							selection = (CrewObject)o;
 							result = selection;
-							btnConfirm.setEnabled( result != null );
+							btnConfirm.setEnabled( !listsView );
 						}
 						else {
 							result = null;
@@ -191,6 +220,7 @@ public class CrewSelectionDialog
 						}
 					}
 					else {
+						resultList = null;
 						result = null;
 						btnConfirm.setEnabled( false );
 					}
@@ -207,7 +237,7 @@ public class CrewSelectionDialog
 					// Sort by blueprint name
 					if ( !sortByBlueprint ) {
 						sortByBlueprint = true;
-						updateTree();
+						if ( !listsView ) updateTree();
 					}
 				}
 			}
@@ -221,7 +251,7 @@ public class CrewSelectionDialog
 					// Sort by title
 					if ( sortByBlueprint ) {
 						sortByBlueprint = false;
-						updateTree();
+						if ( !listsView ) updateTree();
 					}
 				}
 			}
@@ -249,6 +279,29 @@ public class CrewSelectionDialog
 					tree.notifyListeners( SWT.Selection, null );
 				}
 			}
+		);
+
+		btnSwitch.addSelectionListener(
+				new SelectionAdapter() {
+					@Override
+					public void widgetSelected( SelectionEvent e )
+					{
+						btnSearch.setEnabled( listsView );
+						if ( btnSwitch.getText().equals( btnSwitch_list ) )
+						{
+							btnSwitch.setText( btnSwitch_regular );
+							listsView = true;
+							updateTreeList();
+						}
+						else
+						{
+							btnSwitch.setText( btnSwitch_list );
+							listsView = false;
+							updateTree();
+						}
+						tree.notifyListeners( SWT.Selection, null );
+					}
+				}
 		);
 
 		btnCancel.addSelectionListener(
@@ -331,7 +384,10 @@ public class CrewSelectionDialog
 	{
 		response = SWT.NO;
 
-		updateTree();
+		if ( listsView )
+			updateTreeList();
+		else
+			updateTree();
 
 		shell.open();
 
@@ -344,8 +400,54 @@ public class CrewSelectionDialog
 		}
 	}
 
-	public CrewObject open( CrewObject current )
+	public CrewLike open( CrewLike current )
 	{
+		if ( current instanceof CrewObject )
+		{
+			return open( (CrewObject) current );
+		}
+		else if ( current instanceof CrewList )
+		{
+			return open( (CrewList) current );
+		}
+		else
+		{
+			throw new IllegalArgumentException(
+					"Crew Selection Error: " + current.toString() + " is not a crew or list of crew"
+			);
+		}
+	}
+
+	public CrewLike open( CrewList current )
+	{
+		resultList = current;
+		result = null;
+
+		if ( current == null || current == Database.DEFAULT_CREW_LIST ) {
+			resultList = selectionList;
+		}
+		else {
+			selectionList = resultList;
+		}
+
+		btnSearch.setEnabled( true );
+		btnSwitch.setEnabled( true );
+		btnSwitch.notifyListeners( SWT.Selection, null );
+
+		open();
+
+		if ( response == SWT.YES ) {
+			if ( selectedEmpty ) return Database.DEFAULT_CREW_OBJ;
+			return listsView ? resultList : result;
+		}
+		else {
+			return null;
+		}
+	}
+
+	public CrewLike open( CrewObject current )
+	{
+		resultList = null;
 		result = current;
 
 		if ( current == null || current == Database.DEFAULT_CREW_OBJ ) {
@@ -355,12 +457,18 @@ public class CrewSelectionDialog
 			selection = result;
 		}
 
+		btnSearch.setEnabled( true );
+		btnSwitch.setEnabled( true );
+
 		open();
 
-		if ( response == SWT.YES )
-			return result;
-		else
+		if ( response == SWT.YES ) {
+			if ( selectedEmpty ) return Database.DEFAULT_CREW_OBJ;
+			return listsView ? resultList : result;
+		}
+		else {
 			return null;
+		}
 	}
 
 	private void updateTree()
@@ -398,9 +506,61 @@ public class CrewSelectionDialog
 		}
 	}
 
+	private void updateTreeList()
+	{
+		for ( TreeItem trtm : tree.getItems() )
+			trtm.dispose();
+
+		TreeItem trtm = new TreeItem( tree, SWT.NONE );
+		trtm.setText( "No Crew List" );
+		trtm.setData( Database.DEFAULT_CREW_LIST );
+
+		TreeItem selection = null;
+
+		for ( CrewList list : Database.getInstance().getCrewLists() ) {
+			trtm = new TreeItem( tree, SWT.NONE );
+			trtm.setText( list.getBlueprintName() );
+			trtm.setData( list );
+
+			if ( resultList == list )
+				selection = trtm;
+
+			for ( CrewObject crew : list ) {
+				TreeItem crewItem = new TreeItem( trtm, SWT.NONE );
+				crewItem.setText( 0, crew.getBlueprintName() );
+				crewItem.setText( 1, crew.getTitle().toString() );
+				crewItem.setData( crew );
+			}
+		}
+
+		tree.layout();
+
+		if ( selection != null ) {
+			tree.select( selection );
+			tree.setTopItem( selection );
+		}
+		else {
+			tree.select( tree.getItem( 0 ) );
+		}
+	}
+
 	private void updateData()
 	{
-		txtDesc.setText( result == null ? "" : result.getDescription().toString() );
+		if ( result != null ) {
+			statTable.setVisible( false );
+			statTable.clear();
+			for ( CrewStats stat : CrewStats.values() ) {
+				float value = result.getStat( stat );
+				statTable.addEntry( stat.toString(), stat.formatValue( value ) );
+			}
+			statTable.setVisible( true );
+			statTable.updateColumnWidth();
+			txtDesc.setText( result.getDescription().toString() );
+		}
+		else {
+			statTable.clear();
+			txtDesc.setText( "" );
+		}
 	}
 
 	public static CrewSelectionDialog getInstance()

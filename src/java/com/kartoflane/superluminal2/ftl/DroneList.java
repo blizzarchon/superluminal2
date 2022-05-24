@@ -1,8 +1,11 @@
 package com.kartoflane.superluminal2.ftl;
 
-public class DroneList extends BlueprintList<DroneObject>
+import com.kartoflane.superluminal2.components.interfaces.DroneLike;
+
+public class DroneList extends BlueprintList<DroneObject> implements DroneLike
 {
 	private static final long serialVersionUID = 4618623391139370151L;
+	private static final String empty = "No Drone List";
 
 
 	/**
@@ -10,11 +13,16 @@ public class DroneList extends BlueprintList<DroneObject>
 	 */
 	public DroneList()
 	{
-		super( "No Drone List" );
+		super( empty );
 	}
 
 	public DroneList( String blueprint )
 	{
 		super( blueprint );
+	}
+
+	@Override
+	public String buttonView() {
+		return blueprintName;
 	}
 }

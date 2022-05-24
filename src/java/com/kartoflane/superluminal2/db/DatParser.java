@@ -15,6 +15,7 @@ import com.kartoflane.superluminal2.components.enums.WeaponTypes;
 import com.kartoflane.superluminal2.ftl.AnimationObject;
 import com.kartoflane.superluminal2.ftl.AugmentObject;
 import com.kartoflane.superluminal2.ftl.BlueprintList;
+import com.kartoflane.superluminal2.ftl.CrewList;
 import com.kartoflane.superluminal2.ftl.CrewObject;
 import com.kartoflane.superluminal2.ftl.DefaultDeferredText;
 import com.kartoflane.superluminal2.ftl.DroneList;
@@ -252,6 +253,9 @@ public class DatParser
 			else if ( Database.getInstance().getDrone( name ) != null ) {
 				return loadDroneList( attr, children );
 			}
+			else if ( Database.getInstance().getCrew( name ) != null ) {
+				return loadCrewList( attr, children );
+			}
 			else {
 				// Not interested in any other blueprintLists
 			}
@@ -291,6 +295,24 @@ public class DatParser
 			DroneObject drone = db.getDrone( child.getValue() );
 			if ( drone != null )
 				list.add( drone );
+		}
+
+		return list;
+	}
+
+	private static CrewList loadCrewList(String name, List<Element> children )
+	{
+		if ( name == null )
+			throw new IllegalArgumentException( "Name must not be null." );
+		if ( children == null )
+			throw new IllegalArgumentException( "Children list must not be null." );
+
+		Database db = Database.getInstance();
+		CrewList list = new CrewList( name );
+		for ( Element child : children ) {
+			CrewObject crew = db.getCrew( child.getValue() );
+			if ( crew != null )
+				list.add( crew );
 		}
 
 		return list;

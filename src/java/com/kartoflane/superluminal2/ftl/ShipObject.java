@@ -12,6 +12,9 @@ import com.kartoflane.superluminal2.components.enums.BoardingStrategies;
 import com.kartoflane.superluminal2.components.enums.Images;
 import com.kartoflane.superluminal2.components.enums.PlayerShipBlueprints;
 import com.kartoflane.superluminal2.components.enums.Systems;
+import com.kartoflane.superluminal2.components.interfaces.CrewLike;
+import com.kartoflane.superluminal2.components.interfaces.DroneLike;
+import com.kartoflane.superluminal2.components.interfaces.WeaponLike;
 import com.kartoflane.superluminal2.db.Database;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.utils.Utils;
@@ -36,14 +39,14 @@ public class ShipObject extends GameObject
 
 	private HashMap<Systems, ArrayList<SystemObject>> systemMap;
 	private HashMap<Images, ImageObject> imageMap;
-	private ArrayList<CrewObject> crewList;
+	private ArrayList<CrewLike> crewList;
 	private HashMap<String, Integer> crewMinMap;
 	private HashMap<String, Integer> crewMaxMap;
 
 	private ArrayList<AugmentObject> augments;
 	private ArrayList<AugmentObject> hiddenAugments;
-	private ArrayList<WeaponObject> weapons;
-	private ArrayList<DroneObject> drones;
+	private ArrayList<WeaponLike> weapons;
+	private ArrayList<DroneLike> drones;
 	private boolean weaponByList = false;
 	// TODO: private boolean listPerSlot = false;
 	private boolean droneByList = false;
@@ -87,12 +90,12 @@ public class ShipObject extends GameObject
 		imageMap = new HashMap<Images, ImageObject>();
 		augments = new ArrayList<AugmentObject>();
 		hiddenAugments = new ArrayList<AugmentObject>();
-		crewList = new ArrayList<CrewObject>();
+		crewList = new ArrayList<CrewLike>();
 		crewMinMap = new HashMap<String, Integer>();
 		crewMaxMap = new HashMap<String, Integer>();
 
-		weapons = new ArrayList<WeaponObject>();
-		drones = new ArrayList<DroneObject>();
+		weapons = new ArrayList<WeaponLike>();
+		drones = new ArrayList<DroneLike>();
 
 		for ( int i = 0; i < 8; i++ ) {
 			weapons.add( Database.DEFAULT_WEAPON_OBJ );
@@ -104,8 +107,13 @@ public class ShipObject extends GameObject
 			object.setAlias( image.name().toLowerCase() );
 			imageMap.put( image, object );
 		}
-		for ( CrewObject race : Database.getInstance().getCrews() ) {
-			String blueprint = race.getBlueprintName();
+		for ( CrewObject crew : Database.getInstance().getCrews() ) {
+			String blueprint = crew.getBlueprintName();
+			crewMinMap.put( blueprint, 0 );
+			crewMaxMap.put( blueprint, 0 );
+		}
+		for ( CrewList crew : Database.getInstance().getCrewLists() ) {
+			String blueprint = crew.getBlueprintName();
 			crewMinMap.put( blueprint, 0 );
 			crewMaxMap.put( blueprint, 0 );
 		}
@@ -113,11 +121,11 @@ public class ShipObject extends GameObject
 		{
 			crewList.add( Database.DEFAULT_CREW_OBJ );
 		}
-		if (blueprintName.endsWith("_2"))
+		if ( blueprintName.endsWith( "_2" ) )
 		{
 			layoutSlot = "B";
 		}
-		else if (blueprintName.endsWith("_3"))
+		else if ( blueprintName.endsWith( "_3" ) )
 		{
 			layoutSlot = "C";
 		}
@@ -765,15 +773,15 @@ public class ShipObject extends GameObject
 		return weaponList;
 	}
 
-	public WeaponObject[] getWeapons()
+	public WeaponLike[] getWeapons()
 	{
-		return weapons.toArray( new WeaponObject[0] );
+		return weapons.toArray( new WeaponLike[0] );
 	}
 
 	/**
 	 * Puts the new weapon at the specified index in the weapon list.
 	 */
-	public void changeWeapon( int index, WeaponObject neu )
+	public void changeWeapon( int index, WeaponLike neu )
 	{
 		if ( index < 0 || index > weaponSlots )
 			throw new IllegalArgumentException( "Index is out of bounds: " + index );
@@ -784,11 +792,11 @@ public class ShipObject extends GameObject
 	}
 
 	/**
-	 * Removes the first occurence of the old weapon, and puts the new weapon in its place.
+	 * Removes the first occurrence of the old weapon, and puts the new weapon in its place.
 	 * 
 	 * @return index at which the new weapon was placed
 	 */
-	public int changeWeapon( WeaponObject old, WeaponObject neu )
+	public int changeWeapon( WeaponLike old, WeaponLike neu )
 	{
 		if ( old == null )
 			throw new IllegalArgumentException( "Old weapon must not be null." );
@@ -809,7 +817,7 @@ public class ShipObject extends GameObject
 	private void coalesceWeapons()
 	{
 		for ( int i = 0; i < weapons.size(); i++ ) {
-			WeaponObject weapon = weapons.get( i );
+			WeaponLike weapon = weapons.get( i );
 			if ( weapon == Database.DEFAULT_WEAPON_OBJ ) {
 				weapons.remove( weapon );
 				weapons.add( weapon );
@@ -875,15 +883,15 @@ public class ShipObject extends GameObject
 		return droneList;
 	}
 
-	public DroneObject[] getDrones()
+	public DroneLike[] getDrones()
 	{
-		return drones.toArray( new DroneObject[0] );
+		return drones.toArray( new DroneLike[0] );
 	}
 
 	/**
 	 * Puts the new drone at the specified index in the drone list.
 	 */
-	public void changeDrone( int index, DroneObject neu )
+	public void changeDrone( int index, DroneLike neu )
 	{
 		if ( index < 0 || index > droneSlots )
 			throw new IllegalArgumentException( "Index is out of bounds: " + index );
@@ -894,11 +902,11 @@ public class ShipObject extends GameObject
 	}
 
 	/**
-	 * Removes the first occurence of the old drone, and puts the new drone in its place.
+	 * Removes the first occurrence of the old drone, and puts the new drone in its place.
 	 * 
 	 * @return index at which the new drone was placed
 	 */
-	public int changeDrone( DroneObject old, DroneObject neu )
+	public int changeDrone( DroneLike old, DroneLike neu )
 	{
 		if ( old == null )
 			throw new IllegalArgumentException( "Old drone must not be null." );
@@ -919,7 +927,7 @@ public class ShipObject extends GameObject
 	private void coalesceDrones()
 	{
 		for ( int i = 0; i < drones.size(); i++ ) {
-			DroneObject drone = drones.get( i );
+			DroneLike drone = drones.get( i );
 			if ( drone == Database.DEFAULT_DRONE_OBJ ) {
 				drones.remove( drone );
 				drones.add( drone );
@@ -1018,7 +1026,7 @@ public class ShipObject extends GameObject
 	 * Puts the new race at the specified index in the race list.<br>
 	 * Player ships only.
 	 */
-	public void changeCrew( int index, CrewObject neu )
+	public void changeCrew( int index, CrewLike neu )
 	{
 		if ( neu == null )
 			throw new IllegalArgumentException( "New augment must not be null." );
@@ -1029,12 +1037,12 @@ public class ShipObject extends GameObject
 	}
 
 	/**
-	 * Removes the first occurence of the old race, and puts the new race in its place.<br>
+	 * Removes the first occurrence of the old race, and puts the new race in its place.<br>
 	 * Player ships only.
 	 * 
 	 * @return index at which the new race was placed
 	 */
-	public int changeCrew( CrewObject old, CrewObject neu )
+	public int changeCrew( CrewLike old, CrewLike neu )
 	{
 		if ( old == null )
 			throw new IllegalArgumentException( "Old augment must not be null." );
@@ -1054,16 +1062,16 @@ public class ShipObject extends GameObject
 	public int getCrewCount( CrewObject r )
 	{
 		int result = 0;
-		for ( CrewObject race : crewList ) {
-			if ( race.equals(r) )
+		for ( CrewLike crew : crewList ) {
+			if ( crew.equals(r) )
 				result++;
 		}
 		return result;
 	}
 
-	public CrewObject[] getCrew()
+	public CrewLike[] getCrew()
 	{
-		return crewList.toArray( new CrewObject[0] );
+		return crewList.toArray( new CrewLike[0] );
 	}
 
 	/**
@@ -1073,8 +1081,8 @@ public class ShipObject extends GameObject
 	public void coalesceCrew()
 	{
 		for ( int i = 0; i < crewList.size(); i++ ) {
-			CrewObject crew = crewList.get( i );
-			if ( crew == Database.DEFAULT_CREW_OBJ ) {
+			CrewLike crew = crewList.get( i );
+			if ( crew == Database.DEFAULT_CREW_OBJ || crew == Database.DEFAULT_CREW_LIST ) {
 				crewList.remove( crew );
 				crewList.add( crew );
 			}
@@ -1102,7 +1110,7 @@ public class ShipObject extends GameObject
 	 * Sets the minimum amount of crew members of the given race that the ship can have.<br>
 	 * Enemy ships only.
 	 */
-	public void setCrewMin( CrewObject race, int amount )
+	public void setCrewMin( CrewLike race, int amount )
 	{
 		if ( race == null )
 			throw new IllegalArgumentException( "Race must not be null." );
@@ -1116,7 +1124,7 @@ public class ShipObject extends GameObject
 	 * 
 	 * @return minimum amount of crew members of the given race that the ship can have
 	 */
-	public int getCrewMin( CrewObject race )
+	public int getCrewMin( CrewLike race )
 	{
 		if ( race == null )
 			throw new IllegalArgumentException( "Race must not be null." );
@@ -1128,7 +1136,7 @@ public class ShipObject extends GameObject
 	 * Sets the maximum amount of crew members of the given race that the ship can have.<br>
 	 * Enemy ships only.
 	 */
-	public void setCrewMax( CrewObject race, int amount )
+	public void setCrewMax( CrewLike race, int amount )
 	{
 		if ( race == null )
 			throw new IllegalArgumentException( "Race must not be null." );
@@ -1200,7 +1208,7 @@ public class ShipObject extends GameObject
 	}
 
 	/**
-	 * Removes the first occurence of the old augment, and puts the new augment in its place.
+	 * Removes the first occurrence of the old augment, and puts the new augment in its place.
 	 * 
 	 * @return index at which the new augment was placed
 	 */
@@ -1255,7 +1263,7 @@ public class ShipObject extends GameObject
 	}
 
 	/**
-	 * Removes the first occurence of the old augment, and puts the new augment in its place.
+	 * Removes the first occurrence of the old augment, and puts the new augment in its place.
 	 *
 	 * @return index at which the new augment was placed
 	 */

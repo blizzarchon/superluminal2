@@ -5,6 +5,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 
 import com.kartoflane.superluminal2.components.enums.Directions;
+import com.kartoflane.superluminal2.components.interfaces.WeaponLike;
 import com.kartoflane.superluminal2.components.interfaces.Indexable;
 import com.kartoflane.superluminal2.core.LayeredPainter.Layers;
 import com.kartoflane.superluminal2.db.Database;
@@ -12,7 +13,6 @@ import com.kartoflane.superluminal2.events.SLDeleteEvent;
 import com.kartoflane.superluminal2.events.SLEvent;
 import com.kartoflane.superluminal2.ftl.GibObject;
 import com.kartoflane.superluminal2.ftl.MountObject;
-import com.kartoflane.superluminal2.ftl.WeaponObject;
 import com.kartoflane.superluminal2.mvc.View;
 import com.kartoflane.superluminal2.mvc.controllers.props.PropController;
 import com.kartoflane.superluminal2.mvc.models.ObjectModel;
@@ -96,7 +96,7 @@ public class MountController extends ObjectController implements Indexable, Comp
 		updateView();
 	}
 
-	public void setWeapon( WeaponObject weapon )
+	public void setWeapon( WeaponLike weapon )
 	{
 		if ( weapon == null )
 			throw new IllegalArgumentException( "Argument must not be null. For default, use DEFAULT_WEAPON_OBJ" );
@@ -108,7 +108,7 @@ public class MountController extends ObjectController implements Indexable, Comp
 		setVisible( true );
 	}
 
-	public WeaponObject getWeapon()
+	public WeaponLike getWeapon()
 	{
 		return getGameObject().getWeapon();
 	}

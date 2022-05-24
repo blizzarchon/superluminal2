@@ -20,13 +20,14 @@ import com.kartoflane.superluminal2.components.enums.Directions;
 import com.kartoflane.superluminal2.components.enums.Images;
 import com.kartoflane.superluminal2.components.enums.LayoutObjects;
 import com.kartoflane.superluminal2.components.enums.Systems;
+import com.kartoflane.superluminal2.components.interfaces.CrewLike;
+import com.kartoflane.superluminal2.components.interfaces.DroneLike;
+import com.kartoflane.superluminal2.components.interfaces.WeaponLike;
 import com.kartoflane.superluminal2.db.DatParser;
 import com.kartoflane.superluminal2.db.Database;
 import com.kartoflane.superluminal2.ftl.AugmentObject;
-import com.kartoflane.superluminal2.ftl.CrewObject;
 import com.kartoflane.superluminal2.ftl.DoorObject;
 import com.kartoflane.superluminal2.ftl.DroneList;
-import com.kartoflane.superluminal2.ftl.DroneObject;
 import com.kartoflane.superluminal2.ftl.GibObject;
 import com.kartoflane.superluminal2.ftl.GlowObject;
 import com.kartoflane.superluminal2.ftl.GlowSet;
@@ -37,7 +38,6 @@ import com.kartoflane.superluminal2.ftl.ShipObject;
 import com.kartoflane.superluminal2.ftl.StationObject;
 import com.kartoflane.superluminal2.ftl.SystemObject;
 import com.kartoflane.superluminal2.ftl.WeaponList;
-import com.kartoflane.superluminal2.ftl.WeaponObject;
 
 
 /**
@@ -199,7 +199,7 @@ public class ShipLoadUtils
 						count++;
 					}
 					else {
-						throw new IllegalArgumentException( "Multiple entries for system " + sys.toString() );
+						throw new IllegalArgumentException( "Multiple entries for system " + sys );
 					}
 				}
 				else {
@@ -213,7 +213,7 @@ public class ShipLoadUtils
 				// Get the min level the system can have, or the starting level of the system
 				attr = sysEl.getAttributeValue( "power" );
 				if ( attr == null )
-					throw new IllegalArgumentException( sys.toString() + " is missing 'power' attribute." );
+					throw new IllegalArgumentException( sys + " is missing 'power' attribute." );
 				system.setLevelStart( Integer.valueOf( attr ) );
 
 				// Get the max level the system can have
@@ -233,7 +233,7 @@ public class ShipLoadUtils
 				// Get the room to which the system is assigned
 				attr = sysEl.getAttributeValue( "room" );
 				if ( attr == null )
-					throw new IllegalArgumentException( sys.toString() + " is missing 'room' attribute." );
+					throw new IllegalArgumentException( sys + " is missing 'room' attribute." );
 				int id = Integer.valueOf( attr );
 				system.setRoom( ship.getRoomById( id ) );
 
@@ -310,9 +310,15 @@ public class ShipLoadUtils
 					if ( attr == null )
 						throw new IllegalArgumentException( "Artillery is missing 'weapon' attribute." );
 
-					WeaponObject weapon = db.getWeapon( attr );
-					if ( weapon == null )
-						throw new IllegalArgumentException( String.format( "%s - WeaponBlueprint not found: %s", system.toString(), attr ) );
+					WeaponLike weapon = db.getWeapon( attr );
+					if ( weapon == null ) {
+						weapon = db.getWeaponList( attr );
+						if ( weapon == null ) {
+							throw new IllegalArgumentException(
+									String.format( "%s - Could not find weaponBlueprint or weapon blueprintList named %s", system, attr )
+							);
+						}
+					}
 
 					system.setWeapon( weapon );
 				}
@@ -381,7 +387,7 @@ public class ShipLoadUtils
 				ship.setWeaponsByList( false );
 			}
 			else if ( attr != null && isPlayer ) {
-				throw new IllegalArgumentException( "Player ships cannot delcare weapons by list." );
+				throw new IllegalArgumentException( "Player ships cannot declare weapons by list." );
 			}
 
 			if ( ship.getWeaponsByList() ) {
@@ -400,11 +406,14 @@ public class ShipLoadUtils
 					if ( attr == null )
 						throw new IllegalArgumentException( "A weapon in <weaponList> is missing 'name' attribute." );
 
-					WeaponObject weaponObject = db.getWeapon( attr );
-					if ( weaponObject == null )
-						throw new IllegalArgumentException( "WeaponBlueprint not found: " + attr );
-
-					ship.changeWeapon( Database.DEFAULT_WEAPON_OBJ, weaponObject );
+					WeaponLike weaponLike = db.getWeapon( attr );
+					if ( weaponLike == null ) {
+						weaponLike = db.getWeaponList( attr );
+						if ( weaponLike == null ) {
+							throw new IllegalArgumentException( "Could not find weaponBlueprint or weapon blueprintList named " + attr );
+						}
+					}
+					ship.changeWeapon( Database.DEFAULT_WEAPON_OBJ, weaponLike );
 
 					loaded++;
 				}
@@ -451,11 +460,14 @@ public class ShipLoadUtils
 					if ( attr == null )
 						throw new IllegalArgumentException( "A drone in <droneList> is missing 'name' attribute." );
 
-					DroneObject droneObject = db.getDrone( attr );
-					if ( droneObject == null )
-						throw new IllegalArgumentException( "DroneBlueprint not found: " + attr );
-
-					ship.changeDrone( Database.DEFAULT_DRONE_OBJ, droneObject );
+					DroneLike droneLike = db.getDrone( attr );
+					if ( droneLike == null ) {
+						droneLike = db.getDroneList( attr );
+						if ( droneLike == null ) {
+							throw new IllegalArgumentException( "Could not find droneBlueprint or drone blueprintList named " + attr );
+						}
+					}
+					ship.changeDrone( Database.DEFAULT_DRONE_OBJ, droneLike );
 
 					loaded++;
 				}
@@ -509,17 +521,20 @@ public class ShipLoadUtils
 			attr = crew.getAttributeValue( "class" );
 			if ( attr == null )
 				throw new IllegalArgumentException( "<crewCount> tag is missing 'class' attribute." );
-			CrewObject race = db.getCrew( attr );
+			CrewLike race = db.getCrew( attr );
 			if ( race == null ) {
-				String error = "Race class not recognised: " + attr + "\n" +
-						       "Troubleshooting:\n" +
-						       "1. Go to Slipstream and patch in the mod containing this race class. " +
-									"Superluminal should detect changes to the dat and update the database. " +
-									"If it didn't, use File -> Reload Database.\n" +
-						       "2. If that didn't work, open the mod's data files in a text editor, " +
-									"find the chosen shipBlueprint from the blueprints files, " +
-									"and correct any typos in the crewCount tags.";
-				throw new IllegalArgumentException( error );
+				race = db.getCrewList( attr );
+				if ( race == null ) {
+					String error = "Race class not recognised: " + attr + "\n" +
+								   "Troubleshooting:\n" +
+								   "1. Go to Slipstream and patch in the mod containing this race class. " +
+										"Superluminal should detect changes to the dat and update the database. " +
+										"If it didn't, use File -> Reload Database.\n" +
+								   "2. If that didn't work, open the mod's data files in a text editor, " +
+										"find the chosen shipBlueprint from the blueprints files, " +
+										"and correct any typos in the crewCount tags.";
+					throw new IllegalArgumentException( error );
+				}
 			}
 			crewCap += 1;
 

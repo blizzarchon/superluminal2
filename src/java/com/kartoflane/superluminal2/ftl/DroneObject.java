@@ -4,10 +4,11 @@ import java.util.HashMap;
 
 import com.kartoflane.superluminal2.components.enums.DroneStats;
 import com.kartoflane.superluminal2.components.enums.DroneTypes;
+import com.kartoflane.superluminal2.components.interfaces.DroneLike;
 import com.kartoflane.superluminal2.components.interfaces.Identifiable;
 
 
-public class DroneObject extends GameObject implements Comparable<DroneObject>, Identifiable
+public class DroneObject extends GameObject implements Comparable<DroneObject>, Identifiable, DroneLike
 {
 	private static final IDeferredText NO_DRONE = new VerbatimText( "<No Drone>" );
 
@@ -37,6 +38,11 @@ public class DroneObject extends GameObject implements Comparable<DroneObject>, 
 	public String getIdentifier()
 	{
 		return blueprintName;
+	}
+
+	@Override
+	public String buttonView() {
+		return title.toString();
 	}
 
 	public void update()

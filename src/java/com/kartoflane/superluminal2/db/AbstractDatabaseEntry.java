@@ -21,6 +21,7 @@ import com.kartoflane.superluminal2.components.interfaces.Predicate;
 import com.kartoflane.superluminal2.ftl.AnimationObject;
 import com.kartoflane.superluminal2.ftl.AugmentObject;
 import com.kartoflane.superluminal2.ftl.BlueprintList;
+import com.kartoflane.superluminal2.ftl.CrewList;
 import com.kartoflane.superluminal2.ftl.CrewObject;
 import com.kartoflane.superluminal2.ftl.DroneList;
 import com.kartoflane.superluminal2.ftl.DroneObject;
@@ -53,6 +54,7 @@ public abstract class AbstractDatabaseEntry
 	protected Map<String, GlowSet> glowSetMap = new HashMap<String, GlowSet>();
 	protected Map<String, WeaponList> weaponListMap = new HashMap<String, WeaponList>();
 	protected Map<String, DroneList> droneListMap = new HashMap<String, DroneList>();
+	protected Map<String, CrewList> crewListMap = new HashMap<String, CrewList>();
 	protected Map<String, String> textLookupMap = new HashMap<String, String>();
 	/**
 	 * Temporary map to hold anim sheets, since they
@@ -136,6 +138,9 @@ public abstract class AbstractDatabaseEntry
 		}
 		else if ( list instanceof DroneList ) {
 			droneListMap.put( list.getIdentifier(), (DroneList)list );
+		}
+		else if ( list instanceof CrewList ) {
+			crewListMap.put( list.getIdentifier(), (CrewList)list );
 		}
 		else {
 			// Not interested in any other lists
@@ -227,6 +232,23 @@ public abstract class AbstractDatabaseEntry
 	public CrewObject[] getCrews()
 	{
 		return crewMap.values().toArray( new CrewObject[0] );
+	}
+
+	/**
+	 * @param listName the name of the blueprint list
+	 * @return the blueprint list with the given name
+	 */
+	public CrewList getCrewList( String listName )
+	{
+		return crewListMap.get( listName );
+	}
+
+	/**
+	 * @return an array of all drone lists in this entry
+	 */
+	public CrewList[] getCrewLists()
+	{
+		return crewListMap.values().toArray( new CrewList[0] );
 	}
 
 	/**

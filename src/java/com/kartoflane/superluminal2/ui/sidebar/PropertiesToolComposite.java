@@ -2,6 +2,7 @@ package com.kartoflane.superluminal2.ui.sidebar;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -26,17 +27,18 @@ import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.enums.BoardingStrategies;
 import com.kartoflane.superluminal2.components.enums.OS;
 import com.kartoflane.superluminal2.components.enums.Systems;
+import com.kartoflane.superluminal2.components.interfaces.CrewLike;
+import com.kartoflane.superluminal2.components.interfaces.DroneLike;
+import com.kartoflane.superluminal2.components.interfaces.WeaponLike;
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.db.Database;
 import com.kartoflane.superluminal2.ftl.AugmentObject;
 import com.kartoflane.superluminal2.ftl.CrewObject;
 import com.kartoflane.superluminal2.ftl.DroneList;
-import com.kartoflane.superluminal2.ftl.DroneObject;
 import com.kartoflane.superluminal2.ftl.ShipObject;
 import com.kartoflane.superluminal2.ftl.SystemObject;
 import com.kartoflane.superluminal2.ftl.WeaponList;
-import com.kartoflane.superluminal2.ftl.WeaponObject;
 import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.ShipController;
 import com.kartoflane.superluminal2.mvc.controllers.SystemController;
@@ -553,7 +555,7 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 					@Override
 					public void widgetSelected( SelectionEvent e )
 					{
-						btnWeaponList.dispose();
+						if ( btnWeaponList != null ) btnWeaponList.dispose();
 						clearWeaponSlots();
 						ship.setWeaponsByList( btnWeaponByList.getSelection() );
 						if ( ship.getWeaponsByList() ) {
@@ -666,7 +668,7 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 					@Override
 					public void widgetSelected( SelectionEvent e )
 					{
-						btnDroneList.dispose();
+						if ( btnDroneList != null ) btnDroneList.dispose();
 						clearDroneSlots();
 						ship.setDronesByList( btnDroneByList.getSelection() );
 						if ( ship.getDronesByList() ) {
@@ -1027,10 +1029,9 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 			btnWeaponList.setText( wList.getBlueprintName() );
 		}
 		else {
-			count = 0;
-			for ( WeaponObject weapon : ship.getWeapons() ) {
+			for ( WeaponLike weapon : ship.getWeapons() ) {
 				if ( count < ship.getWeaponSlots() ) {
-					btnWeapons.get( count ).setText( weapon.toString() );
+					btnWeapons.get( count ).setText( weapon.buttonView() );
 					count++;
 				}
 			}
@@ -1042,9 +1043,9 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 		}
 		else {
 			count = 0;
-			for ( DroneObject drone : ship.getDrones() ) {
+			for ( DroneLike drone : ship.getDrones() ) {
 				if ( count < ship.getDroneSlots() ) {
-					btnDrones.get( count ).setText( drone.toString() );
+					btnDrones.get( count ).setText( drone.buttonView() );
 					count++;
 				}
 			}
@@ -1067,8 +1068,8 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 		spArtillerySlots.setSelection( ship.getSystems( Systems.ARTILLERY ).size() );
 		count = 0;
 		for ( SystemObject system : ship.getSystems( Systems.ARTILLERY ) ) {
-			WeaponObject weapon = system.getWeapon();
-			btnArtilleries.get( count ).setText( weapon.toString() );
+			WeaponLike weapon = system.getWeapon();
+			btnArtilleries.get( count ).setText( weapon.buttonView() );
 			count++;
 		}
 
@@ -1076,9 +1077,9 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 		if ( ship.isPlayerShip() ) {
 			spCrew.setSelection( ship.getCrewCap() );
 			count = 0;
-			for ( CrewObject race : ship.getCrew() ) {
+			for ( CrewLike crew : ship.getCrew() ) {
 				if ( count < ship.getCrewCap() ) {
-					btnCrewMembers.get( count ).setText( race.getTitle().toString() );
+					btnCrewMembers.get( count ).setText( crew.buttonView() );
 					count++;
 				}
 			}
@@ -1143,7 +1144,7 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 				{
 					WeaponList current = ship.getWeaponList();
 					WeaponSelectionDialog dialog = new WeaponSelectionDialog( EditorWindow.getInstance().getShell() );
-					WeaponList neu = dialog.open( current );
+					WeaponList neu = dialog.openByList( current );
 
 					if ( neu != null ) {
 						ship.setWeaponList( neu );
@@ -1166,13 +1167,13 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 
 				if ( i != -1 ) {
 					ShipObject ship = container.getShipController().getGameObject();
-					WeaponObject current = ship.getWeapons()[i];
+					WeaponLike current = ship.getWeapons()[i];
 
 					WeaponSelectionDialog dialog = new WeaponSelectionDialog( EditorWindow.getInstance().getShell() );
-					WeaponObject neu = dialog.open( current );
+					WeaponLike neu = dialog.open( current );
 
 					if ( neu != null ) {
-						// If the weapon is the default dummy, then replace the first occurence of
+						// If the weapon is the default dummy, then replace the first occurrence of
 						// the dummy weapon, so that there are no gaps
 						if ( current == Database.DEFAULT_WEAPON_OBJ )
 							container.changeWeapon( current, neu );
@@ -1208,7 +1209,7 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 				{
 					DroneList current = ship.getDroneList();
 					DroneSelectionDialog dialog = new DroneSelectionDialog( EditorWindow.getInstance().getShell() );
-					DroneList neu = dialog.open( current );
+					DroneList neu = dialog.openByList( current );
 
 					if ( neu != null ) {
 						ship.setDroneList( neu );
@@ -1231,10 +1232,10 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 
 				if ( i != -1 ) {
 					ShipObject ship = container.getShipController().getGameObject();
-					DroneObject current = ship.getDrones()[i];
+					DroneLike current = ship.getDrones()[i];
 
 					DroneSelectionDialog dialog = new DroneSelectionDialog( EditorWindow.getInstance().getShell() );
-					DroneObject neu = dialog.open( current );
+					DroneLike neu = dialog.open( current );
 
 					if ( neu != null ) {
 						// If the drone is the default dummy, then replace the first occurence of
@@ -1271,10 +1272,10 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 				if ( i != -1 ) {
 					ShipObject ship = container.getShipController().getGameObject();
 					SystemObject system = ship.getSystems( Systems.ARTILLERY ).get( i );
-					WeaponObject current = system.getWeapon();
+					WeaponLike current = system.getWeapon();
 
 					WeaponSelectionDialog dialog = new WeaponSelectionDialog( EditorWindow.getInstance().getShell() );
-					WeaponObject neu = dialog.open( current );
+					WeaponLike neu = dialog.open( current );
 
 					if ( neu != null ) {
 						// If no weapon was selected, default to ARTILLERY_FED
@@ -1350,10 +1351,10 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 
 				if ( i != -1 ) {
 					ShipObject ship = container.getShipController().getGameObject();
-					CrewObject current = ship.getCrew()[i];
+					CrewLike current = ship.getCrew()[i];
 
 					CrewSelectionDialog dialog = new CrewSelectionDialog( EditorWindow.getInstance().getShell() );
-					CrewObject neu = dialog.open( current );
+					CrewLike neu = dialog.open( current );
 
 					if ( neu != null ) {
 						if ( current == Database.DEFAULT_CREW_OBJ )
@@ -1365,7 +1366,6 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 				}
 			}
 		};
-		//todo: verify compCrew should not be grpCrew
 		for ( int i = 0; i < n; i++ ) {
 			Button btn = new Button( grpCrew, SWT.NONE );
 			btn.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 3, 1 ) );

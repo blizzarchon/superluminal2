@@ -1,13 +1,14 @@
 package com.kartoflane.superluminal2.ftl;
 
 import com.kartoflane.superluminal2.components.enums.CrewStats;
+import com.kartoflane.superluminal2.components.interfaces.CrewLike;
 import com.kartoflane.superluminal2.components.interfaces.Identifiable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 
-public class CrewObject extends GameObject implements Comparable<CrewObject>, Identifiable
+public class CrewObject extends GameObject implements Comparable<CrewObject>, Identifiable, CrewLike
 {
 	protected static final IDeferredText NO_CREW = new VerbatimText( "<No Crew>" );
 
@@ -37,6 +38,11 @@ public class CrewObject extends GameObject implements Comparable<CrewObject>, Id
 	public String getIdentifier()
 	{
 		return blueprintName;
+	}
+
+	@Override
+	public String buttonView() {
+		return title.toString();
 	}
 
 	public void update()

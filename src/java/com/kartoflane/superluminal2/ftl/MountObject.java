@@ -6,6 +6,7 @@ import com.kartoflane.superluminal2.components.enums.Directions;
 import com.kartoflane.superluminal2.components.interfaces.Alias;
 import com.kartoflane.superluminal2.components.interfaces.Indexable;
 import com.kartoflane.superluminal2.components.interfaces.Movable;
+import com.kartoflane.superluminal2.components.interfaces.WeaponLike;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.db.Database;
 import com.kartoflane.superluminal2.mvc.controllers.ShipController;
@@ -23,7 +24,7 @@ public class MountObject extends GameObject implements Alias, Movable, Indexable
 	private GibObject gib = Database.DEFAULT_GIB_OBJ;
 	private Directions direction = Directions.UP;
 
-	private WeaponObject weapon = null;
+	private WeaponLike weapon = null;
 
 	private String alias = null;
 
@@ -52,12 +53,12 @@ public class MountObject extends GameObject implements Alias, Movable, Indexable
 		return id;
 	}
 
-	public void setWeapon( WeaponObject weapon )
+	public void setWeapon( WeaponLike weapon )
 	{
 		this.weapon = weapon;
 	}
 
-	public WeaponObject getWeapon()
+	public WeaponLike getWeapon()
 	{
 		return weapon;
 	}
