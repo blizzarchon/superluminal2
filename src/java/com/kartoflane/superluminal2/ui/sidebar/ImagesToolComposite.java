@@ -17,6 +17,7 @@ import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 
 import com.kartoflane.superluminal2.components.enums.Images;
+import com.kartoflane.superluminal2.components.interfaces.Predicate;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.ftl.GibObject;
 import com.kartoflane.superluminal2.ftl.ShipObject;
@@ -24,6 +25,7 @@ import com.kartoflane.superluminal2.mvc.controllers.AbstractController;
 import com.kartoflane.superluminal2.mvc.controllers.GibController;
 import com.kartoflane.superluminal2.ui.BrowseMenu;
 import com.kartoflane.superluminal2.ui.DatabaseFileDialog;
+import com.kartoflane.superluminal2.ui.DatabaseSearchDialog;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.GibWidget;
 import com.kartoflane.superluminal2.ui.ImageViewerDialog;
@@ -108,7 +110,22 @@ public class ImagesToolComposite extends Composite implements DataComposite
 
 					boolean exit = false;
 					while ( !exit ) {
-						String path = dialog.open();
+						String path = dialog.openThenFilter(
+								new Predicate<String>() {
+									@Override
+									public boolean accept( String o ) {
+										return o.toLowerCase().matches(
+												DatabaseSearchDialog.REGEX_OPEN +
+												tempType.getFilenamePattern() +
+												DatabaseSearchDialog.REGEX_CLOSE_FILE
+										) & o.toLowerCase().matches(
+												DatabaseSearchDialog.REGEX_OPEN +
+												tempType.getFolderPattern() + "(?!/[a-z]+/)" +
+												DatabaseSearchDialog.REGEX_CLOSE_FOLDER
+										);
+									}
+								}
+						);
 
 						// path == null only when user cancels
 						if ( path == null ) {
@@ -429,7 +446,18 @@ public class ImagesToolComposite extends Composite implements DataComposite
 
 					boolean exit = false;
 					while ( !exit ) {
-						String path = dialog.open();
+						String path = dialog.openThenFilter(
+								new Predicate<String>() {
+									@Override
+									public boolean accept( String o ) {
+										return o.toLowerCase().matches(
+												DatabaseSearchDialog.REGEX_OPEN +
+												"gib[0-9]+" +
+												DatabaseSearchDialog.REGEX_CLOSE_FILE
+										);
+									}
+								}
+						);
 
 						// path == null only when user cancels
 						if ( path == null ) {

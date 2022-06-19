@@ -88,17 +88,39 @@ public class DatabaseFileDialog extends Dialog implements SelectionListener
 		this( parent, SWT.NONE );
 	}
 
-	public String open()
+	private void startup()
 	{
 		createGUI();
 		loadItems( regexize( cmbExtensions.getText() ) );
 		shell.open();
+	}
 
+	private void loop()
+	{
 		Display display = shell.getDisplay();
 		while ( !shell.isDisposed() ) {
 			if ( !display.readAndDispatch() )
 				display.sleep();
 		}
+	}
+
+	public String open()
+	{
+		startup();
+		loop();
+
+		return result;
+	}
+
+	public String openThenFilter( Predicate<String> myFilter )
+	{
+		startup();
+
+		filter = myFilter;
+		cmbExtensions.notifyListeners( SWT.Selection, null );
+		tree.notifyListeners( SWT.Selection, null );
+
+		loop();
 
 		return result;
 	}

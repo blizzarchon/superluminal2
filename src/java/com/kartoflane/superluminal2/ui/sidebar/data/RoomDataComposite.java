@@ -20,6 +20,7 @@ import org.eclipse.swt.widgets.Text;
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.enums.OS;
 import com.kartoflane.superluminal2.components.enums.Systems;
+import com.kartoflane.superluminal2.components.interfaces.Predicate;
 import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.ftl.GlowSet;
@@ -30,6 +31,7 @@ import com.kartoflane.superluminal2.mvc.controllers.RoomController;
 import com.kartoflane.superluminal2.mvc.controllers.SystemController;
 import com.kartoflane.superluminal2.ui.BrowseMenu;
 import com.kartoflane.superluminal2.ui.DatabaseFileDialog;
+import com.kartoflane.superluminal2.ui.DatabaseSearchDialog;
 import com.kartoflane.superluminal2.ui.EditorWindow;
 import com.kartoflane.superluminal2.ui.GlowSelectionDialog;
 import com.kartoflane.superluminal2.ui.ImageViewerDialog;
@@ -307,7 +309,18 @@ public class RoomDataComposite extends Composite implements DataComposite
 
 						boolean exit = false;
 						while ( !exit ) {
-							String path = dialog.open();
+							String path = dialog.openThenFilter(
+									new Predicate<String>() {
+										@Override
+										public boolean accept( String o ) {
+											return o.toLowerCase().matches(
+													DatabaseSearchDialog.REGEX_OPEN +
+													"img/ship/interior" +
+													DatabaseSearchDialog.REGEX_CLOSE_FOLDER
+											);
+										}
+									}
+							);
 
 							// path == null only when user cancels
 							if ( path == null ) {

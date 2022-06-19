@@ -103,6 +103,42 @@ public enum Images
 	}
 
 	/**
+	 * @return a regular expression for file names associated with this image type
+	 */
+	public String getFilenamePattern()
+	{
+		switch ( this ) {
+			case SHIELD:
+			case HULL:
+			case FLOOR:
+			case CLOAK:
+				return getSuffix() + "[.]";
+			case THUMBNAIL:
+				return getPrefix();
+			default:
+				return "";
+		}
+	}
+
+	/**
+	 * @return a regular expression for folders associated with this image type
+	 */
+	public String getFolderPattern()
+	{
+		switch ( this ) {
+			case SHIELD:
+			case HULL:
+			case FLOOR:
+			case CLOAK:
+				return "ship";
+			case THUMBNAIL:
+				return "customizeui";
+			default:
+				return "";
+		}
+	}
+
+	/**
 	 * @return the name of the file this image should be exported as
 	 */
 	public String getFilename( ShipObject ship )

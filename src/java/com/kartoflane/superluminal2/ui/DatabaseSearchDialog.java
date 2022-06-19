@@ -29,6 +29,9 @@ public class DatabaseSearchDialog extends AbstractSearchDialog<String>
 	private Text txtParent;
 	private Button btnCase;
 
+	public static final String REGEX_OPEN = "(.+/)*?[^/]*?";
+	public static final String REGEX_CLOSE_FILE = "[^/]*?";
+	public static final String REGEX_CLOSE_FOLDER = "[^/]*?/.*?";
 
 	public DatabaseSearchDialog( Shell parent )
 	{
@@ -75,9 +78,9 @@ public class DatabaseSearchDialog extends AbstractSearchDialog<String>
 
 		Button btnDefault = new Button( compButtons, SWT.NONE );
 		GridData gd_btnDefault = new GridData( SWT.LEFT, SWT.CENTER, false, false, 1, 1 );
-		gd_btnDefault.widthHint = 80;
+		gd_btnDefault.widthHint = 130;
 		btnDefault.setLayoutData( gd_btnDefault );
-		btnDefault.setText( "Default" );
+		btnDefault.setText( "View All Folders" );
 
 		Button btnConfirm = new Button( compButtons, SWT.NONE );
 		GridData gd_btnConfirm = new GridData( SWT.RIGHT, SWT.CENTER, true, false, 1, 1 );

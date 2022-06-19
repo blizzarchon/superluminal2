@@ -13,6 +13,7 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import com.kartoflane.superluminal2.components.interfaces.Predicate;
 import com.kartoflane.superluminal2.mvc.controllers.GibController;
 import com.kartoflane.superluminal2.ui.sidebar.ImagesToolComposite;
 import com.kartoflane.superluminal2.utils.IOUtils;
@@ -111,7 +112,18 @@ public class GibWidget extends Composite
 
 					boolean exit = false;
 					while ( !exit ) {
-						String path = dialog.open();
+						String path = dialog.openThenFilter(
+								new Predicate<String>() {
+									@Override
+									public boolean accept( String o ) {
+										return o.toLowerCase().matches(
+												DatabaseSearchDialog.REGEX_OPEN +
+												"gib[0-9]+" +
+												DatabaseSearchDialog.REGEX_CLOSE_FILE
+										);
+									}
+								}
+						);
 
 						// path == null only when user cancels
 						if ( path == null ) {
