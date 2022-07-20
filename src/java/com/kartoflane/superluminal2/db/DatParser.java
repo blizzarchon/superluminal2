@@ -275,8 +275,8 @@ public class DatParser
 		WeaponList list = new WeaponList( name );
 		for ( Element child : children ) {
 			WeaponObject weapon = db.getWeapon( child.getValue() );
-			if ( weapon != null )
-				list.add( weapon );
+			if ( weapon == null ) return null;
+			list.add( weapon );
 		}
 
 		return list;
@@ -293,8 +293,8 @@ public class DatParser
 		DroneList list = new DroneList( name );
 		for ( Element child : children ) {
 			DroneObject drone = db.getDrone( child.getValue() );
-			if ( drone != null )
-				list.add( drone );
+			if ( drone == null ) return null;
+			list.add( drone );
 		}
 
 		return list;
@@ -311,8 +311,8 @@ public class DatParser
 		CrewList list = new CrewList( name );
 		for ( Element child : children ) {
 			CrewObject crew = db.getCrew( child.getValue() );
-			if ( crew != null )
-				list.add( crew );
+			if ( crew == null ) return null;
+			list.add( crew );
 		}
 
 		return list;
