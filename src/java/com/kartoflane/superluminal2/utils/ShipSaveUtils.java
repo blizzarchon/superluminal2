@@ -22,6 +22,7 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.JDOMParseException;
+import org.jdom2.input.SAXBuilder;
 
 import com.kartoflane.superluminal2.components.Tuple;
 import com.kartoflane.superluminal2.components.enums.Images;
@@ -50,7 +51,6 @@ import com.kartoflane.superluminal2.ftl.SystemObject;
 import com.kartoflane.superluminal2.ftl.WeaponList;
 import com.kartoflane.superluminal2.ui.SaveOptionsDialog.SaveOptions;
 import com.kartoflane.superluminal2.ui.ShipContainer;
-import org.jdom2.input.SAXBuilder;
 
 
 /**
@@ -156,9 +156,11 @@ public class ShipSaveUtils
 		Charset utf8 = Charset.forName( "UTF-8" );
 
 		// Create the files in memory
-		fileName = "data/text_blueprints.xml.append";
-		bytes = IOUtils.readDocument( generateTextXML( ship ) ).getBytes( utf8 );
-		fileMap.put( fileName, bytes );
+		if ( Manager.textTagsUseID ) {
+			fileName = "data/text_blueprints.xml.append";
+			bytes = IOUtils.readDocument( generateTextXML( ship ) ).getBytes( utf8 );
+			fileMap.put( fileName, bytes );
+		}
 
 		if ( ship.isPlayerShip() )
 		{
@@ -375,7 +377,12 @@ public class ShipSaveUtils
 		if ( text == null )
 			throw new IllegalArgumentException( "Text must not be null." );
 
-		destElement.setText( text.getTextValue() );
+		if ( Manager.textTagsUseID ) {
+			destElement.setAttribute( "id", text.getTextId() );
+		}
+		else {
+			destElement.setText( text.getTextValue() );
+		}
 	}
 
 	private static Element createNamedTextSourceElement( IDeferredText text )

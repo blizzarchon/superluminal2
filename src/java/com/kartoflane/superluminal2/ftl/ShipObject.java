@@ -28,9 +28,9 @@ public class ShipObject extends GameObject
 	private String layoutSlot = "A";
 	private String img = "myship";
 
-	private IDeferredText shipClass = new VerbatimText( "Ship Class" );
-	private IDeferredText shipName = new VerbatimText( "The Nameless One" );
-	private IDeferredText shipDescription = new VerbatimText( "This ship is completely devoid of any description whatsoever!" );
+	private IDeferredText shipClass = new DefaultDeferredText("text_" + blueprintName + "_class", "Ship Class" );
+	private IDeferredText shipName = new DefaultDeferredText( "text_" + blueprintName + "_name", "The Nameless One" );
+	private IDeferredText shipDescription = new DefaultDeferredText( "text_" + blueprintName + "_desc", "This ship is completely devoid of any description whatsoever!" );
 
 	private TreeSet<RoomObject> rooms;
 	private HashSet<DoorObject> doors;
@@ -121,14 +121,6 @@ public class ShipObject extends GameObject
 		{
 			crewList.add( Database.DEFAULT_CREW_OBJ );
 		}
-		if ( blueprintName.endsWith( "_2" ) )
-		{
-			layoutSlot = "B";
-		}
-		else if ( blueprintName.endsWith( "_3" ) )
-		{
-			layoutSlot = "C";
-		}
 	}
 
 	public ShipObject( boolean isPlayer )
@@ -155,11 +147,11 @@ public class ShipObject extends GameObject
 			droneByList = true;
 		}
 		
-		if (blueprintName.endsWith("_2") || blueprintName.endsWith("_B"))
+		if ( blueprintName.endsWith( "_2" ) )
 		{
 			layoutSlot = "B";
 		}
-		else if (blueprintName.endsWith("_3") || blueprintName.endsWith("_C"))
+		else if ( blueprintName.endsWith( "_3" ) )
 		{
 			layoutSlot = "C";
 		}
@@ -169,7 +161,9 @@ public class ShipObject extends GameObject
 
 	public void update()
 	{
-
+		shipClass = shipClass.derive( "text_" + blueprintName + "_class" );
+		shipName = shipName.derive( "text_" + blueprintName + "_name" );
+		shipDescription = shipDescription.derive( "text_" + blueprintName + "_desc" );
 	}
 
 	public boolean isPlayerShip()

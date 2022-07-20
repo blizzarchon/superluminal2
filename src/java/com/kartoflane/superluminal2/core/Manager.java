@@ -85,6 +85,8 @@ public abstract class Manager
 	public static boolean shownSlotWarning = false;
 	public static boolean shownArtilleryWarning = false;
 
+	public static boolean textTagsUseID = false;
+
 	// Runtime variables
 	public static boolean leftMouseDown = false;
 	public static boolean midMouseDown = false;

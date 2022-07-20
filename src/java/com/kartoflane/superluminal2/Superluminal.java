@@ -171,6 +171,7 @@ public class Superluminal
 		Manager.allowDoorOverlap = appConfig.getPropertyAsBoolean( SuperluminalConfig.ALLOW_OVERLAP_DOOR, false );
 		Manager.resetDoorLinksOnMove = appConfig.getPropertyAsBoolean( SuperluminalConfig.RESET_LINKS, true );
 		Manager.mouseShipRelative = appConfig.getPropertyAsBoolean( SuperluminalConfig.MOUSE_SHIP_RELATIVE, false );
+		Manager.textTagsUseID = appConfig.getPropertyAsBoolean( SuperluminalConfig.TEXT_USES_ID, false );
 
 		Manager.shownSlotWarning = appConfig.getPropertyAsBoolean( SuperluminalConfig.SLOT_WARNING, false );
 		Manager.shownArtilleryWarning = appConfig.getPropertyAsBoolean( SuperluminalConfig.ARTILLERY_WARNING, false );

@@ -29,6 +29,7 @@ public class SuperluminalConfig extends Properties
 	public static final String ALLOW_OVERLAP_DOOR =		"allowDoorOverlap";
 	public static final String RESET_LINKS =			"resetDoorLinksOnMove";
 	public static final String MOUSE_SHIP_RELATIVE =	"pointerRelativeToShip";
+	public static final String TEXT_USES_ID =			"textTagsUseID";
 
 	public static final String SLOT_WARNING =			"shownSlotWarning";
 	public static final String ARTILLERY_WARNING =		"shownArtilleryWarning";
@@ -90,22 +91,25 @@ public class SuperluminalConfig extends Properties
 	 */
 	public void setCurrent()
 	{
-		setProperty( START_MAX, "" + Manager.startMaximised );
-		setProperty( SIDEBAR_SIDE, "" + Manager.sidebarOnRightSide );
-		setProperty( CHECK_UPDATES, "" + Manager.checkUpdates );
-		setProperty( CLOSE_LOADER, "" + Manager.closeLoader );
+		// Behaviour
 		setProperty( ALLOW_OVERLAP, "" + Manager.allowRoomOverlap );
 		setProperty( ALLOW_OVERLAP_DOOR, "" + Manager.allowDoorOverlap );
+		setProperty( CLOSE_LOADER, "" + Manager.closeLoader );
 		setProperty( RESET_LINKS, "" + Manager.resetDoorLinksOnMove );
-		setProperty( MOUSE_SHIP_RELATIVE, "" + Manager.mouseShipRelative );
-
-		setProperty( SLOT_WARNING, "" + Manager.shownSlotWarning );
-		setProperty( ARTILLERY_WARNING, "" + Manager.shownArtilleryWarning );
-
-		setProperty( FTL_RESOURCE, Manager.resourcePath );
+		setProperty( TEXT_USES_ID, "" + Manager.textTagsUseID );
+		// Config
+		setProperty( CHECK_UPDATES, "" + Manager.checkUpdates );
 		setProperty( SAVE_GEOMETRY, "" + Manager.rememberGeometry );
 		if ( Manager.rememberGeometry && !Manager.startMaximised )
 			setProperty( GEOMETRY, Manager.windowSize.x + "," + Manager.windowSize.y );
+		setProperty( START_MAX, "" + Manager.startMaximised );
+		setProperty( SIDEBAR_SIDE, "" + Manager.sidebarOnRightSide );
+		setProperty( MOUSE_SHIP_RELATIVE, "" + Manager.mouseShipRelative );
+		// Warnings that show up once. Once dismissed, don't show up again.
+		setProperty( SLOT_WARNING, "" + Manager.shownSlotWarning );
+		setProperty( ARTILLERY_WARNING, "" + Manager.shownArtilleryWarning );
+		// Path to FTL's resources
+		setProperty( FTL_RESOURCE, Manager.resourcePath );
 	}
 
 	public void writeConfig() throws IOException
@@ -127,6 +131,8 @@ public class SuperluminalConfig extends Properties
 				+ " - If true, door collision will be disabled, allowing doors to be placed on top of each other.\n";
 			configComments += " " + MOUSE_SHIP_RELATIVE
 				+ " - If true, the mouse tracker will display the pointer's location relative to the ship's origin.\n";
+			configComments += " " + TEXT_USES_ID
+				+ " - If true, during ship save, ship name, class and description will be placed in a separate file.\n";
 			configComments += "\n";
 			configComments += " " + GEOMETRY + " - Last saved size of the main window.\n";
 			configComments += "\n";

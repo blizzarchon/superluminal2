@@ -46,19 +46,24 @@ public class SettingsDialog
 	private Listener keyListener = null;
 
 	private Shell shell = null;
+	// Behaviour tab
 	private Button btnOverlap;
+	private Button btnOverlapDoors;
 	private Button btnLoader;
+	private Button btnResetLinks;
+	private Button btnUseID;
+	// Config tab
 	private Button btnUpdates;
 	private Button btnGeometry;
 	private Button btnMaximise;
 	private Button btnSidebar;
-	private Button btnCancel;
-	private Button btnResetLinks;
+	private Button btnMouse;
+	// Keybinds tab
 	private HashMap<Hotkeys, Button> hotkeyButton = new LinkedHashMap<Hotkeys, Button>();
 	private Composite compKeybinds;
 	private Button btnUnbind;
-	private Button btnOverlapDoors;
-	private Button btnMouse;
+	// Exit settings dialog
+	private Button btnCancel;
 
 
 	public SettingsDialog( Shell parent )
@@ -132,6 +137,22 @@ public class SettingsDialog
 		Label lblResetLinks = new Label( compBehaviour, SWT.WRAP );
 		lblResetLinks.setLayoutData( new GridData( SWT.FILL, SWT.TOP, true, false, 1, 1 ) );
 		lblResetLinks.setText( "Resets the door links when a door is moved, so that no accidental connections will be made." );
+
+		Label separator04 = new Label( compBehaviour, SWT.SEPARATOR | SWT.HORIZONTAL );
+		separator04.setLayoutData( new GridData( SWT.FILL, SWT.TOP, false, false, 1, 1 ) );
+
+		btnUseID = new Button( compBehaviour, SWT.CHECK );
+		btnUseID.setLayoutData( new GridData( SWT.LEFT, SWT.TOP, false, false, 1, 1 ) );
+		btnUseID.setText( "Use ID System For Text Field Data" );
+
+		Label lblUseID = new Label( compBehaviour, SWT.WRAP );
+		lblUseID.setLayoutData( new GridData( SWT.FILL, SWT.TOP, true, false, 1, 1 ) );
+		lblUseID.setText(
+				"This is a change to the underlying xml format. " +
+				"Ship name, class and description will be stored in a separate file instead of with the other ship data. " +
+				"This can be useful for future translation or simply seeing all the text in its own file."
+		);
+
 		scBehaviour.setContent( compBehaviour );
 
 		/*
@@ -317,6 +338,7 @@ public class SettingsDialog
 					Manager.allowDoorOverlap = btnOverlapDoors.getSelection();
 					Manager.closeLoader = btnLoader.getSelection();
 					Manager.resetDoorLinksOnMove = btnResetLinks.getSelection();
+					Manager.textTagsUseID = btnUseID.getSelection();
 
 					// Config
 					Manager.checkUpdates = btnUpdates.getSelection();
@@ -514,6 +536,7 @@ public class SettingsDialog
 		btnOverlapDoors.setSelection( Manager.allowDoorOverlap );
 		btnLoader.setSelection( Manager.closeLoader );
 		btnResetLinks.setSelection( Manager.resetDoorLinksOnMove );
+		btnUseID.setSelection( Manager.textTagsUseID );
 
 		// Config
 		btnGeometry.setSelection( Manager.rememberGeometry );
