@@ -20,11 +20,12 @@ import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.Hotkey;
 import com.kartoflane.superluminal2.components.enums.WeaponTypes;
 import com.kartoflane.superluminal2.components.interfaces.Predicate;
+import com.kartoflane.superluminal2.components.interfaces.WeaponLike;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 
 
-public class WeaponSearchDialog extends AbstractSearchDialog<WeaponObject>
+public class WeaponSearchDialog extends AbstractSearchDialog<WeaponLike>
 {
 	private static final int defaultWidth = 400;
 
@@ -200,9 +201,9 @@ public class WeaponSearchDialog extends AbstractSearchDialog<WeaponObject>
 	}
 
 	@Override
-	protected Predicate<WeaponObject> getFilter()
+	protected Predicate<WeaponLike> getFilter()
 	{
-		return new Predicate<WeaponObject>() {
+		return new Predicate<WeaponLike>() {
 			// All are immutable
 			private WeaponTypes type = WeaponSearchDialog.this.type;
 			private boolean caseSensitive = WeaponSearchDialog.this.btnCase.getSelection();
@@ -212,10 +213,11 @@ public class WeaponSearchDialog extends AbstractSearchDialog<WeaponObject>
 			private String desc = WeaponSearchDialog.this.txtDesc.getText();
 
 
-			public boolean accept( WeaponObject o )
+			public boolean accept( WeaponLike o )
 			{
-				if ( type != null ) {
-					if ( o.getType() != type )
+				if ( type != null && o instanceof WeaponObject ) {
+					WeaponObject w = (WeaponObject) o;
+					if ( w.getType() != type )
 						return false;
 				}
 
@@ -223,15 +225,21 @@ public class WeaponSearchDialog extends AbstractSearchDialog<WeaponObject>
 
 				if ( caseSensitive ) {
 					result &= o.getBlueprintName().contains( blue );
-					result &= o.getTitle().toString().contains( title );
-					result &= o.getShortName().toString().contains( shortT );
-					result &= o.getDescription().toString().contains( desc );
+					if ( o instanceof WeaponObject ) {
+						WeaponObject w = (WeaponObject) o;
+						result &= w.getTitle().toString().contains( title );
+						result &= w.getShortName().toString().contains( shortT );
+						result &= w.getDescription().toString().contains( desc );
+					}
 				}
 				else {
 					result &= o.getBlueprintName().toLowerCase().contains( blue.toLowerCase() );
-					result &= o.getTitle().toString().toLowerCase().contains( title.toLowerCase() );
-					result &= o.getShortName().toString().toLowerCase().contains( shortT.toLowerCase() );
-					result &= o.getDescription().toString().toLowerCase().contains( desc.toLowerCase() );
+					if ( o instanceof WeaponObject ) {
+						WeaponObject w = (WeaponObject) o;
+						result &= w.getTitle().toString().toLowerCase().contains( title.toLowerCase() );
+						result &= w.getShortName().toString().toLowerCase().contains( shortT.toLowerCase() );
+						result &= w.getDescription().toString().toLowerCase().contains( desc.toLowerCase() );
+					}
 				}
 
 				return result;

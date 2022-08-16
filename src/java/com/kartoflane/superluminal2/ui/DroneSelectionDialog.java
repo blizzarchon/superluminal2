@@ -53,8 +53,8 @@ public class DroneSelectionDialog
 	private static final int defaultNameTabWidth = 150;
 	private static final int minTreeWidth = defaultBlueTabWidth + defaultNameTabWidth + 5;
 	private static final int defaultDataWidth = 200;
-	private static final Predicate<DroneObject> defaultFilter = new Predicate<DroneObject>() {
-		public boolean accept( DroneObject object )
+	private static final Predicate<DroneLike> defaultFilter = new Predicate<DroneLike>() {
+		public boolean accept( DroneLike object )
 		{
 			return true;
 		}
@@ -70,7 +70,7 @@ public class DroneSelectionDialog
 	private boolean byListMode = false;
 	private boolean sortByBlueprint = true;
 	private HashMap<DroneTypes, TreeItem> treeItemMap = null;
-	private Predicate<DroneObject> filter = defaultFilter;
+	private Predicate<DroneLike> filter = defaultFilter;
 
 	private Shell shell = null;
 	private Text txtDesc;
@@ -271,7 +271,7 @@ public class DroneSelectionDialog
 				public void widgetSelected( SelectionEvent e )
 				{
 					DroneSearchDialog dsDialog = new DroneSearchDialog( shell );
-					Predicate<DroneObject> result = dsDialog.open();
+					Predicate<DroneLike> result = dsDialog.open();
 
 					if ( result == AbstractSearchDialog.RESULT_DEFAULT ) {
 						filter = defaultFilter;
@@ -552,9 +552,9 @@ public class DroneSelectionDialog
 
 		for ( DroneTypes type : DroneTypes.getPlayableDroneTypes() ) {
 			TreeItem typeItem = treeItemMap.get( type );
-			DroneIterator it = new DroneIterator( Database.getInstance().getDronesByType( type ), sortByBlueprint );
+			DroneIterator it = new DroneIterator( new ArrayList<DroneLike>( Database.getInstance().getDronesByType( type ) ), sortByBlueprint );
 			for ( it.first(); it.hasNext(); it.next() ) {
-				DroneObject drone = it.current();
+				DroneObject drone = (DroneObject) it.current();
 
 				trtm = new TreeItem( typeItem, SWT.NONE );
 				trtm.setText( 0, drone.getBlueprintName() );
@@ -597,7 +597,10 @@ public class DroneSelectionDialog
 
 		TreeItem selection = null;
 
-		for ( DroneList list : Database.getInstance().getDroneLists() ) {
+		DroneIterator it = new DroneIterator( new ArrayList<DroneLike>( Database.getInstance().getDroneLists() ), sortByBlueprint );
+		for ( it.first(); it.hasNext(); it.next() ) {
+			DroneList list = (DroneList) it.current();
+
 			trtm = new TreeItem( tree, SWT.NONE );
 			trtm.setText( list.getBlueprintName() );
 			trtm.setData( list );
@@ -663,15 +666,15 @@ public class DroneSelectionDialog
 	}
 
 
-	private class DroneIterator implements Iterator<DroneObject>
+	private class DroneIterator implements Iterator<DroneLike>
 	{
-		private final ArrayList<DroneObject> list;
+		private final ArrayList<DroneLike> list;
 		private final DroneComparator comparator;
 
-		private DroneObject current = null;
+		private DroneLike current = null;
 
 
-		public DroneIterator( ArrayList<DroneObject> list, boolean byBlueprint )
+		public DroneIterator( ArrayList<DroneLike> list, boolean byBlueprint )
 		{
 			comparator = new DroneComparator( byBlueprint );
 
@@ -679,18 +682,18 @@ public class DroneSelectionDialog
 				this.list = list;
 			}
 			else {
-				this.list = new ArrayList<DroneObject>();
-				for ( DroneObject d : list ) {
+				this.list = new ArrayList<DroneLike>();
+				for ( DroneLike d : list ) {
 					if ( filter.accept( d ) )
 						this.list.add( d );
 				}
 			}
 		}
 
-		private DroneObject getSmallestElement()
+		private DroneLike getSmallestElement()
 		{
-			DroneObject result = null;
-			for ( DroneObject drone : list ) {
+			DroneLike result = null;
+			for ( DroneLike drone : list ) {
 				if ( result == null || comparator.compare( drone, result ) < 0 )
 					result = drone;
 			}
@@ -703,7 +706,7 @@ public class DroneSelectionDialog
 			current = getSmallestElement();
 		}
 
-		public DroneObject current()
+		public DroneLike current()
 		{
 			return current;
 		}
@@ -715,7 +718,7 @@ public class DroneSelectionDialog
 		}
 
 		@Override
-		public DroneObject next()
+		public DroneLike next()
 		{
 			remove();
 			current = getSmallestElement();
@@ -729,7 +732,7 @@ public class DroneSelectionDialog
 		}
 	}
 
-	private class DroneComparator implements Comparator<DroneObject>
+	private class DroneComparator implements Comparator<DroneLike>
 	{
 		private final boolean byBlueprint;
 
@@ -740,14 +743,19 @@ public class DroneSelectionDialog
 		}
 
 		@Override
-		public int compare( DroneObject o1, DroneObject o2 )
+		public int compare( DroneLike o1, DroneLike o2 )
 		{
 			if ( byBlueprint ) {
 				// Just compare the two blueprints together for alphanumerical ordering
 				return o1.getBlueprintName().compareTo( o2.getBlueprintName() );
 			}
 			else {
-				int result = o1.getTitle().compareTo( o2.getTitle() );
+				int result = 0;
+				if ( o1 instanceof DroneObject && o2 instanceof DroneObject ) {
+					DroneObject object1 = (DroneObject) o1;
+					DroneObject object2 = (DroneObject) o2;
+					result = object1.getTitle().compareTo( object2.getTitle() );
+				}
 				if ( result == 0 ) // If titles are the same, fall back to sorting by blueprint
 					result = o1.getBlueprintName().compareTo( o2.getBlueprintName() );
 				return result;

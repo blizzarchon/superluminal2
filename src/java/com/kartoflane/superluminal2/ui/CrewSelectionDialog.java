@@ -51,8 +51,8 @@ public class CrewSelectionDialog
 	private static final int defaultNameTabWidth = 150;
 	private static final int minTreeWidth = defaultBlueTabWidth + defaultNameTabWidth + 5;
 	private static final int defaultDataWidth = 200;
-	private static final Predicate<CrewObject> defaultFilter = new Predicate<CrewObject>() {
-		public boolean accept( CrewObject object )
+	private static final Predicate<CrewLike> defaultFilter = new Predicate<CrewLike>() {
+		public boolean accept( CrewLike object )
 		{
 			return true;
 		}
@@ -66,7 +66,7 @@ public class CrewSelectionDialog
 	private int response = SWT.NO;
 
 	private boolean sortByBlueprint = true;
-	private Predicate<CrewObject> filter = defaultFilter;
+	private Predicate<CrewLike> filter = defaultFilter;
 
 	private Shell shell = null;
 	private Text txtDesc;
@@ -263,7 +263,7 @@ public class CrewSelectionDialog
 				public void widgetSelected( SelectionEvent e )
 				{
 					CrewSearchDialog csDialog = new CrewSearchDialog( shell );
-					Predicate<CrewObject> result = csDialog.open();
+					Predicate<CrewLike> result = csDialog.open();
 
 					if ( result == AbstractSearchDialog.RESULT_DEFAULT ) {
 						filter = defaultFilter;
@@ -482,9 +482,9 @@ public class CrewSelectionDialog
 
 		TreeItem selection = null;
 
-		CrewIterator it = new CrewIterator( Database.getInstance().getCrews(), sortByBlueprint );
+		CrewIterator it = new CrewIterator( new ArrayList<CrewLike>( Database.getInstance().getCrews() ), sortByBlueprint );
 		for ( it.first(); it.hasNext(); it.next() ) {
-			CrewObject crew = it.current();
+			CrewObject crew = (CrewObject) it.current();
 
 			trtm = new TreeItem( tree, SWT.NONE );
 			trtm.setText( 0, crew.getBlueprintName() );
@@ -517,7 +517,10 @@ public class CrewSelectionDialog
 
 		TreeItem selection = null;
 
-		for ( CrewList list : Database.getInstance().getCrewLists() ) {
+		CrewIterator it = new CrewIterator( new ArrayList<CrewLike>( Database.getInstance().getCrewLists() ), sortByBlueprint );
+		for ( it.first(); it.hasNext(); it.next() ) {
+			CrewList list = (CrewList) it.current();
+
 			trtm = new TreeItem( tree, SWT.NONE );
 			trtm.setText( list.getBlueprintName() );
 			trtm.setData( list );
@@ -581,15 +584,15 @@ public class CrewSelectionDialog
 	}
 
 
-	private class CrewIterator implements Iterator<CrewObject>
+	private class CrewIterator implements Iterator<CrewLike>
 	{
-		private final ArrayList<CrewObject> list;
+		private final ArrayList<CrewLike> list;
 		private final CrewComparator comparator;
 
-		private CrewObject current = null;
+		private CrewLike current = null;
 
 
-		public CrewIterator( ArrayList<CrewObject> list, boolean byBlueprint )
+		public CrewIterator( ArrayList<CrewLike> list, boolean byBlueprint )
 		{
 			comparator = new CrewComparator( byBlueprint );
 
@@ -597,18 +600,18 @@ public class CrewSelectionDialog
 				this.list = list;
 			}
 			else {
-				this.list = new ArrayList<CrewObject>();
-				for ( CrewObject a : list ) {
+				this.list = new ArrayList<CrewLike>();
+				for ( CrewLike a : list ) {
 					if ( filter.accept( a ) )
 						this.list.add( a );
 				}
 			}
 		}
 
-		private CrewObject getSmallestElement()
+		private CrewLike getSmallestElement()
 		{
-			CrewObject result = null;
-			for ( CrewObject crew : list ) {
+			CrewLike result = null;
+			for ( CrewLike crew : list ) {
 				if ( result == null || comparator.compare( crew, result ) < 0 )
 					result = crew;
 			}
@@ -621,7 +624,7 @@ public class CrewSelectionDialog
 			current = getSmallestElement();
 		}
 
-		public CrewObject current()
+		public CrewLike current()
 		{
 			return current;
 		}
@@ -633,7 +636,7 @@ public class CrewSelectionDialog
 		}
 
 		@Override
-		public CrewObject next()
+		public CrewLike next()
 		{
 			remove();
 			current = getSmallestElement();
@@ -647,7 +650,7 @@ public class CrewSelectionDialog
 		}
 	}
 
-	private class CrewComparator implements Comparator<CrewObject>
+	private class CrewComparator implements Comparator<CrewLike>
 	{
 		private final boolean byBlueprint;
 
@@ -658,14 +661,19 @@ public class CrewSelectionDialog
 		}
 
 		@Override
-		public int compare( CrewObject o1, CrewObject o2 )
+		public int compare( CrewLike o1, CrewLike o2 )
 		{
 			if ( byBlueprint ) {
 				// Just compare the two blueprints together for alphanumerical ordering
 				return o1.getBlueprintName().compareTo( o2.getBlueprintName() );
 			}
 			else {
-				int result = o1.getTitle().compareTo( o2.getTitle() );
+				int result = 0;
+				if ( o1 instanceof CrewObject && o2 instanceof CrewObject ) {
+					CrewObject object1 = (CrewObject) o1;
+					CrewObject object2 = (CrewObject) o2;
+					result = object1.getTitle().compareTo( object2.getTitle() );
+				}
 				if ( result == 0 ) // If titles are the same, fall back to sorting by blueprint
 					result = o1.getBlueprintName().compareTo( o2.getBlueprintName() );
 				return result;

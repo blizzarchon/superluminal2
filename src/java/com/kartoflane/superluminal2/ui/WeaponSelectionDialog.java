@@ -58,8 +58,8 @@ public class WeaponSelectionDialog
 	private static final int defaultNameTabWidth = 150;
 	private static final int minTreeWidth = defaultBlueTabWidth + defaultNameTabWidth + 5;
 	private static final int defaultDataWidth = 250;
-	private static final Predicate<WeaponObject> defaultFilter = new Predicate<WeaponObject>() {
-		public boolean accept( WeaponObject object )
+	private static final Predicate<WeaponLike> defaultFilter = new Predicate<WeaponLike>() {
+		public boolean accept( WeaponLike object )
 		{
 			return true;
 		}
@@ -76,7 +76,7 @@ public class WeaponSelectionDialog
 	private boolean sortByBlueprint = true;
 	private HashMap<WeaponTypes, TreeItem> treeItemMap = null;
 	private Preview preview = null;
-	private Predicate<WeaponObject> filter = defaultFilter;
+	private Predicate<WeaponLike> filter = defaultFilter;
 
 	private Shell shell = null;
 	private Text txtDesc;
@@ -289,7 +289,7 @@ public class WeaponSelectionDialog
 				public void widgetSelected( SelectionEvent e )
 				{
 					WeaponSearchDialog wsDialog = new WeaponSearchDialog( shell );
-					Predicate<WeaponObject> result = wsDialog.open();
+					Predicate<WeaponLike> result = wsDialog.open();
 
 					if ( result == AbstractSearchDialog.RESULT_DEFAULT ) {
 						filter = defaultFilter;
@@ -575,9 +575,9 @@ public class WeaponSelectionDialog
 
 		for ( WeaponTypes type : WeaponTypes.values() ) {
 			TreeItem typeItem = treeItemMap.get( type );
-			WeaponIterator it = new WeaponIterator( Database.getInstance().getWeaponsByType( type ), sortByBlueprint );
+			WeaponIterator it = new WeaponIterator( new ArrayList<WeaponLike>( Database.getInstance().getWeaponsByType( type ) ), sortByBlueprint );
 			for ( it.first(); it.hasNext(); it.next() ) {
-				WeaponObject weapon = it.current();
+				WeaponObject weapon = (WeaponObject) it.current();
 
 				trtm = new TreeItem( typeItem, SWT.NONE );
 				trtm.setText( 0, weapon.getBlueprintName() );
@@ -615,7 +615,10 @@ public class WeaponSelectionDialog
 
 		TreeItem selection = null;
 
-		for ( WeaponList list : Database.getInstance().getWeaponLists() ) {
+		WeaponIterator it = new WeaponIterator( new ArrayList<WeaponLike>( Database.getInstance().getWeaponLists() ), sortByBlueprint );
+		for ( it.first(); it.hasNext(); it.next() ) {
+			WeaponList list = (WeaponList) it.current();
+
 			trtm = new TreeItem( tree, SWT.NONE );
 			trtm.setText( list.getBlueprintName() );
 			trtm.setData( list );
@@ -702,15 +705,15 @@ public class WeaponSelectionDialog
 	}
 
 
-	private class WeaponIterator implements Iterator<WeaponObject>
+	private class WeaponIterator implements Iterator<WeaponLike>
 	{
-		private final ArrayList<WeaponObject> list;
+		private final ArrayList<WeaponLike> list;
 		private final WeaponComparator comparator;
 
-		private WeaponObject current = null;
+		private WeaponLike current = null;
 
 
-		public WeaponIterator( ArrayList<WeaponObject> list, boolean byBlueprint )
+		public WeaponIterator( ArrayList<WeaponLike> list, boolean byBlueprint )
 		{
 			comparator = new WeaponComparator( byBlueprint );
 
@@ -718,18 +721,18 @@ public class WeaponSelectionDialog
 				this.list = list;
 			}
 			else {
-				this.list = new ArrayList<WeaponObject>();
-				for ( WeaponObject w : list ) {
+				this.list = new ArrayList<WeaponLike>();
+				for ( WeaponLike w : list ) {
 					if ( filter.accept( w ) )
 						this.list.add( w );
 				}
 			}
 		}
 
-		private WeaponObject getSmallestElement()
+		private WeaponLike getSmallestElement()
 		{
-			WeaponObject result = null;
-			for ( WeaponObject weapon : list ) {
+			WeaponLike result = null;
+			for ( WeaponLike weapon : list ) {
 				if ( result == null || comparator.compare( weapon, result ) < 0 )
 					result = weapon;
 			}
@@ -742,7 +745,7 @@ public class WeaponSelectionDialog
 			current = getSmallestElement();
 		}
 
-		public WeaponObject current()
+		public WeaponLike current()
 		{
 			return current;
 		}
@@ -754,7 +757,7 @@ public class WeaponSelectionDialog
 		}
 
 		@Override
-		public WeaponObject next()
+		public WeaponLike next()
 		{
 			remove();
 			current = getSmallestElement();
@@ -768,7 +771,7 @@ public class WeaponSelectionDialog
 		}
 	}
 
-	private class WeaponComparator implements Comparator<WeaponObject>
+	private class WeaponComparator implements Comparator<WeaponLike>
 	{
 		private final boolean byBlueprint;
 
@@ -779,14 +782,19 @@ public class WeaponSelectionDialog
 		}
 
 		@Override
-		public int compare( WeaponObject o1, WeaponObject o2 )
+		public int compare( WeaponLike o1, WeaponLike o2 )
 		{
 			if ( byBlueprint ) {
 				// Just compare the two blueprints together for alphanumerical ordering
 				return o1.getBlueprintName().compareTo( o2.getBlueprintName() );
 			}
 			else {
-				int result = o1.getTitle().compareTo( o2.getTitle() );
+				int result = 0;
+				if ( o1 instanceof WeaponObject && o2 instanceof WeaponObject ) {
+					WeaponObject object1 = (WeaponObject) o1;
+					WeaponObject object2 = (WeaponObject) o2;
+					result = object1.getTitle().compareTo( object2.getTitle() );
+				}
 				if ( result == 0 ) // If titles are the same, fall back to sorting by blueprint
 					result = o1.getBlueprintName().compareTo( o2.getBlueprintName() );
 				return result;

@@ -17,12 +17,13 @@ import org.eclipse.swt.widgets.Text;
 
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.Hotkey;
+import com.kartoflane.superluminal2.components.interfaces.CrewLike;
 import com.kartoflane.superluminal2.components.interfaces.Predicate;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.ftl.CrewObject;
 
 
-public class CrewSearchDialog extends AbstractSearchDialog<CrewObject>
+public class CrewSearchDialog extends AbstractSearchDialog<CrewLike>
 {
 	private static final int defaultWidth = 400;
 
@@ -159,28 +160,34 @@ public class CrewSearchDialog extends AbstractSearchDialog<CrewObject>
 	}
 
 	@Override
-	protected Predicate<CrewObject> getFilter()
+	protected Predicate<CrewLike> getFilter()
 	{
-		return new Predicate<CrewObject>() {
+		return new Predicate<CrewLike>() {
 			private boolean caseSensitive = CrewSearchDialog.this.btnCase.getSelection();
 			private String blue = CrewSearchDialog.this.txtBlueprint.getText();
 			private String title = CrewSearchDialog.this.txtTitle.getText();
 			private String desc = CrewSearchDialog.this.txtDesc.getText();
 
 
-			public boolean accept( CrewObject o )
+			public boolean accept( CrewLike o )
 			{
 				boolean result = true;
 
 				if ( caseSensitive ) {
 					result &= o.getBlueprintName().contains( blue );
-					result &= o.getTitle().toString().contains( title );
-					result &= o.getDescription().toString().contains( desc );
+					if ( o instanceof CrewObject ) {
+						CrewObject co = (CrewObject) o;
+						result &= co.getTitle().toString().contains( title );
+						result &= co.getDescription().toString().contains( desc );
+					}
 				}
 				else {
 					result &= o.getBlueprintName().toLowerCase().contains( blue.toLowerCase() );
-					result &= o.getTitle().toString().toLowerCase().contains( title.toLowerCase() );
-					result &= o.getDescription().toString().toLowerCase().contains( desc.toLowerCase() );
+					if ( o instanceof CrewObject ) {
+						CrewObject co = (CrewObject) o;
+						result &= co.getTitle().toString().toLowerCase().contains( title.toLowerCase() );
+						result &= co.getDescription().toString().toLowerCase().contains( desc.toLowerCase() );
+					}
 				}
 
 				return result;

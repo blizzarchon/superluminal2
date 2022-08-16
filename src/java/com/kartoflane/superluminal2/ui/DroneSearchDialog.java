@@ -19,12 +19,13 @@ import org.eclipse.swt.widgets.Text;
 import com.kartoflane.superluminal2.Superluminal;
 import com.kartoflane.superluminal2.components.Hotkey;
 import com.kartoflane.superluminal2.components.enums.DroneTypes;
+import com.kartoflane.superluminal2.components.interfaces.DroneLike;
 import com.kartoflane.superluminal2.components.interfaces.Predicate;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.ftl.DroneObject;
 
 
-public class DroneSearchDialog extends AbstractSearchDialog<DroneObject>
+public class DroneSearchDialog extends AbstractSearchDialog<DroneLike>
 {
 	private static final int defaultWidth = 400;
 
@@ -200,9 +201,9 @@ public class DroneSearchDialog extends AbstractSearchDialog<DroneObject>
 	}
 
 	@Override
-	protected Predicate<DroneObject> getFilter()
+	protected Predicate<DroneLike> getFilter()
 	{
-		return new Predicate<DroneObject>() {
+		return new Predicate<DroneLike>() {
 			// All are immutable
 			private DroneTypes type = DroneSearchDialog.this.type;
 			private boolean caseSensitive = DroneSearchDialog.this.btnCase.getSelection();
@@ -212,10 +213,11 @@ public class DroneSearchDialog extends AbstractSearchDialog<DroneObject>
 			private String desc = DroneSearchDialog.this.txtDesc.getText();
 
 
-			public boolean accept( DroneObject o )
+			public boolean accept( DroneLike o )
 			{
-				if ( type != null ) {
-					if ( o.getType() != type )
+				if ( type != null && o instanceof DroneObject ) {
+					DroneObject d = (DroneObject) o;
+					if ( d.getType() != type )
 						return false;
 				}
 
@@ -223,15 +225,21 @@ public class DroneSearchDialog extends AbstractSearchDialog<DroneObject>
 
 				if ( caseSensitive ) {
 					result &= o.getBlueprintName().contains( blue );
-					result &= o.getTitle().toString().contains( title );
-					result &= o.getShortName().toString().contains( shortT );
-					result &= o.getDescription().toString().contains( desc );
+					if ( o instanceof DroneObject ) {
+						DroneObject d = (DroneObject) o;
+						result &= d.getTitle().toString().contains( title );
+						result &= d.getShortName().toString().contains( shortT );
+						result &= d.getDescription().toString().contains( desc );
+					}
 				}
 				else {
 					result &= o.getBlueprintName().toLowerCase().contains( blue.toLowerCase() );
-					result &= o.getTitle().toString().toLowerCase().contains( title.toLowerCase() );
-					result &= o.getShortName().toString().toLowerCase().contains( shortT.toLowerCase() );
-					result &= o.getDescription().toString().toLowerCase().contains( desc.toLowerCase() );
+					if ( o instanceof DroneObject ) {
+						DroneObject d = (DroneObject) o;
+						result &= d.getTitle().toString().toLowerCase().contains( title.toLowerCase() );
+						result &= d.getShortName().toString().toLowerCase().contains( shortT.toLowerCase() );
+						result &= d.getDescription().toString().toLowerCase().contains( desc.toLowerCase() );
+					}
 				}
 
 				return result;
