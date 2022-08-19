@@ -1383,7 +1383,8 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 	{
 		Control c = UIUtils.getDisplay().getFocusControl();
 		boolean result = c == txtClass || c == spHealth || c == spPower || c == spMissiles || c == spWeaponSlots ||
-			c == spDrones || c == spDroneSlots || c == txtLayout || c == txtImage;
+			c == spDrones || c == spDroneSlots || c == txtLayout || c == txtImage ||
+			c == spArtillerySlots || c == spCrew || c == spHiddenAugments;
 		if ( container.getShipController().isPlayerShip() ) {
 			result |= c == txtName || c == txtDesc;
 		}

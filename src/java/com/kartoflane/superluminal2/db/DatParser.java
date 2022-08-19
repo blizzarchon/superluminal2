@@ -502,15 +502,16 @@ public class DatParser
 				}
 			}
 		}
-		// discard races that don't show up in hyperspace.xml
+		// prevent fake crewBlueprints from showing up as valid choices
 		if ( raceClone == null ) {
-			return null;
+			if ( blueprintName.matches( "human|engi|energy|mantis|rock|slug|crystal|anaerobic|ghost" ) )
+				return crew;
+			else
+				return null;
 		}
-		// this isn't the right approach, because it could ignore vanilla races
-		// maybe instead just make a boolean hyperspace in CrewObject
-		// then if hyperspace == true, look at inner race info
-
-		// add more stats to display? traverse raceClone.getChildren
+		// todo: traverse raceClone.getChildren() to add stats to CrewObject?
+		// for now, just give that CrewObject the relevant Element
+		crew.setHyperspaceStats( raceClone );
 
 		return crew;
 	}

@@ -72,7 +72,7 @@ public class ShipObject extends GameObject
 	private int droneParts = 0;
 	private int hullHealth = 0;
 	private int maxPower = 0;
-	private int crewCap = 99;
+	private int crewCap = 8;
 
 	private int minSector = 1;
 	private int maxSector = 8;

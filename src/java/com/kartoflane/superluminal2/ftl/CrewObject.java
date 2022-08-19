@@ -3,6 +3,7 @@ package com.kartoflane.superluminal2.ftl;
 import com.kartoflane.superluminal2.components.enums.CrewStats;
 import com.kartoflane.superluminal2.components.interfaces.CrewLike;
 import com.kartoflane.superluminal2.components.interfaces.Identifiable;
+import org.jdom2.Element;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,6 +20,8 @@ public class CrewObject extends GameObject implements Comparable<CrewObject>, Id
 
 	protected HashMap<CrewStats, Integer> statMap = null;
 	protected ArrayList<String> powerList = null;
+
+	protected Element hyperspaceStats = null;
 
 
 	/** Creates a default crew object. */
@@ -128,6 +131,14 @@ public class CrewObject extends GameObject implements Comparable<CrewObject>, Id
 
 	public ArrayList<String> getPowerList() {
 		return powerList;
+	}
+
+	public void setHyperspaceStats( Element hyperspaceStats ) {
+		this.hyperspaceStats = hyperspaceStats;
+	}
+
+	public Element getHyperspaceStats() {
+		return hyperspaceStats;
 	}
 
 	@Override

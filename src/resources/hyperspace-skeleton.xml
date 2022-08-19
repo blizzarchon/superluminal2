@@ -1,12 +1,16 @@
 <!-- 
-    If the <ship> with the same base name exists, then we just want to toggle the slot.
-    Otherwise we do want to add a new <ship>.
-    This Slipstream tags code handles that all for us and only looks this way
-    to ensure it works no matter the existing state of hyperspace.xml.
-    Use as a single chunk and don't mix with other Slipstream tags code.
+    If <ship name="MY_SHIP" ... /> already exists, adding another <ship name="MY_SHIP" ... /> will cause ship duplication.
+    If we only look for the ship and turn on the slot, then nothing will happen if that <ship> doesn't exist.
+
+    This code adds a new <ship name="MY_SHIP" ... />, in case the ship does not exist.
+    Then we look to see if there is a <ship> with the same name defined before. If not, that's it!
+    But if so, we remove the line we just added, and go to that existing <ship> and set our layout slot to true.
+
+    The code looks this way to cover all edge cases and ensure it works no matter the existing state of hyperspace.xml.
+    Use it as a single chunk and don't mix with other Slipstream tags code, otherwise it may not work correctly.
 -->
 <!-- start of chunk -->
-<FTL xmlns:mod="mod" xmlns:mod-append="mod-append">
+<FTL xmlns:mod="mod">
     <ships>
         <ship name="replace_me" a="false" b="false" c="false" super="luminal" />
         <customShip />

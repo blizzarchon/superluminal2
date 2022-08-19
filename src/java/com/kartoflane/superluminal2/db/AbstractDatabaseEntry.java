@@ -244,7 +244,7 @@ public abstract class AbstractDatabaseEntry
 	}
 
 	/**
-	 * @return an array of all drone lists in this entry
+	 * @return an array of all crew lists in this entry
 	 */
 	public CrewList[] getCrewLists()
 	{
@@ -595,11 +595,7 @@ public abstract class AbstractDatabaseEntry
 						try {
 							if ( hyperspace ) {
 								CrewObject c = DatParser.loadCrew( e, crewTags );
-								// only load crew if matches race in hyperspace.xml
-								// why again?
-								if ( c != null ) {
-									store( c );
-								}
+								if ( c != null ) store( c );
 							}
 							else {
 								store( DatParser.loadCrew( e ) );

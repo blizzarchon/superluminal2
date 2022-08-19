@@ -156,8 +156,9 @@ public class IOUtils
 					Element rootAdd = docAdd.getRootElement();
 
 					List<Element> addList = rootAdd.getChildren();
-					for ( int i = addList.size() - 1; i >= 0; --i ) {
-						Element e = addList.get( i );
+					int size = addList.size(); // prevents size from changing after detaches
+					for ( int i = 0; i < size; ++i ) {
+						Element e = addList.get( 0 );
 
 						String name = e.getAttributeValue( "name" );
 						if ( name == null ) {
