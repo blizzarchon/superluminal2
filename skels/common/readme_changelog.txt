@@ -1,5 +1,36 @@
 Changelog
 
+2.3:
+(New Features)
+- "Prefix list.txt" is no longer necessary and has thus been removed.
+- Custom crew information is now loaded in from the .dat file. As such, "Race list.txt" is no longer needed and has been removed.
+- Blueprint lists can now be chosen from Weapon, Drone and Crew selection dialogs. Sorted alphabetically.
+- Exported ship mods now use slipstream tag logic that prevents ship duplication.
+- Layout slot selected now determines the blueprint name suffix, correcting any possible discrepancies.
+  * blueprint name chosen: MY_CUSTOM_SHIP_2, ship slot selected: C -> upon save, blueprint name is MY_CUSTOM_SHIP_3
+- Added option for using ID system instead of direct text for saving of ship text data. Off by default.
+(Quality of Life)
+- Picking crew now opens same kind of selection dialog as when picking weapons, drones and augments.
+- Augments and hidden augments have separate sections. This also solves a bug where you could have more than 3 regular augments.
+- Number of hidden augments and crew capacity update immediately when amount is changed.
+- Layout slot buttons are bigger and easier to select.
+- Opening 'Database' for ship images retrieves only the relevant images, though a button can be pressed to see all folders and images.
+(Bug fixes)
+- Fixed bug where hyperspace data of ships loaded via Mod Management was not being loaded.
+- Fixed bug where loaded vanilla ships had zero crew.
+- Fixed bug where new ship started with 99 crew capacity instead of 8.
+- Fixed bug where new ship could not be saved with default values for name, class or description.
+
+"Superluminal for Hyperspace":
+- Added support for some FTL: Hyperspace features:
+  * Custom ships can be selected from Load Ship menu. Selectable ships start with a prefix from external resource "Prefix list.txt".
+  * Custom crew can be selected from crew menu. Custom crew names are loaded from external resource "Race list.txt".
+  * Ship blueprint name is now a text field where the name can be freely edited, instead of choosing an existing ship blueprint.
+  * Crew capacity is no longer limited to 8 and can be set higher or lower.
+  * Augment section has been expanded to more entries. Augments can now be designated as hidden augments.
+  * Layout slot choice of A, B or C determines which layout the ship represents.
+- ID system for saving ship textual data turned off in favor of direct text.
+
 2.2.1:
 - Fixed a crash when saving a ship that was created with old FTL file format.
 - Fixed a crash when changing colors in Generate FLoor Image window using RGB or hex values.

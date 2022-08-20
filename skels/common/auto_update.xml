@@ -1,6 +1,16 @@
 <versions>
-	<latest id="2.2.1" url="https://github.com/kartoFlane/superluminal2/releases/latest" offer-selfpatch="false" />
+	<latest id="2.3" url="https://github.com/blizzarchon/superluminal2/releases/latest" offer-selfpatch="false" />
 	<changelog>
+		<version id="2.3">
+			<change>Hyperspace crew info now loads from dat and thus replaces need for manual user update of Race list.</change>
+			<change>Blueprint lists can now be selected from selection dialogs.</change>
+			<change>Ships loaded via Mod Management now properly load their hyperspace info.</change>
+			<change>Ship duplication is now prevented through better slipstream tag logic.</change>
+			<change>General quality of life improvements for hyperspace features.</change>
+		</version>
+		<version id="Superluminal for Hyperspace">
+			<change>Added some support for FTL: Hyperspace features.</change>
+		</version>
 		<version id="2.2.1">
 			<change>Fixed a crash when saving a ship that was created with old FTL file format.</change>
 			<change>Several bug fixes.</change>
