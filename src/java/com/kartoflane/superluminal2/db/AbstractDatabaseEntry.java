@@ -13,7 +13,10 @@ import java.util.regex.Pattern;
 import org.apache.logging.log4j.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import org.jdom2.filter.Filters;
 import org.jdom2.input.JDOMParseException;
+import org.jdom2.xpath.XPathExpression;
+import org.jdom2.xpath.XPathFactory;
 
 import com.kartoflane.superluminal2.components.enums.DroneTypes;
 import com.kartoflane.superluminal2.components.enums.WeaponTypes;
@@ -56,11 +59,6 @@ public abstract class AbstractDatabaseEntry
 	protected Map<String, DroneList> droneListMap = new HashMap<String, DroneList>();
 	protected Map<String, CrewList> crewListMap = new HashMap<String, CrewList>();
 	protected Map<String, String> textLookupMap = new HashMap<String, String>();
-	/**
-	 * Temporary map to hold anim sheets, since they
-	 * need to be loaded before weaponAnims, which reference them
-	 */
-	protected HashMap<String, Element> animSheetMap = new HashMap<String, Element>();
 
 
 	/**
@@ -77,7 +75,7 @@ public abstract class AbstractDatabaseEntry
 	 * @param innerPath
 	 *            the inner path of the sought file
 	 * @return the stream
-	 * 
+	 *
 	 * @throws FileNotFoundException
 	 *             when the inner path was not found in the entry
 	 * @throws IOException
@@ -93,7 +91,7 @@ public abstract class AbstractDatabaseEntry
 	/**
 	 * Loads the contents of this database entry.<br>
 	 * This method should not be called directly. Use {@link Database#addEntry(AbstractDatabaseEntry)} instead.
-	 * 
+	 *
 	 * <pre>
 	 * Loaded data:
 	 *   - weapon anim, animSheets (only temporarily), weapon sprites
@@ -179,14 +177,6 @@ public abstract class AbstractDatabaseEntry
 	}
 
 	// ===============================================================================================
-
-	/**
-	 * Used to preload anim sheets.
-	 */
-	Element getAnimSheetElement( String anim )
-	{
-		return animSheetMap.get( anim );
-	}
 
 	/**
 	 * @param animName
@@ -408,7 +398,6 @@ public abstract class AbstractDatabaseEntry
 		glowSetMap.clear();
 		weaponListMap.clear();
 		droneListMap.clear();
-		animSheetMap.clear();
 		textLookupMap.clear();
 		System.gc();
 	}
@@ -715,9 +704,6 @@ public abstract class AbstractDatabaseEntry
 			}
 		}
 
-		// Clear anim sheets, as they're no longer needed
-		animSheetMap.clear();
-
 		log.trace( getName() + " was loaded successfully." );
 	}
 
@@ -738,20 +724,11 @@ public abstract class AbstractDatabaseEntry
 					doc = IOUtils.parseXML( dr.text, true );
 					Element root = doc.getRootElement();
 
-					// Preload anim sheets
-					for ( Element e : root.getChildren( "animSheet" ) ) {
-						String name = e.getAttributeValue( "name" );
-						// If older entries are allowed to be overwritten by newer ones, bomb weapons
-						// load the bomb projectile images instead of weapon images, since their sheets
-						// share the same name
-						if ( name != null && !animSheetMap.containsKey( name ) )
-							animSheetMap.put( name, e );
-					}
-
 					// Load and store weaponAnims
-					for ( Element e : root.getChildren( "weaponAnim" ) ) {
+					for ( Element weaponAnim : root.getChildren( "weaponAnim" ) ) {
 						try {
-							store( DatParser.loadAnim( this, e ) );
+							Element animSheet = getAnimSheet( root, weaponAnim );
+							store( DatParser.loadAnim( weaponAnim, animSheet ) );
 						}
 						catch ( IllegalArgumentException ex ) {
 							log.warn( getName() + ": could not load animation: " + ex.getMessage() );
@@ -785,6 +762,40 @@ public abstract class AbstractDatabaseEntry
 			if ( !found )
 				log.trace( String.format( "%s did not contain file %s", getName(), innerPath ) );
 		}
+	}
+
+	/**
+	 * Returns the animSheet referenced by the weaponAnim, unless it doesn't exist in which case an exception is thrown.
+	 */
+	private Element getAnimSheet( Element root, Element weaponAnim ) {
+		// The index of the weaponAnim element in the content list of root
+		String weaponAnimName = weaponAnim.getAttributeValue( "name" );
+		if ( weaponAnimName == null )
+			throw new IllegalArgumentException( "weaponAnim is missing 'name' attribute." );
+		int weaponAnimIndex = root.indexOf( weaponAnim );
+		// Extract the name of the sheet from the weaponAnim
+		Element sheetElement = weaponAnim.getChild( "sheet" );
+		if ( sheetElement == null )
+			throw new IllegalArgumentException( weaponAnim.getAttributeValue( "name" ) + " is missing <sheet> tag" );
+		String sheet = sheetElement.getText();
+		// Create query: animSheets matching that name
+		String query = "//animSheet[@name='" + sheet + "']";
+		XPathExpression<Element> expr = XPathFactory.instance().compile( query, Filters.element() );
+		// Find the last possible matching animSheet, but must be before the weaponAnim
+		int animSheetIndex = -1;
+		for ( Element animSheet : expr.evaluate( root ) ) {
+			int tempIndex = root.indexOf( animSheet );
+			if ( tempIndex > animSheetIndex && tempIndex < weaponAnimIndex ) {
+				animSheetIndex = tempIndex;
+			}
+		}
+		if ( animSheetIndex < 0 ) {
+			throw new IllegalArgumentException(
+					String.format( "no animSheet named %s found before %s weaponAnim.", sheet, weaponAnimName )
+			);
+		}
+		// (animSheetIndex is the index of the animSheet Element in the content list)
+		return (Element) root.getContent( animSheetIndex );
 	}
 
 	private void loadGlowSets( Logger log )

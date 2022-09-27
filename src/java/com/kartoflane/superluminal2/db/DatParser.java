@@ -55,7 +55,7 @@ public class DatParser
 
 	/**
 	 * Loads the ship's metadata from the supplied Element
-	 * 
+	 *
 	 * @param e
 	 *            XML element for the shipBlueprint tag
 	 * @return the ship's metadata - blueprint name, txt and xml layouts, name, class, description
@@ -158,17 +158,12 @@ public class DatParser
 		return metadata;
 	}
 
-	public static AnimationObject loadAnim( AbstractDatabaseEntry de, Element e )
+	public static AnimationObject loadAnim( Element e, Element sheet )
 	{
-		if ( e == null )
-			throw new IllegalArgumentException( "Element must not be null." );
-
 		String attr = null;
 		Element child = null;
 
 		attr = e.getAttributeValue( "name" );
-		if ( attr == null )
-			throw new IllegalArgumentException( e.getName() + " is missing 'name' attribute." );
 
 		AnimationObject anim = new AnimationObject( attr );
 
@@ -188,15 +183,6 @@ public class DatParser
 		int y = Integer.parseInt( attr );
 
 		anim.setMountOffset( x, y );
-
-		// Load the anim sheet
-		child = e.getChild( "sheet" );
-		if ( child == null )
-			throw new IllegalArgumentException( anim.getAnimName() + " is missing <sheet> tag" );
-
-		Element sheet = de.getAnimSheetElement( child.getValue() );
-		if ( sheet == null )
-			throw new IllegalArgumentException( anim.getAnimName() + "'s animSheet could not be found: " + child.getValue() );
 
 		// Load sheet dimensions
 		attr = sheet.getAttributeValue( "w" );
@@ -231,7 +217,7 @@ public class DatParser
 	}
 
 	/**
-	 * 
+	 *
 	 * @param e
 	 *            element to be parsed
 	 * @return blueprint list the element represents, or null if the list was not
