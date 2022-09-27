@@ -593,6 +593,8 @@ public class ShipLoadUtils
 
 		if ( metadata.getCrewCap() > 0 )
 			ship.setCrewCap( metadata.getCrewCap() );
+		if ( metadata.getSystemCap() > 0 )
+			ship.setSystemCap( metadata.getSystemCap() );
 
 		return ship;
 	}

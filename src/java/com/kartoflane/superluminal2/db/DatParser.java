@@ -100,6 +100,7 @@ public class DatParser
 			}
 
 			metadata.setCrewCap( 8 );
+			metadata.setSystemCap( 8 );
 		}
 
 		return metadata;
@@ -136,13 +137,20 @@ public class DatParser
 
 				if ( customShipClone != null ) {
 					for ( Element hiddenAug : customShipClone.getChildren( "hiddenAug" ) ) {
-						metadata.addHiddenAug(hiddenAug.getTextTrim());
+						metadata.addHiddenAug( hiddenAug.getTextTrim() );
 					}
-					Element crewLimit = customShipClone.getChild("crewLimit");
+					Element crewLimit = customShipClone.getChild( "crewLimit" );
 					if ( crewLimit != null ) {
 						int crewLimitValue = Integer.parseInt( crewLimit.getText() );
 						if ( crewLimitValue > 0 )
 							metadata.setCrewCap( crewLimitValue );
+					}
+					Element systemLimit = customShipClone.getChild( "systemLimit" );
+					if ( systemLimit != null ) {
+						int systemLimitValue = Integer.parseInt( systemLimit.getText() );
+						if ( systemLimitValue > 0 ) {
+							metadata.setSystemCap( systemLimitValue );
+						}
 					}
 				}
 			}

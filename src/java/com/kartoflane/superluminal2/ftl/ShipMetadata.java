@@ -18,6 +18,7 @@ public class ShipMetadata
 	private IDeferredText shipName = IDeferredText.EMPTY;
 	private IDeferredText description = IDeferredText.EMPTY;
 	private int crewCap;
+	private int systemCap;
 	private ArrayList<String> hiddenAugs = new ArrayList<String>();
 
 
@@ -113,6 +114,14 @@ public class ShipMetadata
 
 	public void setCrewCap( int crewCap ) {
 		this.crewCap = crewCap;
+	}
+
+	public int getSystemCap() {
+		return systemCap;
+	}
+
+	public void setSystemCap( int systemCap ) {
+		this.systemCap = systemCap;
 	}
 
 	public ArrayList<String> getHiddenAugs() {

@@ -73,6 +73,7 @@ public class ShipObject extends GameObject
 	private int hullHealth = 0;
 	private int maxPower = 0;
 	private int crewCap = 8;
+	private int systemCap = 8;
 
 	private int minSector = 1;
 	private int maxSector = 8;
@@ -709,6 +710,17 @@ public class ShipObject extends GameObject
 		return maxPower;
 	}
 
+	public void setSystemCap( int systemCap )
+	{
+		if ( systemCap < 0 )
+			throw new IllegalArgumentException( "System cap must be non-negative." );
+		this.systemCap = systemCap;
+	}
+
+	public int getSystemCap() {
+		return systemCap;
+	}
+
 	/**
 	 * Sets the number of weapon slots that the ship has.<br>
 	 * This determines how many weapons the ship can have active at once.
@@ -1100,6 +1112,7 @@ public class ShipObject extends GameObject
 	{
 		return crewCap;
 	}
+
 	/**
 	 * Sets the minimum amount of crew members of the given race that the ship can have.<br>
 	 * Enemy ships only.

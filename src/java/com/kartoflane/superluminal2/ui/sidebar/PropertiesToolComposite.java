@@ -63,6 +63,7 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 	private Text txtDesc;
 	private Spinner spHealth;
 	private Spinner spPower;
+	private Spinner spSystemCap;
 	private TabItem tbtmCrew;
 	private Group grpCrew;
 	private Composite compCrew;
@@ -99,6 +100,7 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 	private Spinner spHiddenAugments;
 	private Label lblHullHelp;
 	private Label lblReactorInfo;
+	private Label lblSystemCapInfo;
 	private Label lblLayoutInfo;
 	private Label lblImageHelp;
 	private Label lblBlueprintHelp;
@@ -493,6 +495,35 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 			lblBoardingAIInfo.setImage( helpImage );
 			msg = "This determines the strategy that the ship's crew is going to use when boarding.";
 			UIUtils.addTooltip( lblBoardingAIInfo, Utils.wrapOSNot( msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX() ) );
+		}
+		else {
+			Label lblSystemCap = new Label( compGeneral, SWT.NONE );
+			lblSystemCap.setText( "Max Number of Systems:" );
+
+			spSystemCap = new Spinner( compGeneral, SWT.BORDER );
+			spSystemCap.setTextLimit( 2 );
+			spSystemCap.setMinimum( 1 );
+			spSystemCap.setMaximum( 20 );
+			GridData gd_spSystemCap = new GridData( SWT.RIGHT, SWT.CENTER, true, false, 2, 1 );
+			gd_spSystemCap.widthHint = 25;
+			spSystemCap.setLayoutData( gd_spSystemCap );
+
+			spSystemCap.addSelectionListener(
+					new SelectionAdapter() {
+						@Override
+						public void widgetSelected( SelectionEvent e )
+						{
+							ship.setSystemCap( spSystemCap.getSelection() );
+						}
+					}
+			);
+
+			lblSystemCapInfo = new Label( compGeneral, SWT.NONE );
+			lblSystemCapInfo.setLayoutData( new GridData( SWT.RIGHT, SWT.CENTER, false, false, 1, 1 ) );
+			lblSystemCapInfo.setImage( helpImage );
+			msg = "This sets the limit on how many systems the player can hold. " +
+				  "Vanilla is 8 systems max."; // todo: finish help description
+			UIUtils.addTooltip( lblSystemCapInfo, Utils.wrapOSNot( msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX() ) );
 		}
 
 		/*
@@ -1000,6 +1031,7 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 		spPower.setSelection( ship.getPower() );
 
 		if ( ship.isPlayerShip() ) {
+			spSystemCap.setSelection( ship.getSystemCap() );
 			content = ship.getShipName().toString();
 			txtName.setText( ship.isPlayerShip() && content == null ? "The Nameless One" : content );
 
@@ -1384,7 +1416,7 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 		Control c = UIUtils.getDisplay().getFocusControl();
 		boolean result = c == txtClass || c == spHealth || c == spPower || c == spMissiles || c == spWeaponSlots ||
 			c == spDrones || c == spDroneSlots || c == txtLayout || c == txtImage ||
-			c == spArtillerySlots || c == spCrew || c == spHiddenAugments;
+			c == spArtillerySlots || c == spCrew || c == spHiddenAugments|| c == spSystemCap;
 		if ( container.getShipController().isPlayerShip() ) {
 			result |= c == txtName || c == txtDesc;
 		}

@@ -894,6 +894,10 @@ public class ShipSaveUtils
 			Element crewLimitElement = new Element( "crewLimit" );
 			crewLimitElement.setText( ship.getCrewCap() + "" );
 			customShip.addContent( crewLimitElement );
+
+			Element systemLimitElement = new Element( "systemLimit" );
+			systemLimitElement.setText( ship.getSystemCap() + "" );
+			customShip.addContent( systemLimitElement );
 		}
 
 		return doc;
