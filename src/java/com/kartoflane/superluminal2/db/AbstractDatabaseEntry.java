@@ -5,18 +5,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.Logger;
+import org.jdom2.Content;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import org.jdom2.filter.Filters;
 import org.jdom2.input.JDOMParseException;
-import org.jdom2.xpath.XPathExpression;
-import org.jdom2.xpath.XPathFactory;
 
 import com.kartoflane.superluminal2.components.enums.DroneTypes;
 import com.kartoflane.superluminal2.components.enums.WeaponTypes;
@@ -778,24 +777,25 @@ public abstract class AbstractDatabaseEntry
 		if ( sheetElement == null )
 			throw new IllegalArgumentException( weaponAnim.getAttributeValue( "name" ) + " is missing <sheet> tag" );
 		String sheet = sheetElement.getText();
-		// Create query: animSheets matching that name
-		String query = "//animSheet[@name='" + sheet + "']";
-		XPathExpression<Element> expr = XPathFactory.instance().compile( query, Filters.element() );
-		// Find the last possible matching animSheet, but must be before the weaponAnim
-		int animSheetIndex = -1;
-		for ( Element animSheet : expr.evaluate( root ) ) {
-			int tempIndex = root.indexOf( animSheet );
-			if ( tempIndex > animSheetIndex && tempIndex < weaponAnimIndex ) {
-				animSheetIndex = tempIndex;
+		// Find the animSheet name="{sheet}" closest to weaponAnim (behind it)
+		ListIterator<Content> li = root.getContent().listIterator( weaponAnimIndex );
+		Element animSheet = null;
+		while ( li.hasPrevious() ) {
+			Content content = li.previous();
+			if ( content instanceof Element ) {
+				Element element = (Element) content;
+				if ( element.getName().equals( "animSheet" ) && element.getAttributeValue( "name" ).equals( sheet ) ) {
+					animSheet = element;
+					break;
+				}
 			}
 		}
-		if ( animSheetIndex < 0 ) {
+		if ( animSheet == null ) {
 			throw new IllegalArgumentException(
 					String.format( "no animSheet named %s found before %s weaponAnim.", sheet, weaponAnimName )
 			);
 		}
-		// (animSheetIndex is the index of the animSheet Element in the content list)
-		return (Element) root.getContent( animSheetIndex );
+		return animSheet;
 	}
 
 	private void loadGlowSets( Logger log )
