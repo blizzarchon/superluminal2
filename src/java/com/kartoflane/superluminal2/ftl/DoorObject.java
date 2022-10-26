@@ -11,7 +11,7 @@ import com.kartoflane.superluminal2.mvc.controllers.ShipController;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 
 
-public class DoorObject extends GameObject implements Alias, Movable, Serializable
+public class DoorObject extends GameObject implements Alias, Movable, Serializable, Comparable<DoorObject>
 {
 	private static final long serialVersionUID = 6051451407440322891L;
 
@@ -144,5 +144,18 @@ public class DoorObject extends GameObject implements Alias, Movable, Serializab
 			setLeftRoom( null );
 		if ( rightRoom != null && rightRoom.isDeleted() )
 			setRightRoom( null );
+	}
+
+	@Override
+	public int compareTo( DoorObject o ) {
+		int deltaX = locX - o.locX;
+		int deltaY = locY - o.locY;
+		if ( deltaX == 0 ) {
+			if ( deltaY == 0 ) {
+				return (horizontal ? 0 : 1) - (o.horizontal ? 0 : 1);
+			}
+			return deltaY;
+		}
+		return deltaX;
 	}
 }
