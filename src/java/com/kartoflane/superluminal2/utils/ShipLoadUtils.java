@@ -596,6 +596,12 @@ public class ShipLoadUtils
 		if ( metadata.getSystemCap() > 0 )
 			ship.setSystemCap( metadata.getSystemCap() );
 
+		// Default is A
+		if ( ship.getBlueprintName().endsWith( "_2" ) )
+			ship.setLayoutSlot( "B" );
+		else if ( ship.getBlueprintName().endsWith( "_3" ) )
+			ship.setLayoutSlot( "C" );
+
 		return ship;
 	}
 

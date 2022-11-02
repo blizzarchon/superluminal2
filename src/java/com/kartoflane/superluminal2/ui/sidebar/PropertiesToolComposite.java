@@ -182,20 +182,17 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 			slotB.setImage( layoutBOffImage );
 			slotC.setImage( layoutCOffImage );
 
-			if ( ship.getBlueprintName().endsWith( "_2" ) )
+			if ( ship.getLayoutSlot().equals( "B" ) )
 			{
-				ship.setLayoutSlot( "B" );
 				slotB.setImage( layoutBOnImage );
 				slotB.setSelection( true );
 			}
-			else if ( ship.getBlueprintName().endsWith( "_3" ) )
+			else if ( ship.getLayoutSlot().equals( "C" ) )
 			{
-				ship.setLayoutSlot( "C" );
 				slotC.setImage( layoutCOnImage );
 				slotC.setSelection( true );
 			}
 			else {
-				ship.setLayoutSlot( "A" );
 				slotA.setImage( layoutAOnImage );
 				slotA.setSelection( true );
 			}
