@@ -422,7 +422,7 @@ public abstract class AbstractDatabaseEntry
 		String[] blueprintFiles = {
 			"data/blueprints", "data/autoBlueprints",
 			"data/dlcBlueprints", "data/dlcBlueprintsOverwrite",
-			"data/dlcPirateBlueprints"
+			"data/dlcPirateBlueprints", "data/bosses"
 		};
 
 		// The only texts relevant to the editor are located in

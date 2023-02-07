@@ -86,6 +86,11 @@ public class Database
 	// Dynamically loaded
 	private ArrayList<AbstractDatabaseEntry> dataEntries = new ArrayList<AbstractDatabaseEntry>();
 
+	private final String blueprints = "blueprints.xml";
+	private final String dlcBlueprints = "dlcBlueprints.xml";
+	private final String dlcOverwrite = "dlcBlueprintsOverwrite.xml";
+	private final String bosses = "bosses.xml";
+	private final String autoBlueprints = "autoBlueprints.xml";
 
 	/**
 	 * Creates an empty Database.
@@ -94,10 +99,6 @@ public class Database
 	{
 		instance = this;
 
-		String blueprints = "blueprints.xml";
-		String dlcBlueprints = "dlcBlueprints.xml";
-		String dlcOverwrite = "dlcBlueprintsOverwrite.xml";
-		String bosses = "bosses.xml";
 		// All pre-AE player ships are located in blueprints.xml
 		shipFileMap.put( PlayerShipBlueprints.HARD.toString(), blueprints );
 		shipFileMap.put( PlayerShipBlueprints.HARD_2.toString(), blueprints );
@@ -346,12 +347,15 @@ public class Database
 		{
 			if ( ship.getLayoutSlot().equals( "C" ) )
 			{
-				return "dlcBlueprintsOverwrite.xml";
+				return dlcOverwrite;
 			}
-			return "blueprints.xml";
+			return blueprints;
+		}
+		else if ( shipFileMap.get( ship.getBlueprintName() ).equals( bosses ) ) {
+			return bosses;
 		}
 		else
-			return "autoBlueprints.xml";
+			return autoBlueprints;
 	}
 
 	public AnimationObject getAnimation( String animName )
