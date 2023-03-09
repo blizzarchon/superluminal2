@@ -116,41 +116,39 @@ public class DatParser
 	 * 			  XML child elements of hyperspace &lt;ships&gt; tag
 	 * @return the ship's metadata - blueprint name, txt and xml layouts, name, class, description
 	 */
-	public static ShipMetadata loadShipMetadata( Element e, ArrayList<Element> shipsTags)
+	public static ShipMetadata loadShipMetadata( Element e, ArrayList<Element> shipsTags )
 	{
 			ShipMetadata metadata = loadShipMetadata( e );
 			String blueprintName = metadata.getBlueprintName();
 
-			if ( metadata.isPlayerShip() ) {
-				Element customShipClone = null;
-				Collections.reverse( shipsTags );
-				loop:
-				for ( Element shipsTag : shipsTags ) {
-					for ( Element customShip : shipsTag.getChildren("customShip") ) {
-						String customShipName = customShip.getAttributeValue( "name" );
-						if ( customShipName != null && customShipName.equals( blueprintName ) ) {
-							customShipClone = customShip.clone();
-							break loop;
-						}
+			Element customShipClone = null;
+			Collections.reverse( shipsTags );
+			loop:
+			for ( Element shipsTag : shipsTags ) {
+				for ( Element customShip : shipsTag.getChildren("customShip") ) {
+					String customShipName = customShip.getAttributeValue( "name" );
+					if ( customShipName != null && customShipName.equals( blueprintName ) ) {
+						customShipClone = customShip.clone();
+						break loop;
 					}
 				}
+			}
 
-				if ( customShipClone != null ) {
-					for ( Element hiddenAug : customShipClone.getChildren( "hiddenAug" ) ) {
-						metadata.addHiddenAug( hiddenAug.getTextTrim() );
-					}
-					Element crewLimit = customShipClone.getChild( "crewLimit" );
-					if ( crewLimit != null ) {
-						int crewLimitValue = Integer.parseInt( crewLimit.getText() );
-						if ( crewLimitValue > 0 )
-							metadata.setCrewCap( crewLimitValue );
-					}
-					Element systemLimit = customShipClone.getChild( "systemLimit" );
-					if ( systemLimit != null ) {
-						int systemLimitValue = Integer.parseInt( systemLimit.getText() );
-						if ( systemLimitValue > 0 ) {
-							metadata.setSystemCap( systemLimitValue );
-						}
+			if ( customShipClone != null ) {
+				for ( Element hiddenAug : customShipClone.getChildren( "hiddenAug" ) ) {
+					metadata.addHiddenAug( hiddenAug.getTextTrim() );
+				}
+				Element crewLimit = customShipClone.getChild( "crewLimit" );
+				if ( crewLimit != null ) {
+					int crewLimitValue = Integer.parseInt( crewLimit.getText() );
+					if ( crewLimitValue > 0 )
+						metadata.setCrewCap( crewLimitValue );
+				}
+				Element systemLimit = customShipClone.getChild( "systemLimit" );
+				if ( systemLimit != null ) {
+					int systemLimitValue = Integer.parseInt( systemLimit.getText() );
+					if ( systemLimitValue > 0 ) {
+						metadata.setSystemCap( systemLimitValue );
 					}
 				}
 			}
