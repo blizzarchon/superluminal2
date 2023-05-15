@@ -60,6 +60,7 @@ public class RoomDataComposite extends Composite implements DataComposite
 	private Scale scaleMaxLevel;
 	private Text txtMaxLevel;
 	private Button btnAvailable;
+	private Button checkboxMaxLevel;
 	private Composite imagesComposite;
 	private Button btnInteriorBrowse;
 	private Button btnInteriorClear;
@@ -155,44 +156,69 @@ public class RoomDataComposite extends Composite implements DataComposite
 			}
 		);
 
-		if ( !container.isPlayerShip() ) {
-			lblMaxLevel = new Label( this, SWT.NONE );
-			lblMaxLevel.setText( "Max Level:" );
+		lblMaxLevel = new Label( this, SWT.NONE );
+		lblMaxLevel.setText( "Max Level:" );
 
-			scaleMaxLevel = new Scale( this, SWT.NONE );
-			scaleMaxLevel.setMaximum( 2 );
-			scaleMaxLevel.setMinimum( 1 );
-			scaleMaxLevel.setPageIncrement( 1 );
-			scaleMaxLevel.setIncrement( 1 );
-			scaleMaxLevel.setSelection( 1 );
-			scaleMaxLevel.setLayoutData( new GridData( SWT.RIGHT, SWT.CENTER, true, false, 1, 1 ) );
+		scaleMaxLevel = new Scale( this, SWT.NONE );
+		scaleMaxLevel.setMaximum( 2 );
+		scaleMaxLevel.setMinimum( 1 );
+		scaleMaxLevel.setPageIncrement( 1 );
+		scaleMaxLevel.setIncrement( 1 );
+		scaleMaxLevel.setSelection( 1 );
+		scaleMaxLevel.setLayoutData( new GridData( SWT.RIGHT, SWT.CENTER, true, false, 1, 1 ) );
 
-			txtMaxLevel = new Text( this, SWT.BORDER | SWT.READ_ONLY );
-			txtMaxLevel.setText( "" );
-			txtMaxLevel.setTextLimit( 3 );
-			GridData gd_txtMaxLevel = new GridData( SWT.RIGHT, SWT.CENTER, false, false, 1, 1 );
-			gd_txtMaxLevel.widthHint = 20;
-			txtMaxLevel.setLayoutData( gd_txtMaxLevel );
+		txtMaxLevel = new Text( this, SWT.BORDER | SWT.READ_ONLY );
+		txtMaxLevel.setText( "" );
+		txtMaxLevel.setTextLimit( 3 );
+		GridData gd_txtMaxLevel = new GridData( SWT.RIGHT, SWT.CENTER, false, false, 1, 1 );
+		gd_txtMaxLevel.widthHint = 20;
+		txtMaxLevel.setLayoutData( gd_txtMaxLevel );
 
-			scaleMaxLevel.addSelectionListener(
-				new SelectionAdapter() {
-					@Override
-					public void widgetSelected( SelectionEvent e )
-					{
-						SystemObject sys = container.getActiveSystem( roomC.getGameObject() );
-						SystemController system = (SystemController)container.getController( sys );
+		scaleMaxLevel.addSelectionListener(
+			new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e )
+				{
+					SystemObject sys = container.getActiveSystem( roomC.getGameObject() );
+					SystemController system = (SystemController)container.getController( sys );
 
-						system.setLevelMax( scaleMaxLevel.getSelection() );
-						txtMaxLevel.setText( "" + scaleMaxLevel.getSelection() );
-						scaleSysLevel.setMaximum( scaleMaxLevel.getSelection() );
-						scaleSysLevel.notifyListeners( SWT.Selection, null );
-						scaleSysLevel.setEnabled( scaleMaxLevel.getSelection() > 1 );
-						scaleSysLevel.setSelection( Math.min( scaleSysLevel.getSelection(), scaleSysLevel.getMaximum() ) );
-					}
+					system.setLevelMax( scaleMaxLevel.getSelection() );
+					txtMaxLevel.setText( "" + scaleMaxLevel.getSelection() );
+					scaleSysLevel.setMaximum( scaleMaxLevel.getSelection() );
+					scaleSysLevel.notifyListeners( SWT.Selection, null );
+					scaleSysLevel.setEnabled( scaleMaxLevel.getSelection() > 1 );
+					scaleSysLevel.setSelection( Math.min( scaleSysLevel.getSelection(), scaleSysLevel.getMaximum() ) );
 				}
+			}
+		);
+		if ( container.isPlayerShip() ) {
+			SystemObject sys = container.getActiveSystem( roomC.getGameObject() );
+			SystemController system = (SystemController)container.getController( sys );
+			scaleMaxLevel.setEnabled( system.isUsingMax() );
+
+			checkboxMaxLevel = new Button( this, SWT.CHECK );
+			checkboxMaxLevel.setText( "Enable Max Level" );
+			checkboxMaxLevel.setLayoutData( new GridData( SWT.LEFT, SWT.CENTER, false, false, 2, 1 ) );
+			checkboxMaxLevel.setSelection( system.isUsingMax() );
+			checkboxMaxLevel.addSelectionListener(
+					new SelectionAdapter() {
+						@Override
+						public void widgetSelected( SelectionEvent e ) {
+							SystemObject sys = container.getActiveSystem( roomC.getGameObject() );
+							SystemController system = (SystemController)container.getController( sys );
+							boolean selected = checkboxMaxLevel.getSelection();
+
+							system.setUsingMax( selected );
+							if ( !selected ) { // done before disabling scale because can't set selection after
+								scaleMaxLevel.setSelection( scaleMaxLevel.getMaximum() );
+								scaleSysLevel.setSelection( system.getLevel() );
+								scaleMaxLevel.notifyListeners( SWT.Selection, null );
+							}
+							scaleMaxLevel.setEnabled( selected );
+						}
+					}
 			);
-		}
-		else {
+
 			imagesComposite = new Composite( this, SWT.NONE );
 			GridLayout gl_imagesComposite = new GridLayout( 4, false );
 			gl_imagesComposite.marginHeight = 20;
@@ -492,18 +518,17 @@ public class RoomDataComposite extends Composite implements DataComposite
 		alias = sys.getAlias();
 		btnSystem.setText( sys.toString() + ( alias == null || alias.trim().equals( "" ) ? "" : " (" + alias + ")" ) );
 
-		btnAvailable.setEnabled( system.getSystemId() != Systems.EMPTY );
-		scaleSysLevel.setEnabled( system.getSystemId() != Systems.EMPTY );
-		if ( !playerShip )
-			scaleMaxLevel.setEnabled( system.getSystemId() != Systems.EMPTY );
+		boolean empty = system.getSystemId() == Systems.EMPTY;
+		btnAvailable.setEnabled( !empty );
+		scaleSysLevel.setEnabled( !empty );
+		if ( !playerShip || system.isUsingMax() || empty )
+			scaleMaxLevel.setEnabled( !empty );
+		if ( playerShip )
+			checkboxMaxLevel.setEnabled( !empty );
 
-		if ( system.getSystemId() != Systems.EMPTY ) {
+		if ( !empty ) {
 			// Update widgets with the system's data
 			btnAvailable.setSelection( system.isAvailableAtStart() );
-
-			scaleSysLevel.setMaximum( playerShip ? system.getLevelCap() : scaleMaxLevel.getSelection() );
-			scaleSysLevel.setSelection( system.getLevel() );
-			scaleSysLevel.notifyListeners( SWT.Selection, null );
 
 			if ( playerShip ) {
 				btnInteriorBrowse.setEnabled( system.canContainInterior() );
@@ -531,14 +556,18 @@ public class RoomDataComposite extends Composite implements DataComposite
 					btnGlow.setText( system.getGameObject().getGlow().getGlowSet().getIdentifier() );
 					txtName.setText( system.getGameObject().getInteriorNamespace() );
 				}
-			}
-			else {
-				scaleMaxLevel.setMaximum( system.getLevelCap() );
-				scaleMaxLevel.setSelection( system.getLevelMax() );
-				scaleMaxLevel.notifyListeners( SWT.Selection, null );
 
-				scaleSysLevel.setEnabled( scaleMaxLevel.getSelection() > 1 );
+				checkboxMaxLevel.setSelection( system.isUsingMax() );
+				checkboxMaxLevel.notifyListeners( SWT.Selection, null );
 			}
+			scaleMaxLevel.setMaximum( system.getLevelCap() );
+			scaleMaxLevel.setSelection( system.getLevelMax() );
+
+			scaleSysLevel.setMaximum( scaleMaxLevel.getSelection() );
+			scaleSysLevel.setSelection( system.getLevel() );
+			// notifying scaleSysLevel listener here would be redundant
+
+			scaleMaxLevel.notifyListeners( SWT.Selection, null );
 		}
 		else {
 			// No system - reset to default
@@ -558,11 +587,9 @@ public class RoomDataComposite extends Composite implements DataComposite
 				lblNameInfo.setVisible( false );
 				txtName.setVisible( false );
 			}
-			else {
-				scaleMaxLevel.setMaximum( 2 );
-				scaleMaxLevel.setSelection( 1 );
-				txtMaxLevel.setText( "" );
-			}
+			scaleMaxLevel.setMaximum( 2 );
+			scaleMaxLevel.setSelection( 1 );
+			txtMaxLevel.setText( "" );
 		}
 		OverviewWindow.staticUpdate( roomC );
 	}

@@ -868,8 +868,9 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 					}
 
 					if ( systems.size() < slots ) {
+						Database db = Database.getInstance();
 						for ( int i = systems.size(); i < slots; i++ ) {
-							SystemObject system = new SystemObject( Systems.ARTILLERY, ship );
+							SystemObject system = new SystemObject( db.getSystem( Systems.ARTILLERY ) );
 							system.setAlias( "#" + ( i + 1 ) );
 							SystemController sysC = SystemController.newInstance( container, system );
 							ship.add( system );

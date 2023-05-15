@@ -12,7 +12,7 @@ public class SystemObject extends GameObject implements Alias
 {
 	private final Systems id;
 
-	private final int levelCap;
+	private int levelCap;
 	private int levelStart = 0;
 	private int levelMax = 0;
 	private boolean availableAtStart = true;
@@ -29,49 +29,17 @@ public class SystemObject extends GameObject implements Alias
 	private String interiorPath = null;
 	private String alias = "";
 
+	/** Whether this player ship system is using the optional max level */
+	private boolean usingMax = false;
 
-	public SystemObject( Systems systemId, ShipObject ship )
+
+	public SystemObject( Systems systemId )
 	{
 		if ( systemId == null )
 			throw new IllegalArgumentException( "System id must not be null." );
 		id = systemId;
 
 		setDeletable( false );
-
-		switch ( systemId ) {
-			case BATTERY:
-				levelCap = 2;
-				break;
-			case PILOT:
-			case DOORS:
-			case SENSORS:
-			case CLOAKING:
-			case MEDBAY:
-			case CLONEBAY:
-			case TELEPORTER:
-			case OXYGEN:
-			case HACKING:
-			case MIND:
-			case TEMPORAL:
-				levelCap = 3;
-				break;
-			case ARTILLERY:
-				levelCap = 4;
-				break;
-			case SHIELDS:
-			case WEAPONS:
-			case ENGINES:
-			case DRONES:
-				if ( ship.isPlayerShip() ) {
-					levelCap = 8;
-				}
-				else {
-					levelCap = 10;
-				}
-				break;
-			default:
-				levelCap = 0;
-		}
 
 		if ( canContainStation() ) {
 			station = new StationObject( this );
@@ -104,6 +72,19 @@ public class SystemObject extends GameObject implements Alias
 		Database db = Database.getInstance();
 		if ( db != null && systemId == Systems.ARTILLERY )
 			weapon = db.getWeapon( "ARTILLERY_FED" );
+	}
+
+	/**
+	 * Creates a new system object from an archetype system object.
+	 * Supply the archetype from database via <br> {@link Database#getSystem(Systems)}
+	 * @param systemObject the system to be copied
+	 */
+	@SuppressWarnings( "CopyConstructorMissesField" )
+	public SystemObject( SystemObject systemObject ) {
+		this( systemObject.id );
+
+		this.levelCap = systemObject.levelCap;
+		this.levelStart = systemObject.levelStart;
 	}
 
 	public void update()
@@ -207,6 +188,10 @@ public class SystemObject extends GameObject implements Alias
 		return interiorPath;
 	}
 
+	public void setLevelCap( int level ) {
+		levelCap = level;
+	}
+
 	public int getLevelCap()
 	{
 		return levelCap;
@@ -297,5 +282,13 @@ public class SystemObject extends GameObject implements Alias
 	public void setAlias( String alias )
 	{
 		this.alias = alias;
+	}
+
+	public boolean isUsingMax() {
+		return usingMax;
+	}
+
+	public void setUsingMax( boolean usingMax ) {
+		this.usingMax = usingMax;
 	}
 }

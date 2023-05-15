@@ -19,6 +19,7 @@ import org.jdom2.input.JDOMParseException;
 
 import com.kartoflane.superluminal2.components.enums.DroneTypes;
 import com.kartoflane.superluminal2.components.enums.WeaponTypes;
+import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.components.interfaces.Predicate;
 import com.kartoflane.superluminal2.ftl.AnimationObject;
 import com.kartoflane.superluminal2.ftl.AugmentObject;
@@ -32,6 +33,7 @@ import com.kartoflane.superluminal2.ftl.GlowSet;
 import com.kartoflane.superluminal2.ftl.GlowSet.Glows;
 import com.kartoflane.superluminal2.ftl.NamedText;
 import com.kartoflane.superluminal2.ftl.ShipMetadata;
+import com.kartoflane.superluminal2.ftl.SystemObject;
 import com.kartoflane.superluminal2.ftl.WeaponList;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 import com.kartoflane.superluminal2.utils.DataUtils;
@@ -58,6 +60,7 @@ public abstract class AbstractDatabaseEntry
 	protected Map<String, DroneList> droneListMap = new HashMap<String, DroneList>();
 	protected Map<String, CrewList> crewListMap = new HashMap<String, CrewList>();
 	protected Map<String, String> textLookupMap = new HashMap<String, String>();
+	protected Map<Systems, SystemObject> systemMap = new HashMap<Systems, SystemObject>();
 
 
 	/**
@@ -173,6 +176,10 @@ public abstract class AbstractDatabaseEntry
 	protected void store( NamedText text )
 	{
 		textLookupMap.put( text.getId(), text.getText() );
+	}
+
+	protected void store( SystemObject system ) {
+		systemMap.put( system.getSystemId(), system );
 	}
 
 	// ===============================================================================================
@@ -371,6 +378,10 @@ public abstract class AbstractDatabaseEntry
 		return weaponListMap.values().toArray( new WeaponList[0] );
 	}
 
+	public SystemObject getSystem( Systems system ) {
+		return systemMap.get( system );
+	}
+
 	/**
 	 * @param id
 	 *            id of the text to look up
@@ -549,6 +560,18 @@ public abstract class AbstractDatabaseEntry
 						}
 						catch ( IllegalArgumentException ex ) {
 							log.warn( getName() + ": could not load drone: " + ex.getMessage() );
+						}
+					}
+
+					elements.clear();
+					elements = null;
+					elements = DataUtils.findTagsNamed( dr.text, "systemBlueprint" );
+					for ( Element e : elements ) {
+						try {
+							store( DatParser.loadSystem( e ) );
+						}
+						catch ( IllegalArgumentException ex ) {
+							log.warn( getName() + ": could not load system: " + ex.getMessage() );
 						}
 					}
 

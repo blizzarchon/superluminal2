@@ -197,6 +197,14 @@ public class SystemController extends ObjectController
 		return getGameObject().getLevelMax();
 	}
 
+	public boolean isUsingMax() {
+		return getGameObject().isUsingMax();
+	}
+
+	public void setUsingMax( boolean usingMax ) {
+		getGameObject().setUsingMax( usingMax );
+	}
+
 	public boolean canContainGlow()
 	{
 		return getGameObject().canContainGlow();

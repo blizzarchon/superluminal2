@@ -2,7 +2,6 @@ package com.kartoflane.superluminal2.ftl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.TreeSet;
 
 import org.eclipse.swt.graphics.Point;
@@ -134,10 +133,18 @@ public class ShipObject extends GameObject
 			augments.add( Database.DEFAULT_AUGMENT_OBJ );
 		}
 
+		Database db = Database.getInstance();
+
 		for ( Systems system : Systems.values() ) {
 			ArrayList<SystemObject> list = new ArrayList<SystemObject>();
 			systemMap.put( system, list );
-			add( new SystemObject( system, this ) );
+			if ( system.equals( Systems.EMPTY ) ) {
+				SystemObject empty = new SystemObject( Systems.EMPTY );
+				empty.setLevelCap( 0 );
+				add( empty );
+			} else {
+				add( new SystemObject( db.getSystem( system ) ) );
+			}
 		}
 
 		if ( !isPlayer ) {

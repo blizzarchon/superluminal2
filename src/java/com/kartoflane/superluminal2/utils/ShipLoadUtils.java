@@ -194,7 +194,7 @@ public class ShipLoadUtils
 				ArrayList<SystemObject> systems = ship.getSystems( sys );
 				if ( count >= systems.size() ) {
 					if ( sys == Systems.ARTILLERY ) {
-						system = new SystemObject( Systems.ARTILLERY, ship );
+						system = new SystemObject( db.getSystem( Systems.ARTILLERY ) );
 						ship.add( system );
 						count++;
 					}
@@ -217,17 +217,15 @@ public class ShipLoadUtils
 				system.setLevelStart( Integer.valueOf( attr ) );
 
 				// Get the max level the system can have
-				// Exclusive to enemy ships
-				if ( !isPlayer ) {
-					attr = sysEl.getAttributeValue( "max" );
-					if ( attr != null ) {
-						system.setLevelMax( Integer.valueOf( attr ) );
-					}
-					else {
-						// Some ships (mostly BOSS) are missing the 'max' attribute
-						// Guess-default to the system's level cap
-						system.setLevelMax( system.getLevelCap() );
-					}
+				attr = sysEl.getAttributeValue( "max" );
+				if ( attr != null ) {
+					system.setLevelMax( Integer.valueOf( attr ) );
+					system.setUsingMax( isPlayer );
+				}
+				else {
+					// Some ships (mostly BOSS) are missing the 'max' attribute
+					// Guess-default to the system's level cap
+					system.setLevelMax( system.getLevelCap() );
 				}
 
 				// Get the room to which the system is assigned

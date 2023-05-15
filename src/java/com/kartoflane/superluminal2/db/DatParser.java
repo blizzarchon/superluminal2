@@ -10,6 +10,7 @@ import com.kartoflane.superluminal2.components.enums.CrewStats;
 import com.kartoflane.superluminal2.components.enums.Directions;
 import com.kartoflane.superluminal2.components.enums.DroneStats;
 import com.kartoflane.superluminal2.components.enums.DroneTypes;
+import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.components.enums.WeaponStats;
 import com.kartoflane.superluminal2.components.enums.WeaponTypes;
 import com.kartoflane.superluminal2.ftl.AnimationObject;
@@ -25,6 +26,7 @@ import com.kartoflane.superluminal2.ftl.GlowObject;
 import com.kartoflane.superluminal2.ftl.IDeferredText;
 import com.kartoflane.superluminal2.ftl.NamedText;
 import com.kartoflane.superluminal2.ftl.ShipMetadata;
+import com.kartoflane.superluminal2.ftl.SystemObject;
 import com.kartoflane.superluminal2.ftl.VerbatimText;
 import com.kartoflane.superluminal2.ftl.WeaponList;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
@@ -423,6 +425,38 @@ public class DatParser
 		}
 
 		return drone;
+	}
+
+	public static SystemObject loadSystem( Element e ) {
+		if ( e == null )
+			throw new IllegalArgumentException( "Element must not be null." );
+
+		String attr = null;
+		Element child = null;
+
+		attr = e.getAttributeValue( "name" );
+		if ( attr == null )
+			throw new IllegalArgumentException( e.getName() + " is missing 'name' attribute." );
+		Systems systemId;
+		try {
+			systemId = Systems.valueOf( attr.toUpperCase() );
+		}
+		catch ( IllegalArgumentException ex ) {
+			throw new IllegalArgumentException( attr + " is not a valid systemBlueprint name..", ex );
+		}
+		SystemObject system = new SystemObject( systemId );
+
+		child = e.getChild( "startPower" );
+		if ( child == null )
+			throw new IllegalArgumentException( "systemBlueprint named " + attr + " is missing a <startPower> tag.");
+		system.setLevelStart( Integer.parseInt( child.getValue() ) );
+
+		child = e.getChild( "maxPower" );
+		if ( child == null )
+			throw new IllegalArgumentException( "systemBlueprint named " + attr + " is missing a <maxPower> tag." );
+		system.setLevelCap( Integer.parseInt( child.getValue() ) );
+
+		return system;
 	}
 
 	public static CrewObject loadCrew( Element e ) {

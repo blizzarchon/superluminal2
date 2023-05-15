@@ -14,6 +14,7 @@ import org.eclipse.swt.graphics.Image;
 
 import com.kartoflane.superluminal2.components.enums.DroneTypes;
 import com.kartoflane.superluminal2.components.enums.PlayerShipBlueprints;
+import com.kartoflane.superluminal2.components.enums.Systems;
 import com.kartoflane.superluminal2.components.enums.WeaponTypes;
 import com.kartoflane.superluminal2.components.interfaces.Predicate;
 import com.kartoflane.superluminal2.ftl.AnimationObject;
@@ -28,6 +29,7 @@ import com.kartoflane.superluminal2.ftl.GlowSet;
 import com.kartoflane.superluminal2.ftl.RoomObject;
 import com.kartoflane.superluminal2.ftl.ShipMetadata;
 import com.kartoflane.superluminal2.ftl.ShipObject;
+import com.kartoflane.superluminal2.ftl.SystemObject;
 import com.kartoflane.superluminal2.ftl.WeaponList;
 import com.kartoflane.superluminal2.ftl.WeaponObject;
 import com.kartoflane.superluminal2.utils.UIUtils;
@@ -579,6 +581,16 @@ public class Database
 			for ( WeaponObject o : de.getWeaponsByType( type ) )
 				if ( !result.contains( o ) )
 					result.add( o );
+		}
+		return result;
+	}
+
+	public SystemObject getSystem( Systems system )
+	{
+		SystemObject result = null;
+		for ( int i = dataEntries.size() - 1; i >= 0 && result == null; i-- ) {
+			AbstractDatabaseEntry de = dataEntries.get( i );
+			result = de.getSystem( system );
 		}
 		return result;
 	}

@@ -473,8 +473,12 @@ public class ShipSaveUtils
 					sysEl.setAttribute( "power", "" + system.getLevelStart() );
 
 					// Enemy ships' system have a 'max' attribute which determines the max level of the system
-					if ( !ship.isPlayerShip() )
+					if ( !ship.isPlayerShip() || system.isUsingMax() ) {
 						sysEl.setAttribute( "max", "" + system.getLevelMax() );
+						// reduce starting power if higher than max
+						if ( system.getLevelStart() > system.getLevelMax() )
+							sysEl.setAttribute( "power", "" + system.getLevelMax() );
+					}
 
 					sysEl.setAttribute( "room", "" + system.getRoom().getId() );
 
