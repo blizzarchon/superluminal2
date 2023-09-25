@@ -20,3 +20,7 @@
 *.PDF	 diff=astextplain
 *.rtf	 diff=astextplain
 *.RTF	 diff=astextplain
+
+# these files need LF line ending to work properly on Mac
+skels/mac/Superluminal2.app/Contents/MacOS/runme text eol=lf
+skels/mac/Superluminal2.command text eol=lf

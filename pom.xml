@@ -102,6 +102,7 @@
 				<module>modules/win32</module>
 				<module>modules/win64</module>
 				<module>modules/mac</module>
+				<module>modules/mac-arm64</module>
 				<module>modules/linux32</module>
 				<module>modules/linux64</module>
 			</modules>
@@ -136,6 +137,7 @@
 				<module>modules/core</module>
 				<module>modules/patcher</module>
 				<module>modules/mac</module>
+				<module>modules/mac-arm64</module>
 			</modules>
 		</profile>
 		<profile>
