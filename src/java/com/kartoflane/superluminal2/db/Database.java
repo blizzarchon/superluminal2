@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -353,7 +354,7 @@ public class Database
 			}
 			return blueprints;
 		}
-		else if ( shipFileMap.get( ship.getBlueprintName() ).equals( bosses ) ) {
+		else if ( Objects.equals( shipFileMap.get( ship.getBlueprintName() ), bosses )) {
 			return bosses;
 		}
 		else
@@ -591,6 +592,18 @@ public class Database
 		for ( int i = dataEntries.size() - 1; i >= 0 && result == null; i-- ) {
 			AbstractDatabaseEntry de = dataEntries.get( i );
 			result = de.getSystem( system );
+		}
+		return result;
+	}
+
+	public ArrayList<SystemObject> getSystems()
+	{
+		ArrayList<SystemObject> result = new ArrayList<SystemObject>();
+		for ( int i = dataEntries.size() - 1; i >= 0; i-- ) {
+			AbstractDatabaseEntry de = dataEntries.get( i );
+			for ( SystemObject o : de.getSystems() )
+				if ( !result.contains( o ) )
+					result.add( o );
 		}
 		return result;
 	}

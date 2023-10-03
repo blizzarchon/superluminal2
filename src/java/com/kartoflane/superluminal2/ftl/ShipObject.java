@@ -143,7 +143,16 @@ public class ShipObject extends GameObject
 				empty.setLevelCap( 0 );
 				add( empty );
 			} else {
-				add( new SystemObject( db.getSystem( system ) ) );
+				SystemObject sys = db.getSystem( system );
+				if ( sys != null ) {
+					add( new SystemObject( sys ) );
+				}
+				else { // system not in database, so guess levels
+					sys = new SystemObject( system );
+					sys.setLevelStart( 1 );
+					sys.setLevelCap( 3 );
+					add( sys );
+				}
 			}
 		}
 

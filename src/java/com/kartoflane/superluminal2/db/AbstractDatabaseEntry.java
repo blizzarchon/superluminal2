@@ -378,8 +378,14 @@ public abstract class AbstractDatabaseEntry
 		return weaponListMap.values().toArray( new WeaponList[0] );
 	}
 
-	public SystemObject getSystem( Systems system ) {
+	public SystemObject getSystem( Systems system )
+	{
 		return systemMap.get( system );
+	}
+
+	public SystemObject[] getSystems()
+	{
+		return systemMap.values().toArray( new SystemObject[0]);
 	}
 
 	/**
