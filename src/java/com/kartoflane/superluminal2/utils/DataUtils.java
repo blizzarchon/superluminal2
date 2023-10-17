@@ -106,31 +106,45 @@ public class DataUtils
 		return findTagsNamed( new FileInputStream( f ), f.getName(), tagName );
 	}
 
-	public static Element transformShipsFindLikes( String contents )
-			throws IllegalArgumentException, JDOMParseException, IOException
+	/**
+	 * Finds findLikes of the given type from the given text and
+	 * combines them into a single element with that type as its name.
+	 * These findLikes' mod-append children that match the
+	 * given names are all added to this element, sans namespace.
+	 * <p>
+	 * Elements with mod-append namespace only appear when mods are loaded
+	 * via Mod Management. Modders use this format to add their data to an
+	 * original element, so there is no problem with this result.
+	 * @param contents the text containing the findLike data
+	 * @param findLikeType the name of the element the findLikes target
+	 * @param subTagNames the names of the mod-append elements
+	 * @return one element containing new data from the findLikes
+	 * @throws JDOMParseException when an exception occurs while parsing XML
+	 */
+	public static Element transformFindLikes( String contents, String findLikeType, String... subTagNames )
+			throws JDOMParseException
 	{
 		ArrayList<Element> findLikes = findTagsNamed( contents, "findLike" );
 
-		ArrayList<Element> shipsFindLikes = new ArrayList<Element>();
+		ArrayList<Element> mainTagFindLikes = new ArrayList<Element>();
 		for ( Element findLike : findLikes ) {
 			Attribute typeAttribute = findLike.getAttribute( "type" );
-			if ( typeAttribute != null && typeAttribute.getValue().equals( "ships" ) ) {
-				shipsFindLikes.add( findLike );
+			if ( typeAttribute != null && typeAttribute.getValue().equals( findLikeType ) ) {
+				mainTagFindLikes.add( findLike );
 			}
 		}
 
-		Element finalShipsTag = new Element( "ships" );
-		for ( Element shipsFindLike : shipsFindLikes ) {
-			Element detached = shipsFindLike.clone();
+		Element finalMainTag = new Element( findLikeType );
+		for ( Element mainTagFindLike : mainTagFindLikes ) {
+			Element detached = mainTagFindLike.clone();
 
-			for ( Element shipTag : detached.getChildren( "ship", SlipstreamTagNS.MOD_APPEND ) ) {
-				finalShipsTag.addContent( shipTag.clone().setNamespace( null ) );
-			}
-			for ( Element customShipTag : detached.getChildren( "customShip", SlipstreamTagNS.MOD_APPEND ) ) {
-				finalShipsTag.addContent( customShipTag.clone().setNamespace( null ) );
+			for ( String subTagName : subTagNames ) {
+				for ( Element subTag : detached.getChildren( subTagName, SlipstreamTagNS.MOD_APPEND ) ) {
+					finalMainTag.addContent( subTag.clone().setNamespace( null ) );
+				}
 			}
 		}
 
-		return finalShipsTag;
+		return finalMainTag;
 	}
 }

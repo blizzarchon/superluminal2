@@ -524,7 +524,9 @@ public abstract class AbstractDatabaseEntry
 						DecodeResult hsdr = IOUtils.decodeText( hs, null );
 						// using the same 'ext' is probably not ideal. it will probably be fine.
 						shipsTags = DataUtils.findTagsNamed( hsdr.text, "ships" );
-						Element finalShipsTag = DataUtils.transformShipsFindLikes( hsdr.text );
+						Element finalShipsTag = DataUtils.transformFindLikes(
+								hsdr.text, "ships", "ship", "customShip"
+						);
 						if ( finalShipsTag.getChildren().size() > 0 ) {
 							shipsTags.add( finalShipsTag );
 						}
@@ -604,6 +606,12 @@ public abstract class AbstractDatabaseEntry
 						InputStream hs = getInputStream( "data/hyperspace" + ext );
 						DecodeResult hsdr = IOUtils.decodeText( hs, null );
 						crewTags = DataUtils.findTagsNamed( hsdr.text, "crew" );
+						Element finalCrewTag = DataUtils.transformFindLikes(
+								hsdr.text, "crew", "race"
+						);
+						if ( finalCrewTag.getChildren().size() > 0 ) {
+							crewTags.add( finalCrewTag );
+						}
 					}
 					catch ( Exception ex ) {
 						hyperspace = false;
