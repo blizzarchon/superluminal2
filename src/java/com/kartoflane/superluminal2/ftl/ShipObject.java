@@ -747,8 +747,7 @@ public class ShipObject extends GameObject
 			throw new IllegalArgumentException( "Number of slots must be non-negative." );
 		weaponSlots = slots;
 		if ( weapons.size() > slots ) {
-			for ( int i = slots; i < weapons.size(); i++ )
-				weapons.remove( i );
+			weapons.subList( slots, weapons.size() ).clear();
 		}
 		else if ( weapons.size() < slots ) {
 			for ( int i = weapons.size(); i <= slots; i++ )
@@ -857,8 +856,7 @@ public class ShipObject extends GameObject
 			throw new IllegalArgumentException( "Number of slots must be non-negative." );
 		droneSlots = slots;
 		if ( drones.size() > slots ) {
-			for ( int i = slots; i < drones.size(); i++ )
-				drones.remove( i );
+			drones.subList( slots, drones.size() ).clear();
 		}
 		else if ( drones.size() < slots ) {
 			for ( int i = drones.size(); i <= slots; i++ )
@@ -1190,8 +1188,7 @@ public class ShipObject extends GameObject
 			throw new IllegalArgumentException( "Number of hidden augments must be non-negative." );
 		hiddenAugmentsNumber = number;
 		if ( hiddenAugments.size() > number ) {
-			for ( int i = number; i < hiddenAugments.size(); i++ )
-				hiddenAugments.remove( i );
+			hiddenAugments.subList( number, hiddenAugments.size() ).clear();
 		}
 		else if ( hiddenAugments.size() < number ) {
 			for ( int i = hiddenAugments.size(); i <= number; i++ )
