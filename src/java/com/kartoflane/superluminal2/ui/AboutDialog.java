@@ -33,8 +33,6 @@ public class AboutDialog
 	private String linkFaceText = "";
 	private URL linkURL = null;
 
-	private Color color = null;
-
 	private Shell shell;
 	private Link linkWidget;
 	private Label lblText;
@@ -59,10 +57,7 @@ public class AboutDialog
 		gl_shell.horizontalSpacing = 0;
 		shell.setLayout( gl_shell );
 
-		color = Cache.checkOutColor( this, new RGB( 255, 255, 255 ) );
-
 		Composite composite = new Composite( shell, SWT.NONE );
-		composite.setBackground( color );
 		GridLayout gl_composite = new GridLayout( 2, false );
 		gl_composite.marginWidth = 10;
 		gl_composite.marginHeight = 10;
@@ -72,14 +67,11 @@ public class AboutDialog
 		Label lblIcon = new Label( composite, SWT.NONE );
 		lblIcon.setLayoutData( new GridData( SWT.FILL, SWT.TOP, false, false, 1, 2 ) );
 		lblIcon.setImage( display.getSystemImage( SWT.ICON_INFORMATION ) );
-		lblIcon.setBackground( color );
 
 		lblText = new Label( composite, SWT.NONE );
-		lblText.setBackground( color );
 		lblText.setLayoutData( new GridData( SWT.FILL, SWT.FILL, true, true, 1, 1 ) );
 
 		linkWidget = new Link( composite, SWT.NONE );
-		linkWidget.setBackground( color );
 		linkWidget.setLayoutData( new GridData( SWT.FILL, SWT.FILL, true, true, 1, 1 ) );
 
 		container = new Composite( shell, SWT.NONE );
@@ -151,8 +143,6 @@ public class AboutDialog
 			if ( !display.readAndDispatch() )
 				display.sleep();
 		}
-
-		Cache.checkInColor( this, color.getRGB() );
 
 		return SWT.OK;
 	}
