@@ -206,19 +206,12 @@ public class ShipSaveUtils
 				if ( isImageCorrupt( path ) )
 					continue;
 
-				InputStream is = null;
-				try {
-					is = Manager.getInputStream( path );
-					fileName = img.getDatRelativePath( ship ) + img.getPrefix() + ship.getImageNamespace() + img.getSuffix() + ".png";
-					fileMap.put( fileName, IOUtils.readStream( is ) );
-				}
-				catch ( FileNotFoundException e ) {
-					log.warn( String.format( "File for %s image could not be found: %s", img, path ) );
-				}
-				finally {
-					if ( is != null )
-						is.close();
-				}
+                try (InputStream is = Manager.getInputStream(path)) {
+                    fileName = img.getDatRelativePath(ship) + img.getPrefix() + ship.getImageNamespace() + img.getSuffix() + ".png";
+                    fileMap.put(fileName, IOUtils.readStream(is));
+                } catch (FileNotFoundException e) {
+                    log.warn(String.format("File for %s image could not be found: %s", img, path));
+                }
 			}
 		}
 
@@ -311,20 +304,13 @@ public class ShipSaveUtils
 				if ( isImageCorrupt( path ) )
 					continue;
 
-				InputStream is = null;
-				try {
-					is = Manager.getInputStream( path );
-					String datRelativePath = ship.isPlayerShip() ? "img/ship/" : "img/ships_glow/";
-					fileName = datRelativePath + ship.getImageNamespace() + "_gib" + gib.getId() + ".png";
-					fileMap.put( fileName, IOUtils.readStream( is ) );
-				}
-				catch ( FileNotFoundException e ) {
-					log.warn( String.format( "File for gib #%s could not be found: %s", gib.getId(), path ) );
-				}
-				finally {
-					if ( is != null )
-						is.close();
-				}
+                try (InputStream is = Manager.getInputStream(path)) {
+                    String datRelativePath = ship.isPlayerShip() ? "img/ship/" : "img/ships_glow/";
+                    fileName = datRelativePath + ship.getImageNamespace() + "_gib" + gib.getId() + ".png";
+                    fileMap.put(fileName, IOUtils.readStream(is));
+                } catch (FileNotFoundException e) {
+                    log.warn(String.format("File for gib #%s could not be found: %s", gib.getId(), path));
+                }
 			}
 		}
 
@@ -869,22 +855,13 @@ public class ShipSaveUtils
 			base = shipBlueprintName.substring( 0, shipBlueprintName.length() - 2 );
 		}
 
-		Element shipsTag = ftl.getChild( "ships" );
-		Element shipTag = shipsTag.getChild( "ship" );
-		Element customShip = shipsTag.getChild( "customShip" );
+		Element findLike = ftl.getChild( "findLike", SlipstreamTagNS.MOD );
+		Element shipTag = findLike.getChild( "ship", SlipstreamTagNS.MOD_APPEND );
+		Element customShip = findLike.getChild( "customShip", SlipstreamTagNS.MOD_APPEND );
 
 		shipTag.setAttribute( "name", base );
 		shipTag.setAttribute( hyperspaceSlot, "true" );
 		customShip.setAttribute( "name", shipBlueprintName );
-
-		Element firstChildLike = ftl.getChild( "findWithChildLike", SlipstreamTagNS.MOD );
-		Element selector = firstChildLike.getChild( "selector", SlipstreamTagNS.MOD );
-		Element findName = firstChildLike.getChild( "findName", SlipstreamTagNS.MOD );
-		Element setAttributes = findName.getChild( "setAttributes", SlipstreamTagNS.MOD );
-
-		selector.setAttribute( "name", base );
-		findName.setAttribute( "name", base );
-		setAttributes.setAttribute( hyperspaceSlot, "true" );
 
 		// not cycling through ship.getHiddenAugments b/c size() doesn't match Number
 		for ( int i = 0; i < ship.getHiddenAugmentsNumber(); i++ ) {
