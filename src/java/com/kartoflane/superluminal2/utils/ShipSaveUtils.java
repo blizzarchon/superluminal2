@@ -872,13 +872,19 @@ public class ShipSaveUtils
 			customShip.addContent( hiddenAugElement );
 		}
 		if ( ship.isPlayerShip() ) {
-			Element crewLimitElement = new Element( "crewLimit" );
-			crewLimitElement.setText( ship.getCrewCap() + "" );
-			customShip.addContent( crewLimitElement );
+			int crewCap = ship.getCrewCap();
+			if ( crewCap != 8 ) {
+				Element crewLimitElement = new Element( "crewLimit" );
+				crewLimitElement.setText( crewCap + "" );
+				customShip.addContent( crewLimitElement );
+			}
 
-			Element systemLimitElement = new Element( "systemLimit" );
-			systemLimitElement.setText( ship.getSystemCap() + "" );
-			customShip.addContent( systemLimitElement );
+			int systemCap = ship.getSystemCap();
+			if ( systemCap != 8 ) {
+				Element systemLimitElement = new Element( "systemLimit" );
+				systemLimitElement.setText( systemCap + "" );
+				customShip.addContent( systemLimitElement );
+			}
 		}
 
 		return doc;
