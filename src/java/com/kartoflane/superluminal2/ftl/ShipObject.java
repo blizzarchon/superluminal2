@@ -2,6 +2,7 @@ package com.kartoflane.superluminal2.ftl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.TreeSet;
 
 import org.eclipse.swt.graphics.Point;
@@ -32,7 +33,7 @@ public class ShipObject extends GameObject
 	private IDeferredText shipDescription = new DefaultDeferredText( "text_" + blueprintName + "_desc", "This ship is completely devoid of any description whatsoever!" );
 
 	private TreeSet<RoomObject> rooms;
-	private TreeSet<DoorObject> doors;
+	private HashSet<DoorObject> doors;
 	private TreeSet<MountObject> mounts;
 	private TreeSet<GibObject> gibs;
 
@@ -83,7 +84,7 @@ public class ShipObject extends GameObject
 		setDeletable( false );
 
 		rooms = new TreeSet<RoomObject>();
-		doors = new TreeSet<DoorObject>();
+		doors = new HashSet<DoorObject>();
 		mounts = new TreeSet<MountObject>();
 		gibs = new TreeSet<GibObject>();
 		systemMap = new HashMap<Systems, ArrayList<SystemObject>>();

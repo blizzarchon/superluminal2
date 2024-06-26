@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -676,7 +677,9 @@ public class ShipSaveUtils
 		}
 
 		RoomObject linked = null;
-		for ( DoorObject door : ship.getDoors() ) {
+		DoorObject[] doors = ship.getDoors();
+		Arrays.sort( doors, DoorObject.comparator );
+		for ( DoorObject door : doors ) {
 			buf.append( LayoutObjects.DOOR );
 			buf.append( "\r\n" );
 			buf.append( "" + door.getX() );

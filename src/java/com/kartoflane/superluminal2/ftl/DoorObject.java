@@ -1,6 +1,7 @@
 package com.kartoflane.superluminal2.ftl;
 
 import java.io.Serializable;
+import java.util.Comparator;
 
 import org.eclipse.swt.graphics.Point;
 
@@ -11,12 +12,26 @@ import com.kartoflane.superluminal2.mvc.controllers.ShipController;
 import com.kartoflane.superluminal2.ui.ShipContainer;
 
 
-public class DoorObject extends GameObject implements Alias, Movable, Serializable, Comparable<DoorObject>
+public class DoorObject extends GameObject implements Alias, Movable, Serializable
 {
 	private static final long serialVersionUID = 6051451407440322891L;
 
 	public static final int DOOR_WIDTH = 27;
 	public static final int DOOR_HEIGHT = 8;
+	public static final Comparator<DoorObject> comparator = new Comparator<DoorObject>() {
+		@Override
+		public int compare( DoorObject d1, DoorObject d2 ) {
+			int deltaX = d1.getX() - d2.getX();
+			int deltaY = d1.getY() - d2.getY();
+			if ( deltaX == 0 ) {
+				if ( deltaY == 0 ) {
+					return (d1.isHorizontal() ? 0 : 1) - (d2.isHorizontal() ? 0 : 1);
+				}
+				return deltaY;
+			}
+			return deltaX;
+		}
+	};
 
 	private RoomObject leftRoom = null;
 	private RoomObject rightRoom = null;
@@ -144,18 +159,5 @@ public class DoorObject extends GameObject implements Alias, Movable, Serializab
 			setLeftRoom( null );
 		if ( rightRoom != null && rightRoom.isDeleted() )
 			setRightRoom( null );
-	}
-
-	@Override
-	public int compareTo( DoorObject o ) {
-		int deltaX = locX - o.locX;
-		int deltaY = locY - o.locY;
-		if ( deltaX == 0 ) {
-			if ( deltaY == 0 ) {
-				return (horizontal ? 0 : 1) - (o.horizontal ? 0 : 1);
-			}
-			return deltaY;
-		}
-		return deltaX;
 	}
 }
