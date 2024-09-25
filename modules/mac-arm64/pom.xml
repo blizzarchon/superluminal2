@@ -31,7 +31,7 @@
 		<dependency>
 			<groupId>org.eclipse.platform</groupId>
 			<artifactId>org.eclipse.swt.cocoa.macosx.aarch64</artifactId>
-			<version>3.123.0</version>
+			<version>3.116.100</version>
 			<scope>runtime</scope>
 		</dependency>
 		<!-- all platforms can't be built currently using the same version of
