@@ -211,7 +211,6 @@ public class RoomDataComposite extends Composite implements DataComposite
 							system.setUsingMax( selected );
 							if ( !selected ) { // done before disabling scale because can't set selection after
 								scaleMaxLevel.setSelection( scaleMaxLevel.getMaximum() );
-								scaleSysLevel.setSelection( system.getLevel() );
 								scaleMaxLevel.notifyListeners( SWT.Selection, null );
 							}
 							scaleMaxLevel.setEnabled( selected );
@@ -556,9 +555,6 @@ public class RoomDataComposite extends Composite implements DataComposite
 					btnGlow.setText( system.getGameObject().getGlow().getGlowSet().getIdentifier() );
 					txtName.setText( system.getGameObject().getInteriorNamespace() );
 				}
-
-				checkboxMaxLevel.setSelection( system.isUsingMax() );
-				checkboxMaxLevel.notifyListeners( SWT.Selection, null );
 			}
 			scaleMaxLevel.setMaximum( system.getLevelCap() );
 			scaleMaxLevel.setSelection( system.getLevelMax() );
@@ -568,6 +564,11 @@ public class RoomDataComposite extends Composite implements DataComposite
 			// notifying scaleSysLevel listener here would be redundant
 
 			scaleMaxLevel.notifyListeners( SWT.Selection, null );
+
+			if ( playerShip ) {
+				checkboxMaxLevel.setSelection( system.isUsingMax() );
+				checkboxMaxLevel.notifyListeners( SWT.Selection, null );
+			}
 		}
 		else {
 			// No system - reset to default
