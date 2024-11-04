@@ -269,7 +269,7 @@ public class MountTool extends Tool
 	private boolean canPlace()
 	{
 		ShipContainer container = Manager.getCurrentShip();
-		return container.isMountsVisible() && container.getMountControllers().length < 8;
+		return container.isMountsVisible() && container.getMountControllers().length < 12;
 	}
 
 	public boolean canCreate()
