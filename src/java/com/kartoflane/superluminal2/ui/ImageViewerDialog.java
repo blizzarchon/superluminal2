@@ -98,7 +98,7 @@ public class ImageViewerDialog
 							Desktop desktop = Desktop.getDesktop();
 							if ( desktop != null ) {
 								try {
-									desktop.open( file.getParentFile() );
+									desktop.open( file.getAbsoluteFile().getParentFile() );
 								}
 								catch ( IOException ex ) {
 								}

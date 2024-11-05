@@ -812,8 +812,10 @@ public class EditorWindow
 					Manager.getCurrentShip().generateFloorImage( fif );
 					edit.setCurrent( container.getImage( Images.FLOOR ) );
 
-					if ( !edit.isValuesEqual() )
+					if ( !edit.isValuesEqual() ) {
 						Manager.postEdit( edit );
+						updateSidebarContent();
+					}
 				}
 			}
 		);
