@@ -580,15 +580,19 @@ public class ShipLoadUtils
 		}
 
 		ArrayList<String> hiddenAugIDs = metadata.getHiddenAugs();
-		if ( ! hiddenAugIDs.isEmpty() ) {
-			for ( String id : hiddenAugIDs ) {
-				AugmentObject augmentObject = db.getAugment( id );
-				if ( augmentObject == null )
-					throw new IllegalArgumentException( "AugBlueprint not found: " + id );
-
-				augmentObject.setHidden( true );
-				ship.addHiddenAugment( augmentObject );
+		for ( String id : hiddenAugIDs ) {
+			AugmentObject augmentObject = db.getAugment( id );
+			if ( augmentObject == null ) {
+				// throw new IllegalArgumentException( "AugBlueprint not found: " + id );
+				log.warn( String.format(
+						"Could not find hidden aug: %s\n%22sLoading ship %s without it",
+						id, " ", blueprintName
+				) );
+				continue;
 			}
+
+			augmentObject.setHidden( true );
+			ship.addHiddenAugment( augmentObject );
 		}
 		ship.setHiddenAugmentsNumber( hiddenAugIDs.size() );
 
