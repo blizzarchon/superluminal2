@@ -35,7 +35,6 @@ import com.kartoflane.superluminal2.components.interfaces.WeaponLike;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.db.Database;
 import com.kartoflane.superluminal2.ftl.AugmentObject;
-import com.kartoflane.superluminal2.ftl.CrewObject;
 import com.kartoflane.superluminal2.ftl.DoorObject;
 import com.kartoflane.superluminal2.ftl.DroneList;
 import com.kartoflane.superluminal2.ftl.GibObject;
@@ -877,18 +876,14 @@ public class ShipSaveUtils
 		}
 		if ( ship.isPlayerShip() ) {
 			int crewCap = ship.getCrewCap();
-			if ( crewCap != 8 ) {
-				Element crewLimitElement = new Element( "crewLimit" );
-				crewLimitElement.setText( crewCap + "" );
-				customShip.addContent( crewLimitElement );
-			}
+			Element crewLimitElement = new Element( "crewLimit" );
+			crewLimitElement.setText( crewCap + "" );
+			customShip.addContent( crewLimitElement );
 
 			int systemCap = ship.getSystemCap();
-			if ( systemCap != 8 ) {
-				Element systemLimitElement = new Element( "systemLimit" );
-				systemLimitElement.setText( systemCap + "" );
-				customShip.addContent( systemLimitElement );
-			}
+			Element systemLimitElement = new Element( "systemLimit" );
+			systemLimitElement.setText( systemCap + "" );
+			customShip.addContent( systemLimitElement );
 		}
 
 		return doc;
