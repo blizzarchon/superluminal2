@@ -591,17 +591,18 @@ public class ShipSaveUtils
 			}
 		}
 		else {
-			for ( CrewObject crew : Database.getInstance().getCrews() ) {
-				int amount = ship.getCrewMin( crew );
-				int max = ship.getCrewMax( crew );
+			int amount = ship.getCrewMin();
+			int max = ship.getCrewMax();
+			CrewLike enemyCrew = ship.getEnemyCrew();
 
+			if ( enemyCrew != Database.DEFAULT_CREW_OBJ ) {
 				e = new Element( "crewCount" );
 				e.setAttribute( "amount", "" + amount );
 				e.setAttribute( "max", "" + max );
-				e.setAttribute( "class", crew.getBlueprintName() );
+				e.setAttribute( "class", enemyCrew.getBlueprintName() );
 
 				// Don't print an empty tag
-				if ( amount > 0 && ( ship.isPlayerShip() || max > 0 ) )
+				if ( amount > 0 && max > 0 )
 					shipBlueprint.addContent( e );
 			}
 

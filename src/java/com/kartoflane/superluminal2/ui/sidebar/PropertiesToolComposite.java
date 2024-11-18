@@ -1,7 +1,6 @@
 package com.kartoflane.superluminal2.ui.sidebar;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -34,7 +33,6 @@ import com.kartoflane.superluminal2.core.Cache;
 import com.kartoflane.superluminal2.core.Manager;
 import com.kartoflane.superluminal2.db.Database;
 import com.kartoflane.superluminal2.ftl.AugmentObject;
-import com.kartoflane.superluminal2.ftl.CrewObject;
 import com.kartoflane.superluminal2.ftl.DroneList;
 import com.kartoflane.superluminal2.ftl.ShipObject;
 import com.kartoflane.superluminal2.ftl.SystemObject;
@@ -78,8 +76,9 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 	private ArrayList<Button> btnHiddenAugments = new ArrayList<Button>();
 	private ArrayList<Button> btnArtilleries = new ArrayList<Button>();
 	private ArrayList<Button> btnCrewMembers = new ArrayList<Button>();
-	private HashMap<String, Spinner> spCrewMin = new HashMap<String, Spinner>();
-	private HashMap<String, Spinner> spCrewMax = new HashMap<String, Spinner>();
+	private Button enemyCrewButton;
+	private Spinner spCrewMin;
+	private Spinner spCrewMax;
 	private Spinner spMissiles;
 	private Spinner spWeaponSlots;
 	private Button btnWeaponByList;
@@ -104,6 +103,7 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 	private Label lblLayoutInfo;
 	private Label lblImageHelp;
 	private Label lblBlueprintHelp;
+	private Label lblCrewHelp;
 	private Combo cmbBoardingAI;
 	private Group grpArtillery;
 	private Spinner spArtillerySlots;
@@ -911,15 +911,17 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 
 		compCrew = new Composite( tabFolder, SWT.NONE );
 		tbtmCrew.setControl( compCrew );
-		compCrew.setLayout( new GridLayout( 3, false ) );
+		compCrew.setLayout( new GridLayout() );
+
+		grpCrew = new Group( compCrew, SWT.NONE );
+		grpCrew.setLayoutData( new GridData( SWT.FILL, SWT.TOP, true, false, 1, 1 ) );
+		grpCrew.setText( "Crew" );
+
+		Label lblCrew = new Label( grpCrew, SWT.NONE );
 
 		if ( ship.isPlayerShip() ) {
-			grpCrew = new Group( compCrew, SWT.NONE );
-			grpCrew.setLayout( new GridLayout( 2, false ) );
-			grpCrew.setLayoutData( new GridData( SWT.FILL, SWT.TOP, true, false, 1, 1 ) );
-			grpCrew.setText( "Crew" );
+			grpCrew.setLayout( new GridLayout( 3, false ) );
 
-			Label lblCrew = new Label( grpCrew, SWT.NONE );
 			lblCrew.setText( "Total Capacity:" );
 			
 			spCrew = new Spinner( grpCrew, SWT.BORDER );
@@ -943,63 +945,86 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 					}
 			);
 
-				
 			createCrewMembers( ship.getCrewCap() );
-
 		}
 		else {
-			spCrewMin.clear();
-			spCrewMax.clear();
+			grpCrew.setLayout( new GridLayout( 4, false ) );
 
-			Label lbl = new Label( compCrew, SWT.NONE );
-			lbl.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 1, 1 ) );
-			lbl.setText( "Random Crew:" );
+			lblCrew.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 1, 1 ) );
+			lblCrew.setText( "Race:" );
 
-			lbl = new Label( compCrew, SWT.NONE );
+			lblCrewHelp = new Label( grpCrew, SWT.NONE );
+			lblCrewHelp.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 1, 1 ) );
+			lblCrewHelp.setImage( helpImage );
+
+			String lblCrewHelpMsg = "The enemy ship blueprint is limited to 1 type of crew. " +
+									"You can still completely change its crew to different ones " +
+									"on a <ship> event by <ship> event basis. You can specify " +
+									"which races by percentage in the <crew> of a <ship> event. ";
+			UIUtils.addTooltip( lblCrewHelp, Utils.wrapOSNot( lblCrewHelpMsg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX() ) );
+
+			Label lbl = new Label( grpCrew, SWT.NONE );
 			lbl.setText( "Min" );
 
-			lbl = new Label( compCrew, SWT.NONE );
+			lbl = new Label( grpCrew, SWT.NONE );
 			lbl.setText( "Max" );
-			
 
-			for ( CrewObject race : Database.getInstance().getCrews() ) {
-				final CrewObject r = race;
-				lbl = new Label( compCrew, SWT.NONE );
-				lbl.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 1, 1 ) );
-				lbl.setText( race.toString() );
+			SelectionAdapter enemyCrewListener = new SelectionAdapter() {
+				@Override
+				public void widgetSelected( SelectionEvent e ) {
+					ShipObject ship = container.getShipController().getGameObject();
+					CrewLike current = ship.getEnemyCrew();
 
-				final Spinner spMin = new Spinner( compCrew, SWT.BORDER );
-				final Spinner spMax = new Spinner( compCrew, SWT.BORDER );
-				spMin.setMaximum( 99 );
-				spCrewMin.put( race.getIdentifier(), spMin );
+					CrewSelectionDialog dialog = new CrewSelectionDialog( EditorWindow.getInstance().getShell() );
+					CrewLike neu = dialog.open( current );
 
-				spMax.setMaximum( 99 );
-				spCrewMax.put( race.getIdentifier(), spMax );
+					if ( neu != null ) {
+						ship.setEnemyCrew( neu );
+						updateData();
+					}
+				}
+			};
+			enemyCrewButton = new Button( grpCrew, SWT.NONE );
+			enemyCrewButton.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 2, 1 ) );
+			enemyCrewButton.setText( "<crew slot>" );
+			enemyCrewButton.addSelectionListener( enemyCrewListener );
+			compCrew.layout();
 
-				spMin.addSelectionListener(
-					new SelectionAdapter() {
-						@Override
-						public void widgetSelected( SelectionEvent e )
-						{
-							ship.setCrewMin( r, spMin.getSelection() );
-							if ( ship.getCrewMax( r ) < ship.getCrewMin( r ) ) {
-								spMax.setSelection( ship.getCrewMin( r ) );
-								spMax.notifyListeners( SWT.Selection, null );
-							}
+
+
+			spCrewMin = new Spinner( grpCrew, SWT.BORDER );
+			spCrewMax = new Spinner( grpCrew, SWT.BORDER );
+			spCrewMin.setMaximum( 99 );
+
+			spCrewMax.setMaximum( 99 );
+
+			spCrewMin.addSelectionListener(
+				new SelectionAdapter() {
+					@Override
+					public void widgetSelected( SelectionEvent e )
+					{
+						ship.setCrewMin( spCrewMin.getSelection() );
+						if ( ship.getCrewMax() < ship.getCrewMin() ) {
+							spCrewMax.setSelection( ship.getCrewMin() );
+							spCrewMax.notifyListeners( SWT.Selection, null );
 						}
 					}
-				);
+				}
+			);
 
-				spMax.addSelectionListener(
-					new SelectionAdapter() {
-						@Override
-						public void widgetSelected( SelectionEvent e )
-						{
-							ship.setCrewMax( r, spMax.getSelection() );
+			spCrewMax.addSelectionListener(
+				new SelectionAdapter() {
+					@Override
+					public void widgetSelected( SelectionEvent e )
+					{
+						ship.setCrewMax( spCrewMax.getSelection() );
+						if ( ship.getCrewMax() < ship.getCrewMin() ) {
+							spCrewMin.setSelection( ship.getCrewMax() );
+							spCrewMin.notifyListeners( SWT.Selection, null );
 						}
 					}
-				);
-			}
+				}
+			);
 		}
 
 		pack();
@@ -1115,10 +1140,9 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 			}
 		}
 		else {
-			for ( CrewObject race : Database.getInstance().getCrews() ) {
-				spCrewMin.get( race.getIdentifier() ).setSelection( ship.getCrewMin( race ) );
-				spCrewMax.get( race.getIdentifier() ).setSelection( ship.getCrewMax( race ) );
-			}
+			enemyCrewButton.setText( ship.getEnemyCrew().buttonView() );
+			spCrewMin.setSelection( ship.getCrewMin() );
+			spCrewMax.setSelection( ship.getCrewMax() );
 		}
 	}
 

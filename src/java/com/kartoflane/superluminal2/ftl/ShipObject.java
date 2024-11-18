@@ -40,8 +40,9 @@ public class ShipObject extends GameObject
 	private HashMap<Systems, ArrayList<SystemObject>> systemMap;
 	private HashMap<Images, ImageObject> imageMap;
 	private ArrayList<CrewLike> crewList;
-	private HashMap<String, Integer> crewMinMap;
-	private HashMap<String, Integer> crewMaxMap;
+	private int crewMin;
+	private int crewMax;
+	private CrewLike enemyCrew;
 
 	private ArrayList<AugmentObject> augments;
 	private ArrayList<AugmentObject> hiddenAugments;
@@ -92,8 +93,8 @@ public class ShipObject extends GameObject
 		augments = new ArrayList<AugmentObject>();
 		hiddenAugments = new ArrayList<AugmentObject>();
 		crewList = new ArrayList<CrewLike>();
-		crewMinMap = new HashMap<String, Integer>();
-		crewMaxMap = new HashMap<String, Integer>();
+		crewMin = 0;
+		crewMax = 0;
 
 		weapons = new ArrayList<WeaponLike>();
 		drones = new ArrayList<DroneLike>();
@@ -107,20 +108,6 @@ public class ShipObject extends GameObject
 			ImageObject object = new ImageObject();
 			object.setAlias( image.name().toLowerCase() );
 			imageMap.put( image, object );
-		}
-		for ( CrewObject crew : Database.getInstance().getCrews() ) {
-			String blueprint = crew.getBlueprintName();
-			crewMinMap.put( blueprint, 0 );
-			crewMaxMap.put( blueprint, 0 );
-		}
-		for ( CrewList crew : Database.getInstance().getCrewLists() ) {
-			String blueprint = crew.getBlueprintName();
-			crewMinMap.put( blueprint, 0 );
-			crewMaxMap.put( blueprint, 0 );
-		}
-		for ( int i = 0; i < crewCap; i++ )
-		{
-			crewList.add( Database.DEFAULT_CREW_OBJ );
 		}
 	}
 
@@ -163,6 +150,12 @@ public class ShipObject extends GameObject
 			blueprintName = "NEW_ENEMY_SHIP";
 			weaponByList = true;
 			droneByList = true;
+			enemyCrew = Database.DEFAULT_CREW_OBJ;
+		}
+		else {
+			for ( int i = 0; i < crewCap; i++ ) {
+				crewList.add( Database.DEFAULT_CREW_OBJ );
+			}
 		}
 		
 		if ( blueprintName.endsWith( "_2" ) )
@@ -1050,7 +1043,7 @@ public class ShipObject extends GameObject
 	public void changeCrew( int index, CrewLike neu )
 	{
 		if ( neu == null )
-			throw new IllegalArgumentException( "New augment must not be null." );
+			throw new IllegalArgumentException( "New crew must not be null." );
 		if ( index < 0 )
 			throw new IllegalArgumentException( "Index is out of bounds: " + index );
 		crewList.set( index, neu );
@@ -1066,9 +1059,9 @@ public class ShipObject extends GameObject
 	public int changeCrew( CrewLike old, CrewLike neu )
 	{
 		if ( old == null )
-			throw new IllegalArgumentException( "Old augment must not be null." );
+			throw new IllegalArgumentException( "Old crew must not be null." );
 		if ( neu == null )
-			throw new IllegalArgumentException( "New augment must not be null." );
+			throw new IllegalArgumentException( "New crew must not be null." );
 
 		int i = crewList.indexOf( old );
 		if ( i == -1 )
@@ -1110,6 +1103,9 @@ public class ShipObject extends GameObject
 		}
 	}
 
+	/**
+	 * Player ships only.
+	 */
 	public void setCrewCap(int amount)
 	{
 		for (int i = amount; i > crewCap; --i)
@@ -1129,55 +1125,66 @@ public class ShipObject extends GameObject
 	}
 
 	/**
-	 * Sets the minimum amount of crew members of the given race that the ship can have.<br>
+	 * Sets the singular race or blueprint list that the ship can have.
 	 * Enemy ships only.
 	 */
-	public void setCrewMin( CrewLike race, int amount )
+	public void setEnemyCrew( CrewLike crew )
 	{
-		if ( race == null )
-			throw new IllegalArgumentException( "Race must not be null." );
+		if ( crew == null )
+			throw new IllegalArgumentException( "New crew must not be null." );
+		enemyCrew = crew;
+	}
+
+	/**
+	 * Enemy ships only.
+	 *
+	 * @return the singular race or blueprint list that the ship can have.
+	 */
+	public CrewLike getEnemyCrew()
+	{
+		return enemyCrew;
+	}
+
+	/**
+	 * Sets the minimum amount of crew members of the race that the ship can have.<br>
+	 * Enemy ships only.
+	 */
+	public void setCrewMin( int amount )
+	{
 		if ( amount < 0 )
 			throw new IllegalArgumentException( "Amount must be non-negative." );
-		crewMinMap.put( race.getIdentifier(), amount );
+		crewMin = amount;
 	}
 
 	/**
 	 * Enemy ships only.
 	 * 
-	 * @return minimum amount of crew members of the given race that the ship can have
+	 * @return minimum amount of crew members of the race that the ship can have
 	 */
-	public int getCrewMin( CrewLike race )
+	public int getCrewMin()
 	{
-		if ( race == null )
-			throw new IllegalArgumentException( "Race must not be null." );
-		Integer result = crewMinMap.get( race.getIdentifier() );
-		return result == null ? 0 : result;
+		return crewMin;
 	}
 
 	/**
-	 * Sets the maximum amount of crew members of the given race that the ship can have.<br>
+	 * Sets the maximum amount of crew members of the race that the ship can have.<br>
 	 * Enemy ships only.
 	 */
-	public void setCrewMax( CrewLike race, int amount )
+	public void setCrewMax( int amount )
 	{
-		if ( race == null )
-			throw new IllegalArgumentException( "Race must not be null." );
 		if ( amount < 0 )
 			throw new IllegalArgumentException( "Amount must be non-negative." );
-		crewMaxMap.put( race.getIdentifier(), amount );
+		crewMax = amount;
 	}
 
 	/**
 	 * Enemy ships only.
 	 * 
-	 * @return maximum amount of crew members of the given race that the ship can have
+	 * @return maximum amount of crew members of the race that the ship can have
 	 */
-	public int getCrewMax( CrewObject race )
+	public int getCrewMax()
 	{
-		if ( race == null )
-			throw new IllegalArgumentException( "Race must not be null." );
-		Integer result = crewMaxMap.get( race.getIdentifier() );
-		return result == null ? 0 : result;
+		return crewMax;
 	}
 
 	/**

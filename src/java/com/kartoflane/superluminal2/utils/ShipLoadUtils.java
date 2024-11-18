@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.jdom2.Document;
@@ -48,6 +50,7 @@ import com.kartoflane.superluminal2.ftl.WeaponList;
  */
 public class ShipLoadUtils
 {
+	private static final Logger log = LogManager.getLogger( ShipLoadUtils.class );
 	/**
 	 * Interprets the XML element as a shipBlueprint tag, loading its contents
 	 * and creating a ShipObject to store the data.
@@ -536,33 +539,33 @@ public class ShipLoadUtils
 			}
 			crewCap += 1;
 
+			attr = crew.getAttributeValue( "amount" );
+			if ( attr == null )
+				throw new IllegalArgumentException( "<crewCount> tag is missing 'amount' attribute." );
 			if ( ship.isPlayerShip() ) {
-				attr = crew.getAttributeValue( "amount" );
-				crewCap+=Integer.parseInt(crew.getAttributeValue( "amount" )) - 1;
-				if ( attr == null )
-					throw new IllegalArgumentException( "<crewCount> tag is missing 'amount' attribute." );
-				for ( int i = 0; i < Integer.valueOf( attr ); i++ )
+				crewCap += Integer.parseInt( crew.getAttributeValue( "amount" ) ) - 1;
+				for ( int i = 0; i < Integer.parseInt( attr ); i++ )
 					ship.changeCrew( Database.DEFAULT_CREW_OBJ, race );
 			}
 			else {
-				attr = crew.getAttributeValue( "amount" );
-				if ( attr == null )
-					throw new IllegalArgumentException( "<crewCount> tag is missing 'amount' attribute." );
-				ship.setCrewMin( race, Integer.valueOf( attr ) );
+				ship.setEnemyCrew( race );
+				ship.setCrewMin( Integer.parseInt( attr ) );
 
 				attr = crew.getAttributeValue( "max" );
 				if ( attr == null ) {
 					// Some ships are missing the 'max' attribute
 					// Guess-default to 'amount' value.
-					ship.setCrewMax( race, ship.getCrewMin( race ) );
+					ship.setCrewMax( ship.getCrewMin() );
 				}
 				else {
-					ship.setCrewMax( race, Integer.valueOf( attr ) );
-					crewCap+=(Integer.parseInt(crew.getAttributeValue("max"))-1);
+					ship.setCrewMax( Integer.parseInt( attr ) );
 				}
+				// enemy ships only use the 1st <crewCount> tag
+				break;
 			}
 		}
-		ship.setCrewCap(crewCap);
+		if ( ship.isPlayerShip() )
+			ship.setCrewCap( crewCap );
 
 		for ( Element aug : e.getChildren( "aug" ) ) {
 			attr = aug.getAttributeValue( "name" );

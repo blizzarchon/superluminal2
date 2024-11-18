@@ -246,7 +246,7 @@ public class SHPUtils
 			for ( Map.Entry<Object, Object> entry : map.entrySet() ) {
 				CrewObject race = race( entry.getKey() );
 				int count = integer( entry.getValue() );
-				ship.setCrewMin( race, count );
+				//ship.setCrewMin( race, count );
 				for ( int in = 0; in < count; in++ )
 					ship.changeCrew( Database.DEFAULT_CREW_OBJ, race );
 			}
@@ -259,7 +259,7 @@ public class SHPUtils
 			for ( Map.Entry<Object, Object> entry : map.entrySet() ) {
 				CrewObject race = race( entry.getKey() );
 				int count = integer( entry.getValue() );
-				ship.setCrewMax( race, count );
+				//ship.setCrewMax( race, count );
 			}
 		}
 
