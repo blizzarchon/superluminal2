@@ -12,7 +12,7 @@
 
 	<build>
 		<finalName>patcher</finalName>
-		<sourceDirectory>../../src/java/com/kartoflane/common/selfpatch</sourceDirectory>
+		<!-- <sourceDirectory>../../src/java/com/kartoflane/common/selfpatch</sourceDirectory> -->
 
 		<plugins>
 			<plugin>
