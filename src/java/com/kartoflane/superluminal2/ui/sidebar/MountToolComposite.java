@@ -55,7 +55,8 @@ public class MountToolComposite extends Composite implements DataComposite
 		lblHelp.setLayoutData( new GridData( SWT.RIGHT, SWT.CENTER, false, false, 1, 1 ) );
 		lblHelp.setImage( helpImage );
 		String msg = "- Left-clicking places the mount.\n" +
-			"- The ship can have 12 mounts in total.\n" +
+			"- Any number of mounts can be placed, but the total\n" +
+			"  should match the number of weapon and artillery slots.\n" +
 			"- Right-clicking rotates the mount.\n" +
 			"- Holding down Shift while right-clicking changes\n" +
 			"  the mount's direction.\n" +
