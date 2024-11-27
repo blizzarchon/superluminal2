@@ -31,15 +31,10 @@
 		<dependency>
 			<groupId>org.eclipse.platform</groupId>
 			<artifactId>org.eclipse.swt.cocoa.macosx.aarch64</artifactId>
-			<version>3.116.100</version>
+			<version>${swt-mac.version}</version>
 			<scope>runtime</scope>
 		</dependency>
-		<!-- all platforms can't be built currently using the same version of
-		     org.eclipse.platform from maven central, so just using one-off
-		     for mac arm64 as version numbers are different from {swt.version}
-
-			 also, invalid pom warning can be ignored,
-			 see https://bugs.eclipse.org/bugs/show_bug.cgi?id=510186#c12 -->
+		<!-- invalid pom warning can be ignored: https://bugs.eclipse.org/bugs/show_bug.cgi?id=510186#c12 -->
 	</dependencies>
 
 	<build>

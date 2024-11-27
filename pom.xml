@@ -17,6 +17,7 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<jdk.version>1.6</jdk.version>
 		<swt.version>4.6.1</swt.version>
+		<swt-mac.version>3.127.0</swt-mac.version>
 		<log4j.version>2.0-rc1</log4j.version>
 		<compress.version>1.8</compress.version>
 		<jdom2.version>2.0.6</jdom2.version>

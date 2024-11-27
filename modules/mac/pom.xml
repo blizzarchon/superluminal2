@@ -29,11 +29,12 @@
 		
 		<!-- SWT Mac 64-bit -->
 		<dependency>
-			<groupId>org.eclipse.swt</groupId>
+			<groupId>org.eclipse.platform</groupId>
 			<artifactId>org.eclipse.swt.cocoa.macosx.x86_64</artifactId>
-			<version>${swt.version}</version>
+			<version>${swt-mac.version}</version>
 			<scope>runtime</scope>
 		</dependency>
+		<!-- invalid pom warning can be ignored: https://bugs.eclipse.org/bugs/show_bug.cgi?id=510186#c12 -->
 	</dependencies>
 
 	<build>
