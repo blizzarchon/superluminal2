@@ -120,12 +120,12 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 	{
 		super( parent, SWT.NONE );
 
-		final Image layoutAOffImage = Cache.checkOutImage( this, layoutAOffImageLocation);
-		final Image layoutAOnImage = Cache.checkOutImage( this, layoutAOnImageLocation);
-		final Image layoutBOffImage = Cache.checkOutImage( this, layoutBOffImageLocation);
-		final Image layoutBOnImage = Cache.checkOutImage( this, layoutBOnImageLocation);
-		final Image layoutCOffImage = Cache.checkOutImage( this, layoutCOffImageLocation);
-		final Image layoutCOnImage = Cache.checkOutImage( this, layoutCOnImageLocation);
+		final Image layoutAOffImage = Cache.checkOutImage( this, layoutAOffImageLocation );
+		final Image layoutAOnImage = Cache.checkOutImage( this, layoutAOnImageLocation );
+		final Image layoutBOffImage = Cache.checkOutImage( this, layoutBOffImageLocation );
+		final Image layoutBOnImage = Cache.checkOutImage( this, layoutBOnImageLocation );
+		final Image layoutCOffImage = Cache.checkOutImage( this, layoutCOffImageLocation );
+		final Image layoutCOnImage = Cache.checkOutImage( this, layoutCOnImageLocation );
 
 		setLayout( new GridLayout( 1, false ) );
 

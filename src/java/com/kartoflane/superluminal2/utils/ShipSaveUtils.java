@@ -868,10 +868,11 @@ public class ShipSaveUtils
 
 		// not cycling through ship.getHiddenAugments b/c size() doesn't match Number
 		for ( int i = 0; i < ship.getHiddenAugmentsNumber(); i++ ) {
-			if ( ship.getHiddenAugments()[i] == Database.DEFAULT_AUGMENT_OBJ )
+			AugmentObject hiddenAug = ship.getHiddenAugments()[i];
+			if ( hiddenAug == Database.DEFAULT_AUGMENT_OBJ )
 				continue;
 			Element hiddenAugElement = new Element( "hiddenAug" );
-			hiddenAugElement.setText( ship.getHiddenAugments()[i].getIdentifier() );
+			hiddenAugElement.setText( hiddenAug.getIdentifier() );
 			customShip.addContent( hiddenAugElement );
 		}
 		if ( ship.isPlayerShip() ) {

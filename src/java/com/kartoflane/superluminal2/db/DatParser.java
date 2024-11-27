@@ -294,7 +294,7 @@ public class DatParser
 		return list;
 	}
 
-	private static CrewList loadCrewList(String name, List<Element> children )
+	private static CrewList loadCrewList( String name, List<Element> children )
 	{
 		if ( name == null )
 			throw new IllegalArgumentException( "Name must not be null." );
@@ -511,7 +511,7 @@ public class DatParser
 		return crew;
 	}
 
-	public static CrewObject loadCrew( Element e, ArrayList<Element> crewTags)
+	public static CrewObject loadCrew( Element e, ArrayList<Element> crewTags )
 	{
 		CrewObject crew = loadCrew( e );
 		String blueprintName = crew.getBlueprintName();

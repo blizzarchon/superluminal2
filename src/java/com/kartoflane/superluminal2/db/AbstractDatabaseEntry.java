@@ -385,7 +385,7 @@ public abstract class AbstractDatabaseEntry
 
 	public SystemObject[] getSystems()
 	{
-		return systemMap.values().toArray( new SystemObject[0]);
+		return systemMap.values().toArray( new SystemObject[0] );
 	}
 
 	/**
@@ -527,7 +527,7 @@ public abstract class AbstractDatabaseEntry
 						Element finalShipsTag = DataUtils.transformFindLikes(
 								hsdr.text, "ships", "ship", "customShip"
 						);
-						if ( finalShipsTag.getChildren().size() > 0 ) {
+						if ( !finalShipsTag.getChildren().isEmpty() ) {
 							shipsTags.add( finalShipsTag );
 						}
 					}
@@ -609,7 +609,7 @@ public abstract class AbstractDatabaseEntry
 						Element finalCrewTag = DataUtils.transformFindLikes(
 								hsdr.text, "crew", "race"
 						);
-						if ( finalCrewTag.getChildren().size() > 0 ) {
+						if ( !finalCrewTag.getChildren().isEmpty() ) {
 							crewTags.add( finalCrewTag );
 						}
 					}
