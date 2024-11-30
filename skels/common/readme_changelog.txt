@@ -1,5 +1,28 @@
 Changelog
 
+2.4:
+(New Features)
+- Player ship systems now have the option to set a max level, similar to enemy ships.
+- Added compatibility for newer Macs with M series of chips aka ARM architecture.
+- Simplified hyperspace.xml output during ship saving.
+- Added support for Hyperspace systemLimit to set a max number of systems.
+- Systems' default levels now correspond to their blueprint definition when possible.
+  * in case of missing blueprint, levels default to 1-3 like vanilla auxiliary systems.
+- Boss ships now show up in ship load selection and save to bosses.xml.append.
+- Uncapped number of placeable weapon mounts, previously set to 8.
+- Corrected enemy ships' Crew tab to selection of 1 race.
+(Quality of Life)
+- Added support for races added from Mod Management mods via findLikes.
+- Door entries in the .txt file are now sorted by x, y and orientation.
+- Ships with unrecognized hidden augs load with warning instead of not loading at all.
+(Bug fixes)
+- Fixed bug where weapon image sometimes showed projectile instead of weapon.
+- Fixed bug where immediately saving ship on load didn't save to the correct slot.
+- Fixed bug where a system's start level could be lowered by another system's max level.
+- Fixed bug where reducing Armaments via number input did not properly remove them.
+- Fixed bug where path for generated floor would not update if it was already visible.
+- Fixed crash when trying to view generated floor image location in file system.
+
 2.3:
 (New Features)
 - "Prefix list.txt" is no longer necessary and has thus been removed.
@@ -9,6 +32,7 @@ Changelog
 - Layout slot selected now determines the blueprint name suffix, correcting any possible discrepancies.
   * blueprint name chosen: MY_CUSTOM_SHIP_2, ship slot selected: C -> upon save, blueprint name is MY_CUSTOM_SHIP_3
 - Added option for using ID system instead of direct text for saving of ship text data. Off by default.
+- Hyperspace's Temporal system can now be assigned to a room under the Special menu
 (Quality of Life)
 - Picking crew now opens same kind of selection dialog as when picking weapons, drones and augments.
 - Augments and hidden augments have separate sections. This also solves a bug where you could have more than 3 regular augments.

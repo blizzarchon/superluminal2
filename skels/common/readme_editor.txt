@@ -1,12 +1,12 @@
 FTL Ship Editor - Superluminal 2
-  http://github.com/kartoFlane/superluminal2/
+  http://github.com/blizzarchon/superluminal2/
 
 
 About
 
 	Superluminal2 is a ship editor for the game FTL: Faster Than Light,
 	and the expansion, FTL: Advanced Edition.
-	  http://www.subsetgames.com/ftl.html
+	  https://www.subsetgames.com/ftl.html
 
 	The editor provides a layer of abstraction over the game's files,
 	visually representing the data in the same form as in the game, making
@@ -16,10 +16,12 @@ About
 
 Requirements
 
-	Java (1.6 or higher)
-	  http://www.java.com/en/download/
+	Java (1.8 or higher) (Windows/Linux)
+	  https://www.java.com/en/download
+	Java (17 or higher) (Mac)
+	  https://adoptium.net/temurin/releases/?package=jre&os=mac
 	FTL: AE (1.5.10 or higher, Windows/OSX/Linux, Steam/GOG/Standalone)
-	  http://www.ftlgame.com/
+	  https://subsetgames.com/ftl.html
 
 
 Setup
@@ -47,6 +49,6 @@ Setup
 Troubleshooting
 
 	In case of problems, consult the FAQ:
-	  http://www.subsetgames.com/forum/viewtopic.php?f=12&t=24901&p=78739#p78739
+	  https://www.subsetgames.com/forum/viewtopic.php?f=12&t=24901&p=78739#p78739
 	Or post in the editor's thread at the FTL forums:
-	  http://www.subsetgames.com/forum/viewtopic.php?f=12&t=24901
+	  https://subsetgames.com/forum/viewtopic.php?t=38322
