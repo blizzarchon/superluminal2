@@ -387,7 +387,7 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 		UIUtils.addTooltip( lblHullHelp, Utils.wrapOSNot( msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX() ) );
 
 		Label lblReactor = new Label( compGeneral, SWT.NONE );
-		lblReactor.setText( "Reactor Power:" );
+		lblReactor.setText( "Starting Power:" );
 
 		spPower = new Spinner( compGeneral, SWT.BORDER );
 		spPower.setTextLimit( 3 );
@@ -409,10 +409,10 @@ public class PropertiesToolComposite extends Composite implements DataComposite
 		lblReactorInfo = new Label( compGeneral, SWT.NONE );
 		lblReactorInfo.setLayoutData( new GridData( SWT.RIGHT, SWT.CENTER, false, false, 1, 1 ) );
 		lblReactorInfo.setImage( helpImage );
-		msg = "This sets the amount of power the ship starts with. " +
-			"The reactor can only be upgraded to level 25 ingame, " +
-			"but can be set to a higher value when creating your " +
-			"ship in this editor.";
+		msg = "This sets the amount of reactor power the ship starts with. " +
+			  "It's possible to set this even higher than the maximum power " +
+			  "the ship can upgrade to - usually level 25. Just remember " +
+			  "that setting it past the max means no more reactor upgrades.";
 		UIUtils.addTooltip( lblReactorInfo, Utils.wrapOSNot( msg, Superluminal.WRAP_WIDTH, Superluminal.WRAP_TOLERANCE, OS.MACOSX() ) );
 
 		if ( !ship.isPlayerShip() ) {
