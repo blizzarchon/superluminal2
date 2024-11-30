@@ -1,12 +1,20 @@
 <versions>
-	<latest id="2.3" url="https://github.com/blizzarchon/superluminal2/releases/latest" offer-selfpatch="false" />
+	<latest id="2.4" url="https://github.com/blizzarchon/superluminal2/releases/latest" offer-selfpatch="false" />
 	<changelog>
+		<version id="2.4">
+			<change>Player ship systems can now set a max level, like enemy ships.</change>
+			<change>Now compatible with newer Macs with ARM architecture.</change>
+			<change>Fixed bug where weapons sometimes displayed as projectiles.</change>
+			<change>Simplified hyperspace.xml output during ship saving.</change>
+			<change>More changes and bugfixes, check changelog for details.</change>
+		</version>
 		<version id="2.3">
 			<change>Hyperspace crew info now loads from dat and thus replaces need for manual user update of Race list.</change>
 			<change>Blueprint lists can now be selected from selection dialogs.</change>
 			<change>Ships loaded via Mod Management now properly load their hyperspace info.</change>
 			<change>Ship duplication is now prevented through better slipstream tag logic.</change>
 			<change>General quality of life improvements for hyperspace features.</change>
+			<change>Hyperspace's Temporal system can now be assigned.</change>
 		</version>
 		<version id="Superluminal for Hyperspace">
 			<change>Added some support for FTL: Hyperspace features.</change>
